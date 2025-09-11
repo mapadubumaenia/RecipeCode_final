@@ -1,6 +1,7 @@
 package com.RecipeCode.teamproject.common;
 
 
+
 import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
 import com.RecipeCode.teamproject.reci.recipeTag.dto.RecipeTagDto;
@@ -29,9 +30,26 @@ public interface MapStruct {
     // TODO: 수정 시 사용: dirty checking 기능(save() 없이 수정 가능)
     void updateFromDto(FaqDto faqDto, @MappingTarget Faq faq);
 
+
     //  TODO: RecipeTag
     RecipeTagDto toDto(RecipeTag recipeTag);
 
     RecipeTag toEntity(RecipeTagDto recipeTagDto);
+
+// Recipes <-> RecipesDto
+    RecipesDto toDto(Recipes recipes);
+    Recipes toEntity(RecipesDto recipesDto);
+
+// Comments <-> CommentsDto
+    @Mapping(source = "userEmail.userId", target = "userId")
+    @Mapping(source = "userEmail.userEmail", target = "userEmail")
+    @Mapping(source = "uuid.uuid", target = "recipeUuid")
+    @Mapping(source = "parentId.commentsId", target = "parentId")
+    Comments toDto(CommentsDto commentsDto);
+    @Mapping(source = "userEmail", target = "userEmail.userEmail")
+    @Mapping(source = "recipeUuid", target = "uuid.uuid")
+    @Mapping(source = "parentId", target = "parentId.commentsId")
+    CommentsDto toEntity(Comments comments);
+
 
 }
