@@ -28,7 +28,9 @@ public interface MapStruct {
     void updateFromDto(FaqDto faqDto, @MappingTarget Faq faq);
 
     //  TODO: RecipeTag
+    @Mapping(source = "recipes.uuid", target = "uuid")
     RecipeTagDto toDto(RecipeTag recipeTag);
+    @Mapping(source = "uuid", target = "recipes.uuid")
     RecipeTag toEntity(RecipeTagDto recipeTagDto);
 
 // Recipes <-> RecipesDto

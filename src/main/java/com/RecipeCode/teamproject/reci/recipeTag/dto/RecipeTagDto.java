@@ -3,6 +3,8 @@ package com.RecipeCode.teamproject.reci.recipeTag.dto;
 import com.RecipeCode.teamproject.reci.recipes.entity.Recipes;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -10,6 +12,6 @@ import lombok.*;
 @ToString
 public class RecipeTagDto {
     private Long tagId;
-    private Recipes recipes;
-    private String tagName;
+    private String uuid;
+    private List<String> tagName;    // 여러 개 태그 가능하게
 }

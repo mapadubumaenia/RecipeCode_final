@@ -10,9 +10,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import java.util.UUID;
+
 @Log4j2
 @SpringBootTest
-@EnableJpaAuditing
 class RecipeTagServiceTest {
     @Autowired
     RecipeTagService recipeTagService;
@@ -28,6 +29,7 @@ class RecipeTagServiceTest {
     @Test
     void save() {
         RecipeTagDto recipeTagDto = new RecipeTagDto();
+        recipeTagDto.setUuid("11");
         recipeTagDto.setTagName("한식");
 //		2) 실제 메소드실행
         recipeTagService.save(recipeTagDto);

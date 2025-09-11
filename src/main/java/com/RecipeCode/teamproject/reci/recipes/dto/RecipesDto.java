@@ -1,8 +1,6 @@
 package com.RecipeCode.teamproject.reci.recipes.dto;
 
-import com.RecipeCode.teamproject.reci.recipes.entity.IngredientItem;
 import com.RecipeCode.teamproject.reci.recipes.entity.Inquiry;
-import jakarta.persistence.Column;
 import lombok.*;
 
 import java.time.LocalDateTime;
