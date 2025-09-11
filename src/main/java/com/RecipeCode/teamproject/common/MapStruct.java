@@ -5,7 +5,14 @@ import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
 import com.RecipeCode.teamproject.reci.recipeTag.dto.RecipeTagDto;
 import com.RecipeCode.teamproject.reci.recipeTag.entity.RecipeTag;
+
+import com.RecipeCode.teamproject.reci.comments.dto.CommentsDto;
+import com.RecipeCode.teamproject.reci.comments.entity.Comments;
+import com.RecipeCode.teamproject.reci.recipes.dto.RecipesDto;
+import com.RecipeCode.teamproject.reci.recipes.entity.Recipes;
+
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -14,6 +21,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 )
 public interface MapStruct {
     //  TODO: Faq
+
     FaqDto toDto(Faq faq);
 
     Faq toEntity(FaqDto faqDto);
