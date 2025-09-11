@@ -1,6 +1,6 @@
 <%--
   Created by IntelliJ IDEA.
-  User: user
+  User: member
   Date: 25. 9. 10.
   Time: 오전 11:54
   To change this template use File | Settings | File Templates.
@@ -8,9 +8,100 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login</title>
+    <link rel="stylesheet" href="./css/common.css">
+    <link rel="stylesheet" href="./css/register_page.css">
 </head>
 <body>
+<main class="container">
 
+    <!-- 헤더 -->
+    <header class="profile-header">
+        <div class="flex-row">
+            <h1 class="page-title">Login</h1>
+            <a href="newfeed-ver-main-wireframe.html" class="float-text">home</a>
+        </div>
+        <a class="btn-logout" href="newfeed-ver-main-wireframe.html">Back</a>
+    </header>
+
+    <!-- 로그인 카드 -->
+    <section class="auth">
+        <article class="card p-16">
+            <!-- 나중에 JSP form으로 교체 -->
+            <form id="loginForm" method="post" action="/auth/loginProcess">
+
+                <!-- 이메일 -->
+                <div class="field">
+                    <label for="email">이메일</label>
+                    <input class="input" type="email" id="email" name="userEmail" placeholder="you@example.com" required />
+                </div>
+
+                <!-- 비밀번호 -->
+                <div class="field">
+                    <label for="pw">비밀번호</label>
+                    <div class="input-wrap">
+                        <input class="input" type="password" id="pw" name="password" placeholder="비밀번호 입력" minlength="8" required />
+                        <button class="toggle" type="button" aria-label="비밀번호 표시" data-target="#pw">👁️</button>
+                    </div>
+                </div>
+
+                <!-- 약관 동의 대신 자동 로그인 옵션 -->
+                <div class="field">
+                    <label class="switch">
+                        <input type="checkbox" id="remember" name="remember" />
+                        <span>로그인 상태 유지</span>
+                    </label>
+                </div>
+
+                <!-- 소셜 로그인 -->
+                <div class="divider">또는</div>
+                <div class="social">
+                    <button type="button" class="btn social" disabled>🔵 Continue with Google</button>
+                    <button type="button" class="btn social" disabled>🟡 Continue with Kakao</button>
+                </div>
+
+                <!-- 제출 -->
+                <div class="actions" style="margin-top:12px">
+                    <div class="left">
+                        <a class="btn ghost" href="register_page.html">회원가입</a>
+                        <a class="btn ghost" href="#">비밀번호 찾기</a>
+                    </div>
+                    <button class="btn primary" id="submitBtn" type="submit">로그인</button>
+                </div>
+
+                <div class="error" id="formError" aria-live="polite"></div>
+            </form>
+        </article>
+    </section>
+</main>
+
+<script>
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+
+    // 비밀번호 보기 토글
+    $$(".toggle").forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+            const input = document.querySelector(btn.dataset.target);
+            if(!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
+        });
+    });
+
+    // 제출 (와이어프레임용)
+    $('#loginForm').addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const payload = {
+            email: $('#email').value.trim(),
+            password: $('#pw').value,
+            remember: $('#remember').checked
+        };
+        e.target.submit();
+        console.log('LOGIN PAYLOAD', payload);
+        alert('로그인 요청! (백엔드 연동 지점)');
+    });
+</script>
 </body>
 </html>

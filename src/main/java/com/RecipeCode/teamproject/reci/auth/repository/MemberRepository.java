@@ -1,9 +1,9 @@
-package com.RecipeCode.teamproject.reci.comments.repository;
+package com.RecipeCode.teamproject.reci.auth.repository;
+
 
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 @Repository
-public interface MemberRepository extends JpaRepository<Member, String> {
+public interface MemberRepository extends JpaRepository<Member,String> {
 }
