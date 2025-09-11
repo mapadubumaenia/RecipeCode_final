@@ -1,15 +1,14 @@
 package com.RecipeCode.teamproject.reci.recipes.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
+import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.ingredient.entity.Ingredient;
 import com.RecipeCode.teamproject.reci.recipecontent.entity.RecipeContent;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.processing.Pattern;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+
 
 @Getter
 @Setter
@@ -26,10 +25,6 @@ public class Recipes extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String uuid;                        // 기본키
-
-//  @ManyToOne(optional=false) private Member author;
-//  @Column(nullable = false)
-//  private User userEmail;
 
     @Column(length = 100, nullable = false)
     private String recipeTitle;
@@ -57,11 +52,23 @@ public class Recipes extends BaseTimeEntity {
     @Column(length = 10)
     private String difficulty;                  // 난이도
 
-//  @ElementCollection : JPA가 자동으로 별도 테이블을 만듬
-//  @CollectionTable : recipes_uuid와 조인 + 리스트 원소 저장할 컬럼들 + sort_order 컬럼 자동 생성
-    @ElementCollection
-    @CollectionTable(name = "INQUIRY", joinColumns = @JoinColumn(name = "recipes_uuid"))
-    @OrderColumn(name = "sort_order")
-    private List<Inquiry> inquiry = new ArrayList<>();
+
+    @OneToMany(mappedBy = "recipes", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<Ingredient> ingredients = new ArrayList<>();
+
+//  RecipeContent
+//  recipesRepository.save() 할 때 contents도 같이 저장
+//  저장 시에는 RecipeContent에 반드시 setRecipes(recipe)로 부모를 지정
+//  cascade = CascadeType.ALL : 부모 엔티티에 수행한 작업을 자식 엔티티에도 전파
+//  orphanRemoval = true : 부모 엔티티가 사라지면 자식을 자동 삭제
+    @OneToMany(mappedBy = "recipes", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("stepOrder ASC")
+    private List<RecipeContent> contents = new ArrayList<>();
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_userEmail", nullable = false)
+  private Member userEmail;
+
 
 }

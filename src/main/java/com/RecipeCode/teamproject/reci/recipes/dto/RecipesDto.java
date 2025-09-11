@@ -1,8 +1,7 @@
 package com.RecipeCode.teamproject.reci.recipes.dto;
 
-import com.RecipeCode.teamproject.reci.recipes.entity.IngredientItem;
-import com.RecipeCode.teamproject.reci.recipes.entity.Inquiry;
-import jakarta.persistence.Column;
+import com.RecipeCode.teamproject.reci.ingredient.dto.IngredientDto;
+import com.RecipeCode.teamproject.reci.recipecontent.dto.RecipeContentDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -25,7 +24,8 @@ public class RecipesDto {
     private String difficulty;
     private Long cookingTime;
 
-    private List<Inquiry> inquiry;
+    private List<RecipeContentDto> contents;
+    private List<IngredientDto> ingredients;
 
     private Long viewCount;
     private Long likeCount;

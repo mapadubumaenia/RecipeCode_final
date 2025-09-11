@@ -1,6 +1,7 @@
 package com.RecipeCode.teamproject.reci.comments.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
+import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.recipes.entity.Recipes;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,11 +49,10 @@ public class Comments extends BaseTimeEntity {
     @JoinColumn(name = "parentId_commentsId")
     private Comments parentId;
 
-
 //  댓글 작성자
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "users_userEmail", referencedColumnName="userEmail", nullable = false)
-//    private Users userEmail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_userEmail", nullable = false)
+    private Member userEmail;
 
     @OneToMany(mappedBy = "parentId",
                cascade = CascadeType.ALL,
