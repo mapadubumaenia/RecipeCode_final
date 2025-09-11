@@ -24,18 +24,13 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 )
 public interface MapStruct {
     //  TODO: Faq
-
     FaqDto toDto(Faq faq);
-
     Faq toEntity(FaqDto faqDto);
-
     // TODO: 수정 시 사용: dirty checking 기능(save() 없이 수정 가능)
     void updateFromDto(FaqDto faqDto, @MappingTarget Faq faq);
 
-
     //  TODO: RecipeTag
     RecipeTagDto toDto(RecipeTag recipeTag);
-
     RecipeTag toEntity(RecipeTagDto recipeTagDto);
 
 // Recipes <-> RecipesDto
