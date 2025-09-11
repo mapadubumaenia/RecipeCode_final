@@ -1,14 +1,16 @@
 package com.RecipeCode.teamproject.common;
 
-
-
 import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
+import com.RecipeCode.teamproject.reci.ingredient.dto.IngredientDto;
+import com.RecipeCode.teamproject.reci.ingredient.entity.Ingredient;
 import com.RecipeCode.teamproject.reci.recipeTag.dto.RecipeTagDto;
 import com.RecipeCode.teamproject.reci.recipeTag.entity.RecipeTag;
 
 import com.RecipeCode.teamproject.reci.comments.dto.CommentsDto;
 import com.RecipeCode.teamproject.reci.comments.entity.Comments;
+import com.RecipeCode.teamproject.reci.recipecontent.dto.RecipeContentDto;
+import com.RecipeCode.teamproject.reci.recipecontent.entity.RecipeContent;
 import com.RecipeCode.teamproject.reci.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.recipes.entity.Recipes;
 
@@ -45,11 +47,25 @@ public interface MapStruct {
     @Mapping(source = "userEmail.userEmail", target = "userEmail")
     @Mapping(source = "uuid.uuid", target = "recipeUuid")
     @Mapping(source = "parentId.commentsId", target = "parentId")
-    Comments toDto(CommentsDto commentsDto);
+    CommentsDto toDto(Comments comments);
     @Mapping(source = "userEmail", target = "userEmail.userEmail")
     @Mapping(source = "recipeUuid", target = "uuid.uuid")
     @Mapping(source = "parentId", target = "parentId.commentsId")
-    CommentsDto toEntity(Comments comments);
+    Comments toEntity(CommentsDto commentsDto);
 
 
+//  RecipeContent <-> RecipeContentDto
+    @Mapping(source = "uuid.uuid", target = "recipeUuid")
+    RecipeContentDto toDto(RecipeContent recipeContent);
+    @Mapping(source = "recipeUuid", target = "uuid.uuid")
+    @Mapping(target = "recipes", ignore = true)
+    RecipeContent toEntity(RecipeContentDto recipeContentDto);
+
+//  Ingredient <-> IngredientDto
+    @Mapping(source = "recipeUuid.uuid", target = "recipeUuid")
+    IngredientDto toDto(Ingredient ingredient);
+
+    @Mapping(source = "recipeUuid", target = "recipeUuid.uuid")
+    @Mapping(target = "recipeUuid", ignore = true)
+    Ingredient toEntity(IngredientDto ingredientDto);
 }
