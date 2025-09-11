@@ -62,7 +62,9 @@ dependencies {
 	// TODO: es 라이브러리
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
-
+	//TODO: 엘라스틱서치더미데이터 작성기
+	implementation "net.datafaker:datafaker:2.2.2"
+	implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch"
 
 }
 
