@@ -29,6 +29,6 @@ public class RecipeContent extends BaseTimeEntity {
 
 //  레시피 참조키
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipes_uuid", nullable = false)
-    private Recipes uuid;
+    @JoinColumn(name = "uuid", nullable = false)
+    private Recipes recipes;
 }

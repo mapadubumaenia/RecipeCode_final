@@ -1,18 +1,20 @@
 package com.RecipeCode.teamproject.reci.recipes.service;
-
+import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.recipes.entity.Recipes;
 import com.RecipeCode.teamproject.reci.recipes.repository.RecipesRepository;
-import com.RecipeCode.teamproject.reci.recipes.repository.RecipesSummaryView;
+import jakarta.persistence.EntityManager;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Log4j2
@@ -21,43 +23,49 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RecipesServiceTest {
 
     @Autowired
-    RecipesService recipesService;
-    @Autowired
     RecipesRepository recipesRepository;
+    @Autowired
+    RecipesService recipesService;
+//  EntityManager : DB에 엔티티를 저장하고 관리하는 핵심 클래스
+    @Autowired
+    EntityManager em;
+
 
     @Test
-    @DisplayName("공개 레시피만 조회된다")
-    void getPublicRecipes() {
-        Recipes publicRecipe = Recipes.builder()
-                .recipeTitle("한 냄비 파스타")
-                .recipeIntro("설거지 줄이는 꿀팁")
+    void getFollowFeed() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Member member = new Member();
+        member.setUserEmail("testUser@example.com");
+        member.setUserId("tester01");
+        member.setNickname("테스트유저");
+        member.setPassword("encodedPassword");
+        member.setProfileStatus("PUBLIC");
+
+        em.persist(member);
+
+        Recipes recipe1 = Recipes.builder()
+                .recipeTitle("첫 번째 레시피")
+                .recipeCategory("한식")
+                .postStatus("PUBLIC")
+                .member(member)
+                .build();
+
+        Recipes recipe2 = Recipes.builder()
+                .recipeTitle("두 번째 레시피")
                 .recipeCategory("양식")
                 .postStatus("PUBLIC")
-                .thumbnailUrl("thumb1.jpg")
-                .likeCount(10L)
-                .commentCount(2L)
-                .build();
-        Recipes privateRecipe = Recipes.builder()
-                .recipeTitle("비밀 파스타")
-                .recipeIntro("나만 아는 꿀팁")
-                .recipeCategory("양식")
-                .postStatus("PRIVATE")
-                .thumbnailUrl("thumb2.jpg")
-                .likeCount(1L)
-                .commentCount(0L)
+                .member(member)
                 .build();
 
-        recipesRepository.save(publicRecipe);
-        recipesRepository.save(privateRecipe);
+        recipesRepository.save(recipe1);
+        recipesRepository.save(recipe2);
 
-        // when
-        List<RecipesSummaryView> result = recipesService.getPublicRecipes();
+//      userEmail을 List로 불러옴
+        List<String> followIds = List.of("tester01");
+        Page<RecipesDto> feed = recipesService.getFollowFeed(followIds, pageable);
 
-        // then
-        assertThat(result).hasSize(1); // 공개 레시피만
-        assertThat(result.get(0).getRecipeTitle()).isEqualTo("한 냄비 파스타");
-        assertThat(result.get(0).getPostStatus()).isEqualTo("PUBLIC");
-
-        log.info("조회 결과 = {}", result);
+        log.info("피드 결과: {}", feed.getContent());
     }
 }

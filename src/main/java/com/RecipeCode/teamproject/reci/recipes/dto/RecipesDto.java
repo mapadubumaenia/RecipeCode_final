@@ -15,14 +15,15 @@ import java.util.List;
 @Builder
 public class RecipesDto {
 
-    private String uuid;
-    private String userEmail;
+    private String uuid;            // PK
+    private String userEmail;       // member FK
     private String recipeTitle;
     private String recipeIntro;
     private String recipeCategory;
     private String postStatus;
     private String difficulty;
     private Long cookingTime;
+    private String thumbnailUrl;
 
     private List<RecipeContentDto> contents;
     private List<IngredientDto> ingredients;

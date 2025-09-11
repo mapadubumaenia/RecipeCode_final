@@ -41,12 +41,16 @@ public class Recipes extends BaseTimeEntity {
     @Column(nullable = false)
     private String postStatus;                  // 공개여부
     @Column(nullable = false)
+    @Builder.Default
     private Long viewCount = 0L;                // 조회수
     @Column(nullable = false)
+    @Builder.Default
     private Long likeCount = 0L;                // 좋아요
     @Column(nullable = false)
+    @Builder.Default
     private Long reportCount = 0L;              // 신고수
     @Column(nullable = false)
+    @Builder.Default
     private Long commentCount = 0L;             // 댓글수
 
     @Column(length = 10)
@@ -67,8 +71,8 @@ public class Recipes extends BaseTimeEntity {
     private List<RecipeContent> contents = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_userEmail", nullable = false)
-  private Member userEmail;
+  @JoinColumn(name = "userEmail", nullable = false)
+  private Member member;
 
 
 }
