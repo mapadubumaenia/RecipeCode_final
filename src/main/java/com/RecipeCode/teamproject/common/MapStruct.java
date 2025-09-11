@@ -38,34 +38,40 @@ public interface MapStruct {
 
     RecipeTag toEntity(RecipeTagDto recipeTagDto);
 
+
 // Recipes <-> RecipesDto
+    @Mapping(source = "member.userEmail", target = "userEmail")
     RecipesDto toDto(Recipes recipes);
+    @Mapping(target = "thumbnail", ignore = true)
+    @Mapping(target = "member", ignore = true)
     Recipes toEntity(RecipesDto recipesDto);
 
 // Comments <-> CommentsDto
-    @Mapping(source = "userEmail.userId", target = "userId")
-    @Mapping(source = "userEmail.userEmail", target = "userEmail")
-    @Mapping(source = "uuid.uuid", target = "recipeUuid")
+
+    @Mapping(source = "recipes.uuid", target = "recipeUuid")
+    @Mapping(source = "member.userEmail", target = "userEmail")
+    @Mapping(source = "member.userId", target = "userId") // Member 엔티티에 userId 있다고 가정
     @Mapping(source = "parentId.commentsId", target = "parentId")
     CommentsDto toDto(Comments comments);
-    @Mapping(source = "userEmail", target = "userEmail.userEmail")
-    @Mapping(source = "recipeUuid", target = "uuid.uuid")
-    @Mapping(source = "parentId", target = "parentId.commentsId")
+    @Mapping(target = "recipes", ignore = true)   // UUID -> Recipes 변환은 서비스에서 처리
+    @Mapping(target = "member", ignore = true)    // Email -> Member 변환도 서비스에서 처리
+    @Mapping(target = "parentId", ignore = true)  // parent 댓글 세팅도 서비스에서 처리
+    @Mapping(target = "children", ignore = true)  // 자식 댓글은 별도 로직 필요
     Comments toEntity(CommentsDto commentsDto);
 
 
 //  RecipeContent <-> RecipeContentDto
-    @Mapping(source = "uuid.uuid", target = "recipeUuid")
+    @Mapping(source = "recipes.uuid", target = "recipes")
     RecipeContentDto toDto(RecipeContent recipeContent);
-    @Mapping(source = "recipeUuid", target = "uuid.uuid")
-    @Mapping(target = "recipes", ignore = true)
+    @Mapping(target = "recipes", ignore = true)                  // uuid -> Recipes 변환은 서비스에서 처리
+    @Mapping(target = "recipeImage", ignore = true)
     RecipeContent toEntity(RecipeContentDto recipeContentDto);
 
+
 //  Ingredient <-> IngredientDto
-    @Mapping(source = "recipeUuid.uuid", target = "recipeUuid")
+    @Mapping(source = "recipes.uuid", target = "recipesUuid")
     IngredientDto toDto(Ingredient ingredient);
 
-    @Mapping(source = "recipeUuid", target = "recipeUuid.uuid")
-    @Mapping(target = "recipeUuid", ignore = true)
+    @Mapping(target = "recipes", ignore = true)                 // UUID -> Recipes 객체 변환은 서비스에서 직접 처리
     Ingredient toEntity(IngredientDto ingredientDto);
 }

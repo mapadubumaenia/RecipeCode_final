@@ -31,7 +31,7 @@ public class Ingredient extends BaseTimeEntity {
 
 // Recipes FK (부모 Recipes 엔티티 참조)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipes_uuid", nullable = false)
-    private Recipes recipeUuid;
+    @JoinColumn(name = "uuid", nullable = false)
+    private Recipes recipes;
 
 }

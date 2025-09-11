@@ -9,9 +9,9 @@ import lombok.*;
 @ToString
 @Builder
 public class RecipeContentDto {
-    private Long stepId;
+    private Long stepId;                // PK
     private String recipeImageUrl;
     private String stepExplain;
     private Long stepOrder;
-    private String recipeUuid;
+    private String recipes;             // FK
 }

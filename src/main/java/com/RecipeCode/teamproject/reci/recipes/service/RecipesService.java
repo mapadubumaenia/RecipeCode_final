@@ -1,8 +1,13 @@
 package com.RecipeCode.teamproject.reci.recipes.service;
 
+import com.RecipeCode.teamproject.common.MapStruct;
+import com.RecipeCode.teamproject.reci.recipes.dto.RecipesDto;
+import com.RecipeCode.teamproject.reci.recipes.entity.Recipes;
 import com.RecipeCode.teamproject.reci.recipes.repository.RecipesRepository;
-import com.RecipeCode.teamproject.reci.recipes.repository.RecipesSummaryView;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,19 +17,18 @@ import java.util.List;
 public class RecipesService {
 
     private final RecipesRepository recipesRepository;
+    private final MapStruct mapStruct;
 
-//    메인 화면용 (공개 레시피만)
-    public List<RecipesSummaryView> getPublicRecipes() {
-        return recipesRepository.findByPostStatus("PUBLIC");
+// 팔로우 레시피 내 팔로우 피드보기 (최신순)
+    public Page<RecipesDto> getFollowFeed(List<String> followIds, Pageable pageable) {
+//        공개 레시피
+        String status = "PUBLIC";
+
+        Page<Recipes> recipesPage = recipesRepository
+                .findByMember_UserIdInAndPostStatusOrderByInsertTimeDesc(
+                    followIds, status, pageable);
+
+        return recipesPage.map(recipesDto -> mapStruct.toDto(recipesDto));
     }
 
-//    마이 페이지 (내 모든 레시피)
-    public List<RecipesSummaryView> getMyRecipes(String userEmail) {
-        return recipesRepository.findByUserEmail(userEmail);
-    }
-
-//    마이 페이지 (내 공개 레시피 or 비공개만)
-    public List<RecipesSummaryView> getMyRecipesByPostStatus(String userEmail, String postStatus) {
-        return recipesRepository.findByUserEmailAndPostStatus(userEmail, postStatus);
-    }
 }

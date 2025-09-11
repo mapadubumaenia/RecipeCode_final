@@ -26,8 +26,8 @@ public class Comments extends BaseTimeEntity {
 
 //  댓글이 달린 레시피
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipes_uuid", nullable = false)
-    private Recipes uuid;
+    @JoinColumn(name = "uuid", nullable = false)
+    private Recipes recipes;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
@@ -51,8 +51,8 @@ public class Comments extends BaseTimeEntity {
 
 //  댓글 작성자
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_userEmail", nullable = false)
-    private Member userEmail;
+    @JoinColumn(name = "userEmail", nullable = false)
+    private Member member;
 
     @OneToMany(mappedBy = "parentId",
                cascade = CascadeType.ALL,
