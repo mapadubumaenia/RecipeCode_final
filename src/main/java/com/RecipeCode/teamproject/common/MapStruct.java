@@ -1,5 +1,8 @@
 package com.RecipeCode.teamproject.common;
 
+
+import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
+import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
 import com.RecipeCode.teamproject.reci.ingredient.dto.IngredientDto;
@@ -71,4 +74,9 @@ public interface MapStruct {
 
     @Mapping(target = "recipes", ignore = true)                 // UUID -> Recipes 객체 변환은 서비스에서 직접 처리
     Ingredient toEntity(IngredientDto ingredientDto);
+
+// Member <-> MemberDto
+    MemberDto toDto(Member member);
+    Member toEntity(MemberDto memberDto);
+
 }
