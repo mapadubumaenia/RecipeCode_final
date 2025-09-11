@@ -3,9 +3,9 @@ package com.RecipeCode.teamproject.es.search.service;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
+import com.RecipeCode.teamproject.common.CursorUtil; // ★ 커서 유틸 import
 import com.RecipeCode.teamproject.es.search.document.RecipeSearchDoc;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -32,65 +32,81 @@ public class SearchService {
     }
 
     /**
-     * 통합검색 v1
+     * 통합검색 v1 (하위호환)
+     * - page 기반. 내부적으로 v2(after=null) 호출
+     */
+    public Map<String, Object> searchAndLog(String q, List<String> tags, String sort, int page, int size) {
+        size = Math.min(Math.max(size, 1), 50);
+        return searchAndLog(q, tags, sort, /*after*/ null, size);
+    }
+
+    /**
+     * 통합검색 v2 (커서 기반)
      * - q:
      *   - "#태그"  -> tags(keyword) term 정확일치
      *   - "@아이디" -> authorId(keyword) term 정확일치
      *   - 그외     -> title/body/authorNick multi_match
      * - 공통 필터: visibility == PUBLIC
-     * - 정렬: new(최신), hot(인기), 기본은 _score
+     * - 정렬: new(최신), hot(인기) → search_after 지원
+     *   (rel/_score 모드는 score 기반이라 search_after 미지원: 이때 after는 무시)
      * - 집계: tags terms / createdAt day 히스토그램
      */
-    public Map<String, Object> searchAndLog(String q, List<String> tags, String sort, int page, int size) {
+    public Map<String, Object> searchAndLog(String q, List<String> tags, String sort, String after, int size) {
         // size 가드(1~50)
         size = Math.min(Math.max(size, 1), 50);
-        page = Math.max(page, 0);
 
         // 1) 메인 쿼리 분기
         Query main = buildMainQuery(q);
 
-        // 2) 공통/부가 필터 구성
+        // 2) 공통/부가 필터
         List<Query> filters = new ArrayList<>();
-        // visibility = PUBLIC 고정
         filters.add(Query.of(b -> b.term(t -> t.field("visibility").value("PUBLIC"))));
-
-        // tags 파라미터로 필터가 넘어올 경우 (여러 태그 AND 필터가 있다면 terms 로 in-list)
         if (tags != null && !tags.isEmpty()) {
             List<FieldValue> vals = tags.stream().map(FieldValue::of).toList();
             filters.add(Query.of(b -> b.terms(t -> t.field("tags").terms(v -> v.value(vals)))));
         }
 
-        // 3) 최종 Bool 조립 (must: main, filter: 공통/부가)
         Query boolQuery = Query.of(b -> b.bool(bb -> bb.must(main).filter(filters)));
 
-        // 4) NativeQuery 빌더
+        // 3) NativeQuery
         NativeQueryBuilder qb = NativeQuery.builder()
                 .withQuery(boolQuery)
-                .withPageable(PageRequest.of(page, size));
+                .withPageable(PageRequest.of(0, size)); // 커서 모드의 첫 페이지는 항상 0
 
-        // 5) 집계 (상위 태그 / 일자 히스토그램)
-        qb.withAggregation("tags",
-                Aggregation.of(a -> a.terms(t -> t.field("tags").size(20)))
-        );
-        qb.withAggregation("by_day",
-                Aggregation.of(a -> a.dateHistogram(h -> h
-                        .field("createdAt")
-                        .fixedInterval(fi -> fi.time("1d"))   // 1일 간격(버전 호환 안전)
-                ))
-        );
+        // 4) 집계
+        qb.withAggregation("tags", Aggregation.of(a -> a.terms(t -> t.field("tags").size(20))));
+        qb.withAggregation("by_day", Aggregation.of(a -> a.dateHistogram(h -> h
+                .field("createdAt")
+                .fixedInterval(fi -> fi.time("1d")))));
 
-        // 6) 정렬
-        if ("new".equalsIgnoreCase(sort)) {
-            qb.withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
-        } else if ("hot".equalsIgnoreCase(sort)) {
+        // 5) 정렬(커서 키와 순서 반드시 일치)
+        boolean cursorSortable = false;
+        if ("hot".equalsIgnoreCase(sort)) {
             qb.withSort(s -> s.field(f -> f.field("likes").order(SortOrder.Desc)));
             qb.withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
-        } // 기본은 _score (rel)
+            qb.withSort(s -> s.field(f -> f.field("id").order(SortOrder.Desc))); // tie-breaker
+            cursorSortable = true;
+        } else if ("new".equalsIgnoreCase(sort) || !StringUtils.hasText(sort)) {
+            qb.withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
+            qb.withSort(s -> s.field(f -> f.field("id").order(SortOrder.Desc))); // tie-breaker
+            cursorSortable = true;
+        } else {
+            // rel/_score 모드: 정렬 미설정(ES 기본 score desc)
+            // → score 기반 search_after 미지원이므로 after는 무시됨
+        }
+
+        // 6) after 적용
+        if (cursorSortable) {
+            List<Object> afterValues = CursorUtil.decode(after);
+            if (afterValues != null) {
+                qb.withSearchAfter(afterValues);
+            }
+        }
 
         // 7) 검색 실행
         SearchHits<RecipeSearchDoc> hits = es.search(qb.build(), RecipeSearchDoc.class);
 
-        // 8) 결과 매핑 (필요 필드만 노출)
+        // 8) 결과 매핑
         var items = hits.getSearchHits().stream().map(h -> {
             var d = h.getContent();
             return Map.<String, Object>of(
@@ -104,14 +120,23 @@ public class SearchService {
             );
         }).toList();
 
+        // 9) next 커서 생성
+        String next = null;
+        if (cursorSortable && !hits.getSearchHits().isEmpty()) {
+            var last = hits.getSearchHits().get(hits.getSearchHits().size() - 1);
+            var sortVals = last.getSortValues(); // List<Object>
+            if (sortVals != null && !sortVals.isEmpty()) {
+                next = CursorUtil.encode(sortVals);
+            }
+        }
+
         var res = new LinkedHashMap<String, Object>();
         res.put("total", hits.getTotalHits());
         res.put("items", items);
-        // (집계 응답까지 API로 내리고 싶다면, 아래처럼 꺼내서 넣어도 됨)
-        // res.put("aggs", hits.getAggregations());
+        res.put("next", next); // 없으면 FE는 더보기 버튼 숨김/자동로딩 중단
 
-        // 9) 검색 로그 적재 (실패 없어야 하므로 예외는 서비스 내부에서 삼켜도 OK)
-        logs.log(q, tags, sort, page, size, hits.getTotalHits(), null);
+        // 10) 검색 로그 적재
+        logs.log(q, tags, sort, /*page=*/0, size, hits.getTotalHits(), null);
 
         return res;
     }
@@ -130,18 +155,14 @@ public class SearchService {
         if (!StringUtils.hasText(qv)) {
             return Query.of(b -> b.matchAll(m -> m));
         }
-
         if (qv.startsWith("#") && qv.length() > 1) {
             String tag = qv.substring(1).trim();
             return Query.of(b -> b.term(t -> t.field("tags").value(tag)));
         }
-
         if (qv.startsWith("@") && qv.length() > 1) {
             String uid = qv.substring(1).trim();
             return Query.of(b -> b.term(t -> t.field("authorId").value(uid)));
         }
-
-        // 일반 텍스트
         return Query.of(b -> b.multiMatch(mm -> mm
                 .query(qv)
                 .fields("title", "body", "authorNick")
