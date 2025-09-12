@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RecipesRepository extends JpaRepository<Recipes, String> {
@@ -43,5 +44,21 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
             @Param("status") String status,
             Pageable pageable
     );
+
+//    uuid로 레시피 찾기 상세조회
+//    @Query("SELECT r FROM Recipes r \n" +
+//            "LEFT JOIN FETCH r.ingredients \n" +
+//            "LEFT JOIN FETCH r.contents \n" +
+//            "WHERE r.uuid = :uuid")
+//    Optional<Recipes> findByUuid(String uuid);
+
+    @Query("SELECT r FROM Recipes r " +
+            "LEFT JOIN FETCH r.contents " +
+            "WHERE r.uuid = :uuid")
+    Optional<Recipes> findByUuid(String uuid);
+
+//    섬네일만 바로 가져옴
+    @Query(value = "select r.thumbnail from Recipes r where r.uuid = :uuid")
+    byte[] findThumbnailByUuid(@Param("uuid") String uuid);
 
 }

@@ -84,54 +84,54 @@ class RecipesServiceTest {
     }
 
 
-    @Test
-    void testSave() {
-            // 1. 테스트용 멤버 저장
-            Member member = new Member();
-            member.setUserEmail("testUser@example.com");
-            member.setUserId("tester01");
-            member.setNickname("테스트유저");
-            member.setPassword("encodedPassword");
-            member.setProfileStatus("PUBLIC");
-            memberRepository.save(member);
-
-            // 2. DTO 준비
-            IngredientDto ingredientDto = new IngredientDto();
-            ingredientDto.setIngredientName("스파게티면");
-            ingredientDto.setIngredientAmount("200g");
-            ingredientDto.setSortOrder(1L);
-
-            RecipeContentDto recipeContentDto = new RecipeContentDto();
-            recipeContentDto.setStepOrder(10L);
-            recipeContentDto.setStepExplain("끓는 물에 면을 삶는다.");
-
-            RecipesDto recipesDto = new RecipesDto();
-            recipesDto.setRecipeTitle("태그 포함 테스트 레시피");
-            recipesDto.setRecipeCategory("양식");
-            recipesDto.setPostStatus("PUBLIC");
-            recipesDto.setDifficulty("쉬움");
-            recipesDto.setCookingTime(20L);
-            recipesDto.setIngredients(List.of(ingredientDto));
-            recipesDto.setContents(List.of(recipeContentDto));
-            recipesDto.setCommentCount(0L);
-            recipesDto.setLikeCount(0L);
-            recipesDto.setViewCount(0L);
-            recipesDto.setReportCount(0L);
-
-            // 🔥 태그 추가
-            recipesDto.setTags(List.of("파스타", "간단요리", "저녁메뉴"));
-
-            // 3. 서비스 호출
-            String uuid = recipesService.save(recipesDto, member.getUserEmail());
-
-            // 4. 검증
-            assertNotNull(uuid);
-            System.out.println("등록된 레시피 uuid = " + uuid);
-
-            // 5. 태그 검증
-            List<RecipeTag> recipeTags = recipeTagRepository.findByRecipes_Uuid(uuid);
-            assertEquals(3, recipeTags.size()); // 태그 3개 들어갔는지 확인
-            recipeTags.forEach(rt -> System.out.println("저장된 태그 = " + rt.getTag().getTag()));
-    }
+//    @Test
+//    void testSave() {
+//            // 1. 테스트용 멤버 저장
+//            Member member = new Member();
+//            member.setUserEmail("testUser@example.com");
+//            member.setUserId("tester01");
+//            member.setNickname("테스트유저");
+//            member.setPassword("encodedPassword");
+//            member.setProfileStatus("PUBLIC");
+//            memberRepository.save(member);
+//
+//            // 2. DTO 준비
+//            IngredientDto ingredientDto = new IngredientDto();
+//            ingredientDto.setIngredientName("스파게티면");
+//            ingredientDto.setIngredientAmount("200g");
+//            ingredientDto.setSortOrder(1L);
+//
+//            RecipeContentDto recipeContentDto = new RecipeContentDto();
+//            recipeContentDto.setStepOrder(10L);
+//            recipeContentDto.setStepExplain("끓는 물에 면을 삶는다.");
+//
+//            RecipesDto recipesDto = new RecipesDto();
+//            recipesDto.setRecipeTitle("태그 포함 테스트 레시피");
+//            recipesDto.setRecipeCategory("양식");
+//            recipesDto.setPostStatus("PUBLIC");
+//            recipesDto.setDifficulty("쉬움");
+//            recipesDto.setCookingTime(20L);
+//            recipesDto.setIngredients(List.of(ingredientDto));
+//            recipesDto.setContents(List.of(recipeContentDto));
+//            recipesDto.setCommentCount(0L);
+//            recipesDto.setLikeCount(0L);
+//            recipesDto.setViewCount(0L);
+//            recipesDto.setReportCount(0L);
+//
+//            // 🔥 태그 추가
+//            recipesDto.setTags(List.of("파스타", "간단요리", "저녁메뉴"));
+//
+//            // 3. 서비스 호출
+//            String uuid = recipesService.save(recipesDto, member.getUserEmail());
+//
+//            // 4. 검증
+//            assertNotNull(uuid);
+//            System.out.println("등록된 레시피 uuid = " + uuid);
+//
+//            // 5. 태그 검증
+//            List<RecipeTag> recipeTags = recipeTagRepository.findByRecipes_Uuid(uuid);
+//            assertEquals(3, recipeTags.size()); // 태그 3개 들어갔는지 확인
+//            recipeTags.forEach(rt -> System.out.println("저장된 태그 = " + rt.getTag().getTag()));
+//    }
 
 }

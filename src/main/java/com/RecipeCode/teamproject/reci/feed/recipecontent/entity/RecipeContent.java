@@ -1,4 +1,4 @@
-package com.RecipeCode.teamproject.reci.recipecontent.entity;
+package com.RecipeCode.teamproject.reci.feed.recipecontent.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
