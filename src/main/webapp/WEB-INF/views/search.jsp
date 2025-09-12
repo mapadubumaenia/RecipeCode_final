@@ -26,9 +26,9 @@
   <input id="q" type="text" placeholder="#비건 / @u1234 / 김치찌개"
          value="<c:out value='${param.q}'/>"/>
   <select id="sort">
-    <option value="rel">관련도</option>
-    <option value="new">최신순</option>
-    <option value="hot">인기순</option>
+    <option value="rel" <c:if test="${param.sort == 'rel' || empty param.sort}">selected</c:if>>관련도</option>
+    <option value="new" <c:if test="${param.sort == 'new'}">selected</c:if>>최신순</option>
+    <option value="hot" <c:if test="${param.sort == 'hot'}">selected</c:if>>인기순</option>
   </select>
   <button id="searchBtn">검색</button>
 </div>
@@ -109,13 +109,7 @@
     return { q, sort };
   }
 
-  // 검색 버튼/엔터
-  document.getElementById('searchBtn').addEventListener('click', () => {
-    next = null;
-    document.getElementById('end').style.display = 'none';
-    document.getElementById('list').innerHTML = '';
-    loadMore(currentParams());
-  });
+
   document.getElementById('q').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') document.getElementById('searchBtn').click();
   });
@@ -135,6 +129,22 @@
     loadMore(currentParams());
   })();
 
+//URL 동기화(검색 누를 때 주소창 갱신) 새로고침/공유해도 같은 결과 나오게:
+  document.getElementById('searchBtn').addEventListener('click', () => {
+    const { q, sort } = currentParams();
+    const params = new URLSearchParams({ q, sort });
+    history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
+
+    next = null;
+    document.getElementById('end').style.display = 'none';
+    document.getElementById('list').innerHTML = '';
+    loadMore({ q, sort });
+  });
+
+  // 정렬 변경시 자동 재검색
+  document.getElementById('sort').addEventListener('change', () => {
+    document.getElementById('searchBtn').click();
+  });
 
 </script>
 
