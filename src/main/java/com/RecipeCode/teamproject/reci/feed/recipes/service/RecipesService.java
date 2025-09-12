@@ -4,7 +4,6 @@ import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.MapStruct;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
-import com.RecipeCode.teamproject.reci.feed.comments.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.feed.recipeTag.entity.RecipeTag;
 import com.RecipeCode.teamproject.reci.feed.recipeTag.repository.RecipeTagRepository;
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;

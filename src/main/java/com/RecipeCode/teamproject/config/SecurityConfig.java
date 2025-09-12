@@ -22,8 +22,6 @@ public class SecurityConfig {
         return http
                 // 개발용: CSRF 완전 비활성화(POST/PUT 테스트 편의)
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-
                 // 개발용: 전부 열어두기
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/search").permitAll() // JSP 뷰
