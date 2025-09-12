@@ -12,8 +12,8 @@ import com.RecipeCode.teamproject.reci.feed.recipeTag.entity.RecipeTag;
 
 import com.RecipeCode.teamproject.reci.feed.comments.dto.CommentsDto;
 import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
-import com.RecipeCode.teamproject.reci.recipecontent.dto.RecipeContentDto;
-import com.RecipeCode.teamproject.reci.recipecontent.entity.RecipeContent;
+import com.RecipeCode.teamproject.reci.feed.recipecontent.dto.RecipeContentDto;
+import com.RecipeCode.teamproject.reci.feed.recipecontent.entity.RecipeContent;
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 
@@ -70,9 +70,12 @@ public interface MapStruct {
 
 //  RecipeContent <-> RecipeContentDto
     @Mapping(source = "recipes.uuid", target = "recipes")
+//    @Mapping(source = "stepExplain", target = "stepExplain")
     RecipeContentDto toDto(RecipeContent recipeContent);
     @Mapping(target = "recipes", ignore = true)                  // uuid -> Recipes 변환은 서비스에서 처리
     @Mapping(target = "recipeImage", ignore = true)
+//    @Mapping(source = "stepExplain", target = "stepExplain")
+    @Mapping(source = "recipeImageUrl", target = "recipeImageUrl")
     RecipeContent toEntity(RecipeContentDto recipeContentDto);
 
 

@@ -1,4 +1,4 @@
-package com.RecipeCode.teamproject.reci.recipecontent.dto;
+package com.RecipeCode.teamproject.reci.feed.recipecontent.dto;
 
 import lombok.*;
 

@@ -1,7 +1,7 @@
 package com.RecipeCode.teamproject.reci.feed.recipes.dto;
 
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
-import com.RecipeCode.teamproject.reci.recipecontent.dto.RecipeContentDto;
+import com.RecipeCode.teamproject.reci.feed.recipecontent.dto.RecipeContentDto;
 import lombok.*;
 
 import java.time.LocalDateTime;

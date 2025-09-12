@@ -3,7 +3,7 @@ package com.RecipeCode.teamproject.reci.feed.recipes.entity;
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.feed.ingredient.entity.Ingredient;
-import com.RecipeCode.teamproject.reci.recipecontent.entity.RecipeContent;
+import com.RecipeCode.teamproject.reci.feed.recipecontent.entity.RecipeContent;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -21,7 +21,6 @@ import java.util.List;
 public class Recipes extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String uuid;                        // 기본키
 
     private String recipeTitle;
