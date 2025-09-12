@@ -31,7 +31,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll() // 검색 API
                         .anyRequest().permitAll()
                 )
-
                 // 로그인/기본인증 비활성화
                 .formLogin(form -> form
                         .loginPage("/auth/login")                                // 사용자 정의 로그인 페이지
