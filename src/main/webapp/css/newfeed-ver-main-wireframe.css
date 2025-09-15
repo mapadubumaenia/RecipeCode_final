@@ -1,0 +1,65 @@
+/* 헤더 */
+.search-bar{display:none;}
+.search-btn{padding:10px 12px;border:none;border-radius:12px;
+  background:var(--brand);color:var(--wtext);cursor:pointer}
+
+/* 트렌딩/태그/피드 전용 */
+.trend-grid{display:grid;grid-auto-flow:column;grid-auto-columns:80%;gap:12px;
+  overflow-x:auto;padding:4px 2px 8px;margin-bottom:8px}
+.trend-card{display:flex;flex-direction:column;gap:8px}
+.trend-title{font-weight:800;font-size:1rem}
+.trend-desc{color:var(--muted);font-size:.9rem}
+.actions{display:flex;gap:12px;font-size:.9rem;color:var(--muted);justify-content: space-between;}
+.populartag{margin-top:6px}
+.tags{display:grid;gap:8px}
+.tag-item{display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px dashed var(--line);padding:10px 2px}
+.chip{background:var(--tag);padding:6px 10px;border-radius:999px;font-size:.85rem}
+
+/* 사이드 특징 배너 */
+.feature{display:flex;flex-direction:column;gap:10px}
+.feature .thumb{aspect-ratio:16/9}
+
+/* 커뮤니티 피드 카드 */
+.post{display:flex;flex-direction:column;gap:10px;margin-bottom: 8px;}
+.post-head{display:flex;flex-direction: row; align-items:center;gap:10px}
+.post-info{flex:1;}
+.post-id{font-weight: 700;}
+.followbtn-sm {justify-items: flex-end;}
+.followbtn-sm[aria-busy="true"]{opacity: .6; pointer-events:none;}
+.followbtn-sm.is-active{background: var(--brand); color:var(--wtext);border-color: var(--brand);}
+.post-cta{display:flex;gap:14px}
+
+/* 댓글 박스 */
+.cmt-box{margin-top:10px;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+.cmt-head{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 10px;border-bottom:1px solid var(--border)}
+.cmt-list{display:grid;gap:10px;padding:10px;max-height:320px;overflow:auto}
+.cmt{display:grid;grid-template-columns:40px 1fr;gap:8px}
+.cmt .avatar-ss{width:40px;height:40px;border-radius:50%;background:var(--tag)}
+.cmt .meta{color:var(--muted);font-size:.85rem}
+.cmt-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+.cmt-input textarea{flex:1;border:1px solid var(--border);border-radius:8px;
+  padding:8px;min-height:52px;resize:vertical;background:var(--card);color:var(--text)}
+.cmt-empty{padding:14px;color:var(--muted);text-align:center}
+.cmt-loading{padding:14px;text-align:center}
+
+/* 하단 플로팅/검색바(PC만 노출) */
+.search{flex:1;border:1px solid var(--border);border-radius:12px;padding:6px;outline:none;width:100%}
+
+/* 반응형 */
+@media (min-width:768px){
+  .btn{padding:12px;border-radius:12px;border:1px solid var(--brand);
+    font-weight:700;background:var(--card)}
+  .btn.primary{background:var(--brand);color:var(--wtext)}
+}
+@media (min-width:1024px){
+  .register{display:none}
+  .btn.pc-register{background:var(--muted);color:var(--wtext)}
+  .page-title{margin-bottom:8px}
+  .layout{display:grid;grid-template-columns:1fr 320px;gap:18px}
+  .sidebar{position:sticky;top:16px;align-self:start;height:max-content}
+  .search-bar{display:flex;gap:8px}
+  .search-input{flex:1;border:1px solid var(--border);border-radius:12px;
+    padding:10px 12px;background:var(--card)}
+}
