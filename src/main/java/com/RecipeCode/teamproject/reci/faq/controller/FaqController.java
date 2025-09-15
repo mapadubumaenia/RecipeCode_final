@@ -23,16 +23,31 @@ public class FaqController {
     //	전체조회
     @GetMapping("/faq")
     public String selectFaqList(@RequestParam(defaultValue = "") String searchKeyword,
-                                @PageableDefault(page = 0, size = 3) Pageable pageable,
+                                @PageableDefault(page = 0, size = 20) Pageable pageable,
                                 Model model) {
 //		전체조회 서비스 메소드 실행
         Page<FaqDto> pages = faqService.selectFaqList(searchKeyword, pageable);
         log.info("FAQ 목록 조회 : " + pages);
-        model.addAttribute("faqs", pages.getContent());
-        model.addAttribute("pages", pages);
+        model.addAttribute("faqs", pages.getContent()); //FAQ 목록
+        model.addAttribute("pages", pages);  // 페이징 정보
 
         return "faq/faq_all";
     }
+
+    // 카테고리별 조회
+    @GetMapping("/faq/category")
+    public String selectFaqListByTag(@RequestParam String tag,
+                                     @PageableDefault(page = 0, size = 20) Pageable pageable,
+                                     Model model) {
+//	카테고리 조회 서비스 메소드 실행
+        Page<FaqDto> pages = faqService.selectFaqListByTag(tag, pageable);
+        log.info("FAQ 카테고리별 목록 조회 : " + pages);
+        model.addAttribute("faqs", pages.getContent()); // FAQ 목록
+        model.addAttribute("pages", pages);  // 페이징 정보
+
+        return "faq/faq_all";  //
+    }
+
 
     //	추가 페이지 열기
     @GetMapping("/faq/addition")
@@ -47,7 +62,7 @@ public class FaqController {
         log.info("저장 로그 :" + faqDto);
 //		서비스의 insert 실행
         faqService.save(faqDto);
-        return "redirect:/faq";
+        return "redirect:/faq/addition";
     }
 
     //	수정페이지 열기(상세조회)

@@ -1,0 +1,170 @@
+/* ===========================
+   common.css (공통)
+   =========================== */
+
+/* 1) 디자인 토큰 */
+/* 1-1) 기본모드 */
+:root{
+  --bg:#f7f7f9; --card:#fff; --border:#e9e9ee; --line:#e9e9ee; --text:hsl(0, 0%, 13%);
+  --muted:#6b7280; --brand:#111827; --tag:#eef2f7; --btn:#111827; --wtext:#fff;
+  --radius:16px; --shadow:0 2px 10px rgba(0,0,0,.05); --chip:#eef2f7;
+  --maxw:1080px; --danger:#dc2626; --ok:#16a34a; --warn:#d97706;
+}
+
+/* 1-2) 다크모드 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#1a1a1a;          /* 배경 → 거의 검정에 가까운 다크 그레이 */
+    --card:#242424;        /* 카드 배경 → BG보다 살짝 밝게 */
+    --border:#3a3a3a;      /* 테두리 → BG와 카드 중간 톤 */
+    --line:#3a3a3a;        /* 구분선도 동일 */
+    --text:#e5e5e5;        /* 일반 텍스트 → 거의 흰색 */
+    --muted:#9ca3af;       /* 서브 텍스트 → 그레이톤 */
+    --brand:#60a5fa;       /* 브랜드 포인트 → 파란 계열 (화이트 모드보다 밝게) */
+    --tag:#333;            /* 태그 배경 → 어두운 그레이 */
+    --btn:#3b82f6;         /* 버튼 메인 → 블루톤 */
+    --wtext:#fff;          /* 버튼 안 텍스트 → 흰색 */
+    --radius:16px;
+    --shadow:0 2px 10px rgba(0,0,0,.6); /* 다크에서 더 뚜렷한 그림자 */
+    --chip:#333;           /* 칩/작은 요소 BG */
+    --maxw:1080px;
+    --danger:#f87171;      /* 빨강 → 톤 다운 */
+    --ok:#34d399;          /* 초록 → 네온 느낌 살짝 */
+    --warn:#fbbf24;        /* 노랑/주황 → 경고 */
+  }
+}
+
+/* 2) 리셋/기본 */
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+
+/* 3) 레이아웃 유틸 */
+.container{max-width:var(--maxw);margin:0 auto;padding:12px}
+.hidden{display:none !important}
+.m-0{margin: 0;}
+.mb-8{margin-bottom:8px}
+.mb-12{margin-bottom:12px}
+.p-12{padding:12px}
+.p-16{padding:16px}
+.grid{display:grid;gap:10px}
+.grid.cols-2{grid-template-columns:1fr 1fr}
+.flex-box{display: flex; flex-direction: row; justify-content: space-between;}
+.text-center{text-align: center;}
+.float-text{cursor:pointer}
+.float-text:hover{font-weight:600}
+
+
+/* 4) 카드/텍스트 유틸 */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.muted{color:var(--muted);font-size:.9rem}
+.trend-card{display:flex;flex-direction:column;gap:8px}
+.trend-title{font-weight:800;font-size:1rem}
+
+
+/* 5) 버튼 (페이지별 변주 최소화) */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:6px;border:1px solid var(--border);background:var(--card);border-radius:12px;cursor:pointer;font-weight:700;color: var(--text);}
+.btn.primary{background:var(--brand);color:var(--wtext);border-color:var(--brand)}
+.btn.ghost{background:var(--card);border-color:var(--border)}
+.btn.danger{background:var(--card);border-color:#f2caca;color:#c33}
+.btn-logout{border:none;background:#eee;padding:6px 10px;border-radius:8px;cursor:pointer;color: #1a1a1a;}
+.btn-none{border: 0; background-color: inherit; font-size: 16px;cursor: pointer; color: var(--text);}
+.followbtn-sm{border: 1px dotted var(--muted); background: var(--card); color: var(--text); border-radius: 12px; padding: 6px; cursor: pointer;}
+.followbtn-md{border: 1px dotted var(--muted); background: var(--card); color: var(--text); border-radius: 12px; padding: 8px 8px; cursor: pointer;}
+.stack-btns{display:none} /* 모바일에서 안보임 */
+
+/* 6) 헤더 공통 */
+.page-title{margin:0}
+.flex-box{display:flex;justify-content:space-between}
+.flex-row{display:flex;align-items:center;gap:16px}
+.profile-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+
+/* 6-1) 하단 공통 : 유저 액션바 */
+footer{display:flex;align-items:center;justify-content:space-between;position:fixed;width: 100%; bottom:0;z-index:20;background:rgba(247,247,249,.85);padding:6px 12px;box-shadow:var(--shadow);font-weight:700}
+.authbar{flex:1;display:flex;gap:10px;align-items:center;max-width:var(--maxw);padding:10px 12px}
+
+/* 6-2) 하단 공통 : 플루팅 FAQ */
+.faq-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .2s,transform .2s}
+.faq-btn:hover{background:#000;transform:translateY(-2px)}
+
+/* 6-3) 하단 공통 : 탑투 */
+.to-top{position:fixed;bottom:80px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:22px;font-weight:bold;cursor:pointer;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .2s,transform .2s;z-index:50}
+.to-top:hover{background:#000;transform:translateY(-2px)}
+
+/* 7) 탭 */
+.tabs{display:flex;gap:8px;overflow:auto;padding:6px 8px}
+.tab{white-space:nowrap;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);color: var(--text); font-weight:600;cursor:pointer;}
+.tab.is-active{background:var(--brand);color:var(--wtext);border-color:var(--brand)}
+
+/* 8) 썸네일(이미지 자리) */
+.thumb{position:relative;width:100%;aspect-ratio:16/10;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#eee,#ddd)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+
+/* 9) 아바타/포스트(피드 공용) */
+.avatar{width:32px;height:32px;border-radius:50%;background:#ddd;object-fit:cover}
+/* --- 프로필 이미지 : 사이즈별 --- */
+.avatar-ss{width:42px;height:42px;border-radius:50%;background:#ddd;object-fit:cover}
+.avatar-sm{width:56px;height:56px;border-radius:50%;background:#ddd;object-fit:cover}
+.avatar-mm{width:70px;height:70px;border-radius:50%;background:#ddd;object-fit:cover}
+.avatar-lg {width:64px; height:64px; border-radius:50%; background:#ddd;}
+.post{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+.post-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+/* 10) 알림(Notif) 컴포넌트 */
+.header-actions{display:flex;align-items:center;gap:10px;position:relative}
+.notif-wrap{position:relative}
+.notif-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;cursor:pointer;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow)}
+.notif-btn:hover{background:#f3f4f6}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ff4d4f;box-shadow:0 0 0 2px #fff;display:none}
+.notif-btn.has-new .notif-dot{display:block}
+.notif-item button {padding: 4px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; font-size: .85rem;}
+.notif-item button:hover {background: var(--brand); background-color: var(--brand); color: var(--wtext);}
+/* 10-1) 드롭다운 패널 */
+.notif-panel{position:absolute;top:calc(100% + 8px);right:0;width:min(420px,92vw); color: var(--text); background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:8px;z-index:1000;display:none}
+.notif-panel.open{display:block}
+.notif-head,.notif-foot{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid var(--border)}
+.notif-foot{border-bottom:none;border-top:1px solid var(--border)}
+/* 10-2) 목록 */
+.notif-list{display:grid;gap:8px;max-height:360px;overflow:auto;padding:8px 0}
+.notif-empty{color:var(--muted);text-align:center;padding:12px 0}
+.notif-item{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px}
+.notif-item.unread{background:rgba(96, 165, 250, 0.08);border-color:var(--brand)}
+.notif-item .ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--tag);font-size:18px; color: var(--brand);}
+.notif-item .msg{font-size:.95rem; margin-bottom: 2px;}
+.notif-item .time{color:var(--muted);font-size:.8rem}
+
+/* 12) 코멘트 */
+
+/* 댓글 박스 */
+.cmt-box{margin-top:10px;border:1px solid var(--border);border-radius:12px;background:var(--card);color: var(--text);}
+.cmt-head{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border)}
+.cmt-list{display:grid;gap:10px;padding:10px;max-height:320px;overflow:auto}
+.cmt{display:grid;grid-template-columns:40px 1fr;gap:8px}
+.cmt .avatar-ss{width:40px;height:40px;border-radius:50%;background:#ddd}
+.cmt .meta{color:var(--muted);font-size:.85rem}
+.cmt-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+.cmt-input textarea{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px;min-height:52px;resize:vertical;background:var(--card);color:var(--text)}
+.cmt-empty{padding:14px;color:var(--muted);text-align:center}
+.cmt-loading{padding:14px;text-align:center}
+.cmt-more {display: block; margin: 8px auto; padding: 6px 12px; color: var(--brand); cursor: pointer; text-align: center;}
+.cmt-more:hover{font-weight: 600; }
+
+
+/* 다크모드 보정 */
+@media (prefers-color-scheme: dark){
+  .cmt .meta {color: #aaa;}
+}
+
+/* 12) 반응형 공통 스니펫 */
+@media (min-width:768px){
+  .tabs{padding:6px 8px}
+}
+@media (min-width:1024px){
+  .container{padding:16px}
+  footer{display:none}
+  .stack-btns{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+}
+
