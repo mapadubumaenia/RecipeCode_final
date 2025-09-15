@@ -1,9 +1,7 @@
 package com.RecipeCode.teamproject.reci.auth.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -13,6 +11,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
+@EqualsAndHashCode(of = "userEmail", callSuper = false)
 public class Member extends BaseTimeEntity {
     @Id
     private String userEmail;
@@ -27,6 +27,9 @@ public class Member extends BaseTimeEntity {
     private String userBlog;
     private String userInterestTag;
     private String profileStatus;
-    private String profileImageUrl;
+
+    @Lob
     private byte[] profileImage;
+    private String profileImageUrl;
+
 }

@@ -1,0 +1,40 @@
+    /* 레이아웃 */
+    .layout{display:grid;gap:16px}
+
+    /* 카드/버튼 */
+    .btn.small{padding:6px 10px;border-radius:10px;font-weight:600}
+    .chip{background:var(--chip);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-weight:700;cursor:pointer}
+    .chip.is-active{background:#111827;color:#fff;border-color:#111827}
+
+
+    @media (min-width: 992px){
+      .layout{grid-template-columns:1fr 320px}
+      .sidebar{position:sticky;top:12px;align-self:start;height:max-content}
+    }
+
+    /* 검색 박스 */
+    .search{display:grid;gap:10px}
+    .search .row{display:grid;grid-template-columns:1fr auto;gap:8px}
+    .input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .filters{display:flex;gap:8px;flex-wrap:wrap}
+
+    /* FAQ 리스트 */
+    .faq-list{display:grid;gap:12px}
+    .faq-item{overflow:hidden}
+    .faq-q{width:100%;text-align:left;padding:14px;border:0;background:transparent;font-weight:800;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+    .faq-q .arrow{transition:transform .2s}
+    .faq-q[aria-expanded="true"] .arrow{transform:rotate(90deg)}
+    .faq-a{padding:0 16px 16px 16px;border-top:1px solid var(--line)}
+    .faq-a p{margin:10px 0;color:#333}
+    .faq-a .tip{color:var(--muted);font-size:.95rem}
+    .meta{color:var(--muted);font-size:.9rem}
+    .help{display:flex;gap:8px;align-items:center;margin-top:8px}
+
+    /* 사이드 */
+    .side-card{display:grid;gap:8px}
+    .toc{display:grid;gap:6px}
+    .toc a{padding:8px;border-radius:10px;border:1px solid var(--line);background:#fff}
+    .toc a:hover{background:#f0f3f8}
+
+    /* 하이라이트 */
+    mark{background:#fff2a8;padding:0 2px;border-radius:4px}

@@ -1,6 +1,6 @@
 package com.RecipeCode.teamproject.reci.recipes.service;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
-import com.RecipeCode.teamproject.reci.feed.comments.repository.MemberRepository;
+import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.feed.recipes.service.RecipesService;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
 import com.RecipeCode.teamproject.reci.feed.recipeTag.entity.RecipeTag;

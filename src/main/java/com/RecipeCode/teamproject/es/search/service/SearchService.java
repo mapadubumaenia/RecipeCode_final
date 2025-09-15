@@ -163,9 +163,19 @@ public class SearchService {
             String uid = qv.substring(1).trim();
             return Query.of(b -> b.term(t -> t.field("authorId").value(uid)));
         }
-        return Query.of(b -> b.multiMatch(mm -> mm
-                .query(qv)
-                .fields("title", "body", "authorNick")
-                .type(TextQueryType.BestFields)));
+        // 🔽 일반 텍스트: 정확 매치 + 접두(prefix) 매치 병행
+        return Query.of(b -> b.bool(bb -> bb
+                .should(s -> s.multiMatch(mm -> mm
+                        .query(qv)
+                        .fields("title^3", "body", "authorNick")
+                        .type(TextQueryType.BestFields)       // 정확도 위주
+                ))
+                .should(s -> s.multiMatch(mm -> mm
+                        .query(qv)
+                        .fields("title^3", "body", "authorNick")
+                        .type(TextQueryType.BoolPrefix)       // 마지막 토큰 접두 매치 (as-you-type)
+                ))
+                .minimumShouldMatch("1")                  // 둘 중 하나만 맞아도 통과
+        ));
     }
 }

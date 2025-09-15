@@ -17,11 +17,17 @@ public class FaqService {
     private final FaqRepository faqRepository;
     private final MapStruct mapStruct;
     private final ErrorMsg errorMsg;
-
+//    검색
     public Page<FaqDto> selectFaqList(String searchKeyword, Pageable pageable) {
         Page<Faq> page= faqRepository.selectFaqList(searchKeyword, pageable);
         return page.map(faq -> mapStruct.toDto(faq));
     }
+//   카테고리 검색
+    public Page<FaqDto> selectFaqListByTag(String tag, Pageable pageable) {
+        Page<Faq> page = faqRepository.selectFaqListByTag(tag, pageable);
+        return page.map(faq -> mapStruct.toDto(faq));
+    }
+
     public void save(FaqDto faqDto) {
         Faq faq=mapStruct.toEntity(faqDto);
         faqRepository.save(faq);

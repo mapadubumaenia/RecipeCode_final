@@ -1,5 +1,8 @@
 package com.RecipeCode.teamproject.common;
 
+
+import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
+import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
@@ -48,6 +51,8 @@ public interface MapStruct {
 
 
 
-
+// Member <-> MemberDto
+    MemberDto toDto(Member member);
+    Member toEntity(MemberDto memberDto);
 
 }
