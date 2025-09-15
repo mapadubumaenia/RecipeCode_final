@@ -34,25 +34,6 @@ public interface MapStruct {
     // TODO: 수정 시 사용: dirty checking 기능(save() 없이 수정 가능)
     void updateFromDto(FaqDto faqDto, @MappingTarget Faq faq);
 
-    //  TODO: RecipeTag <-> RecipeTagDto
-    @Mapping(source = "recipes.uuid", target = "recipeUuid")
-    @Mapping(source = "tag.tagId", target = "tagId")
-    @Mapping(source = "tag.tag", target = "tagName")
-    RecipeTagDto toDto(RecipeTag recipeTag);
-    @Mapping(target = "recipes", ignore = true)
-    @Mapping(target = "tag", ignore = true)
-    RecipeTag toEntity(RecipeTagDto recipeTagDto);
-
-// Tag <-> TagDto
-    TagDto toDto(Tag tag);
-    Tag toEntity(TagDto tagDto);
-
-// Recipes <-> RecipesDto
-    @Mapping(source = "member.userEmail", target = "userEmail")
-    RecipesDto toDto(Recipes recipes);
-    @Mapping(target = "thumbnail", ignore = true)
-    @Mapping(target = "member", ignore = true)
-    Recipes toEntity(RecipesDto recipesDto);
 
 // Comments <-> CommentsDto
 
@@ -68,23 +49,7 @@ public interface MapStruct {
     Comments toEntity(CommentsDto commentsDto);
 
 
-//  RecipeContent <-> RecipeContentDto
-    @Mapping(source = "recipes.uuid", target = "recipes")
-//    @Mapping(source = "stepExplain", target = "stepExplain")
-    RecipeContentDto toDto(RecipeContent recipeContent);
-    @Mapping(target = "recipes", ignore = true)                  // uuid -> Recipes 변환은 서비스에서 처리
-    @Mapping(target = "recipeImage", ignore = true)
-//    @Mapping(source = "stepExplain", target = "stepExplain")
-    @Mapping(source = "recipeImageUrl", target = "recipeImageUrl")
-    RecipeContent toEntity(RecipeContentDto recipeContentDto);
 
-
-//  Ingredient <-> IngredientDto
-    @Mapping(source = "recipes.uuid", target = "recipesUuid")
-    IngredientDto toDto(Ingredient ingredient);
-
-    @Mapping(target = "recipes", ignore = true)                 // UUID -> Recipes 객체 변환은 서비스에서 직접 처리
-    Ingredient toEntity(IngredientDto ingredientDto);
 
 // Member <-> MemberDto
     MemberDto toDto(Member member);

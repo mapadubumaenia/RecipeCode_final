@@ -1,0 +1,106 @@
+
+/* 접근성/모션 */
+@media (prefers-reduced-motion:reduce){#imgSlides,#textSlides{transition:none}}
+
+/* 오버라이드 */
+.btn{background:var(--btn);border:1px solid var(--line);color:#fff;cursor:pointer;padding:8px 14px;border-radius:999px;font-weight:700}
+
+
+/* 상세 전용 레이아웃/콘텐츠 */
+.layout{ display:grid;gap: 8px; }
+.content,.mainContent,.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.title{font-size:1.25rem;font-weight:800;margin:14px 0 6px}
+.meta{color:var(--muted);font-size:.9rem}
+
+.ratio-16x9{position:relative;width:100%;padding-top:56.25%}
+.ratio-16x9 > iframe, .ratio-16x9 > video {
+  position:absolute;inset:0;width:100%;height:100%;border:0
+}
+
+/* 이미지 & 텍스트 슬라이드 */
+.step-slider{position:relative;overflow:hidden;border-radius:12px;aspect-ratio:16/9;background:#000}
+#imgSlides{display:flex;height:100%;will-change:transform;overflow:visible}
+#imgSlides .slide{flex:0 0 100%;height:100%;display:flex;align-items:center;justify-content:center}
+#imgSlides .slide img{width:100%;height:100%;object-fit:cover}
+.text-viewport{overflow:hidden;width:100%}
+#textSlides{display:grid;grid-auto-flow:column;grid-auto-columns:100%;transition:transform .35s cubic-bezier(.22,.61,.36,1);will-change:transform}
+#textSlides .slide{box-sizing:border-box;padding:20px;text-align:center}
+.no-trans{transition:none !important}
+.prev,.next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;padding:8px 12px;cursor:pointer;border-radius:6px;z-index:10}
+.prev{left:10px}.next{right:10px}
+
+/* 조리순서 & 재료/채널 */
+.channelBar{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.channel{display:flex; justify-content: space-between; align-items:center;gap:12px; width: 100%;}
+.channelInfo{display:flex; flex-direction: row; gap: 6px;}
+.text-nav{display:flex;gap:8px;justify-content:space-between;margin-top:8px}
+.btn-step{border:1px solid var(--line);background:var(--chip);padding:6px 10px;border-radius:10px;font-weight:700}
+.panel h3{margin:0 0 10px;font-size:1rem}
+.grid{grid-template-columns:1fr 1fr;margin-top:6px}
+.channel{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%}
+.channelInfo{display:flex;gap:6px}
+.btn.red{background:var(--accent);border-color:transparent}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+
+
+/* 접기 박스 & 댓글/대댓글 */
+.desc{background:var(--card); border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-top:12px}
+.desc .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.tag{font-size:.8rem;background:#202020;border:1px solid #2b2b2b;color:var(--wtext);padding:6px;border-radius:999px;box-shadow: var(--shadow); font-weight: 600;}
+.desc .contentText{border:1px solid var(--line);border-radius:var(--radius);white-space:pre-line;max-height:4.5em;overflow:hidden;padding:0 14px 8px}
+.desc.expanded .contentText{max-height:none}
+.toggle{color:#9bd;font-weight:700;cursor:pointer;margin-top:8px;display:inline-block}
+
+.comment{display:flex;flex-direction: column; gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.collapsible .contentText{max-height:4.5em;overflow:hidden}
+.collapsible.expanded .contentText{max-height:none}
+.comments{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-top:14px;padding:0 12px}
+.comment-input{display:flex;gap:10px;align-items:flex-start;justify-content:center;margin-bottom:12px}
+.comment-input textarea,.reply-input .reply-text,.edit-textarea{flex:1; background:#fff;color:#131313;border:1px solid var(--line);border-radius:10px;min-height:70px;resize:vertical}
+.reply-input{display:flex;gap:8px;align-items:flex-start;margin:8px 0 10px}
+.replies{margin-top:8px;padding-left:48px;border-left:2px solid var(--line)}
+.reply-list .reply-item{display:flex;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.editing .cmtCard{background:#fafafa;border-radius:12px;padding:8px}
+.edit-controls{display:flex;gap:8px;margin-top:8px}
+.edit-controls .btn--ghost{background:transparent;border:1px solid var(--line)}
+.toggleBox{display:flex;justify-content:center;width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);font-weight:700;background:transparent;margin-bottom:12px}
+.cmtcard{display: flex; flex-direction: row;}
+.cmtInfo{display: flex; flex-direction: row; align-items: center; gap: 4px; color:#ddd;}
+.name{flex:1; color:var(--text)}
+.name .createdAt {font-weight: normal; }
+.cmtActions{display: flex; flex-wrap: nowrap; gap: 12px; justify-content: end;}
+
+/* 댓글 수정 */
+.editing .cmtCard { background: var(--card); border-radius: 12px; padding: 8px;}
+.edit-controls { display:flex; gap:8px; margin-top:8px; }
+.edit-controls .btn--ghost { background:transparent; border:1px solid var(--line); color:var(--text); }
+.edit-textarea {width:100%; min-height:80px; resize:vertical;background:#fff; color:#131313;
+  border:1px solid var(--line); border-radius:10px; padding:8px 10px;
+}
+
+/* reply */
+.replies {margin-top: 8px; padding-left: 48px; border-left: 2px solid var(--line);}
+.reply-input {display: flex; gap: 8px; align-items: flex-start;margin: 8px 0 10px;}
+.reply-input .reply-text {flex: 1; min-height: 60px; resize: vertical;background:#fff; color:#131313; border:1px solid var(--line);
+  border-radius:10px; padding:6px 10px;}
+.reply-list .reply-item {display:flex; gap:8px; padding:10px 0;border-bottom:1px solid var(--line);}
+.reply-list .reply-item:last-child { border-bottom: none; }
+
+
+/* 사이드 추천 */
+.side{position:relative;min-height:200px}
+.side .card{display:grid;grid-template-columns:140px 1fr;gap:10px;margin-bottom:12px}
+.side .thumb{width:100%;height:100%;aspect-ratio:16/9;object-fit:cover}
+.side .info{padding:10px}
+.side .ttl{font-weight:700;margin:0 0 4px;font-size:.95rem}
+.side .sub{color:var(--muted);font-size:.8rem}
+
+/* 반응형 */
+@media (min-width:768px){
+.layout{display: grid; grid-template-columns:1fr 1fr;gap:8px}
+.grid{grid-template-columns:1fr 1fr 1fr;gap:6px;}
+}
+
+@media (min-width:1024px){
+.layout{grid-template-columns:2fr 1fr;gap:8px}
+}

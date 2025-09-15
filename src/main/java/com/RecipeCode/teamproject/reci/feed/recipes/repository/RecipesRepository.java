@@ -21,13 +21,6 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
             Pageable pageable
     );
 
-//  최신순(email 조회-관리자에 필요할까 싶어서 만들어둠)
-    Page<Recipes> findByMember_UserEmailInAndPostStatusOrderByInsertTimeDesc(
-            List<String> userEmails,
-            String postStatus,
-            Pageable pageable
-    );
-
 //  인기순(Id기준)
     Page<Recipes> findByMember_UserIdInAndPostStatusOrderByLikeCountDesc(
             List<String> userEmails,
@@ -45,20 +38,21 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
             Pageable pageable
     );
 
-//    uuid로 레시피 찾기 상세조회
-//    @Query("SELECT r FROM Recipes r \n" +
-//            "LEFT JOIN FETCH r.ingredients \n" +
-//            "LEFT JOIN FETCH r.contents \n" +
-//            "WHERE r.uuid = :uuid")
-//    Optional<Recipes> findByUuid(String uuid);
-
-    @Query("SELECT r FROM Recipes r " +
-            "LEFT JOIN FETCH r.contents " +
+    @Query("SELECT r FROM Recipes r\n " +
+            "LEFT JOIN FETCH RecipeContent\n " +
             "WHERE r.uuid = :uuid")
     Optional<Recipes> findByUuid(String uuid);
+
 
 //    섬네일만 바로 가져옴
     @Query(value = "select r.thumbnail from Recipes r where r.uuid = :uuid")
     byte[] findThumbnailByUuid(@Param("uuid") String uuid);
 
+
+//    레시피 태그조회 : 태그 테이블과 조인패치
+@Query(value = "select DISTINCT r from Recipes r\n" +
+        "left join fetch r.recipeTag rt\n" +
+        "left join fetch rt.tag\n" +
+        "where r.uuid = :uuid")
+Optional<Recipes> findByIdWithTags(@Param("uuid") String uuid);
 }
