@@ -19,7 +19,7 @@ public class MemberController {
     //    로그인 함수
     @GetMapping("/auth/login")
     public String login() {
-        return "sample";
+        return "auth/login";
     }
 
 //    회원가입 페이지 이동
@@ -32,6 +32,6 @@ public class MemberController {
     public String register(Model model, @ModelAttribute MemberDto memberDto) {
         memberService.save(memberDto);
         model.addAttribute("msg","회원 가입을 성공했습니다");
-        return "auth/register";
+        return "auth/login";
     }
 }

@@ -1,0 +1,46 @@
+    /* 카드 & 버튼 (공통) */
+    .btn.icon{padding:8px 10px;border-radius:10px}
+
+    /* 레이아웃: 폼를 가운데 정렬 */
+    /* .auth-wrap{display:grid;place-items:start;} */
+    .auth{width:100%;max-width:560px;margin:0 auto;display:grid;gap:12px}
+
+    /* 필드 */
+    .field{display:grid;gap:6px;margin-bottom:10px}
+    .field label{font-weight:700}
+    .input{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff}
+    .hint{color:var(--muted);font-size:.88rem}
+
+    /* 인풋 그룹 (아이콘/토글) */
+    .input-wrap{position:relative}
+    .input-wrap .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
+
+    /* 비밀번호 강도 */
+    .strength{height:8px;background:#eee;border-radius:999px;overflow:hidden}
+    .strength > span{display:block;height:100%;width:0;background:var(--danger);transition:width .25s ease, background .25s ease}
+
+    /* 약관 스위치 (공통 스타일과 유사) */
+    .switch{display:inline-flex;align-items:center;gap:8px;user-select:none}
+    .switch input{appearance:none;width:42px;height:24px;background:#ddd;border-radius:999px;position:relative;outline:none;cursor:pointer}
+    .switch input:checked{background:#111827}
+    .switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+    .switch input:checked::after{transform:translateX(18px)}
+
+    /* 구분선 */
+    .divider{display:flex;align-items:center;gap:10px;color:var(--muted);}
+    .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+
+    /* 소셜 버튼 (플레이스홀더) */
+    .social{display:flex;gap:8px;flex-wrap:wrap}
+    .btn.social{flex:1 1 48%}
+
+    /* 제출 */
+    .actions{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .actions .left{display:flex;gap:8px;align-items:center}
+    .error{color:var(--danger);font-size:.9rem}
+    .ok{color:var(--ok)}
+
+    /* 반응형 */
+    @media (min-width:768px){
+      .auth{max-width:640px}
+    }
