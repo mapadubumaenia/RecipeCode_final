@@ -25,10 +25,10 @@ public class RecipeTag extends BaseTimeEntity {
     private Long recipeTagId;               //pk
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uuid")
+    @JoinColumn(name = "UUID")
     private Recipes recipes;                // fk
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id")
+    @JoinColumn(name = "TAG_ID")
     private Tag tag;
 }
