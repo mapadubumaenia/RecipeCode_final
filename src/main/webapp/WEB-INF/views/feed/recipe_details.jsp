@@ -217,5 +217,101 @@
 </script>
 <script src="${ctx}/js/recipe-detail-common.js"></script>
 <script src="${ctx}/js/recipe-details.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const recipeUuid = document.querySelector(".container").dataset.recipeUuid;
+        const cmtList = document.getElementById("cmtList");
+        const btnCmtSubmit = document.getElementById("btnCmtSubmit");
+        const cmtInput = document.getElementById("cmt");
+        const btnCmtMore = document.getElementById("btnCmtMore");
+
+        const COMMENTS_PAGE_SIZE = 5; // 한 번에 표시할 댓글 수
+        let page = 0;
+        let sort = "desc"; // 최신순
+
+        // 댓글 불러오기
+        async function loadComments(reset = false) {
+            try {
+                if (reset) {
+                    cmtList.innerHTML = "";
+                    page = 0;
+                }
+
+                const res = await fetch(`${ctx}/comments/${recipeUuid}?page=${page}&size=${COMMENTS_PAGE_SIZE}&sort=${sort}`);
+                if (!res.ok) throw new Error("댓글 조회 실패");
+                const data = await res.json();
+
+                data.forEach(c => {
+                    const commentElem = createCommentElem(c);
+                    cmtList.appendChild(commentElem);
+                });
+
+                // 더보기 버튼 표시 여부
+                btnCmtMore.style.display = data.length === COMMENTS_PAGE_SIZE ? "block" : "none";
+                page++; // 다음 페이지 준비
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // 댓글 DOM 생성 (XSS 방지)
+        function createCommentElem(c) {
+            const div = document.createElement("div");
+            div.className = "comment";
+            div.dataset.commentsId = c.commentsId;
+
+            // 작성자: userId
+            const user = document.createElement("b");
+            user.textContent = c.userId;
+
+            // 댓글 내용
+            const content = document.createElement("span");
+            content.textContent = c.commentsContent;
+
+            // 작성자, 내용, 작성시간을 댓글 div에 추가
+            div.appendChild(user);
+            div.appendChild(content);
+
+            return div;
+        }
+
+        // 댓글 작성
+        btnCmtSubmit.addEventListener("click", async () => {
+            // 비어있으면 경고
+            const content = cmtInput.value.trim();
+            if (!content) return alert("댓글 내용을 입력해주세요.");
+
+            try {
+                const res = await fetch(`${ctx}/comments/${recipeUuid}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ commentsContent: content })
+                });
+
+                if (!res.ok) throw new Error("댓글 작성 실패");
+
+                // 작성 후 초기화
+                cmtInput.value = "";
+                loadComments(true); // 새로 불러오기
+            } catch (e) {
+                console.error(e);
+                alert("댓글 작성 중 오류가 발생했습니다.");
+            }
+        });
+
+        // 더보기 버튼 클릭
+        btnCmtMore.addEventListener("click", () => {
+            loadComments();
+        });
+
+        // 초기 댓글 로드
+        loadComments();
+    });
+</script>
+
 </body>
 </html>
