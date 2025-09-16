@@ -61,7 +61,7 @@ public class RecipesViewController {
     ) throws Exception {
 
 //        TODO: 개발용 테스트유저 : 다되면 지울것!!
-        String userEmail = (userDetails != null) ? userDetails.getUsername() : "asdf1234@naver.com";
+//        String userEmail = (userDetails != null) ? userDetails.getUsername() : "asdf1234@naver.com";
 
         byte[] thumbnailBytes = (thumbnail != null && !thumbnail.isEmpty()) ? thumbnail.getBytes() : null;
 
@@ -87,7 +87,7 @@ public class RecipesViewController {
         String uuid = recipesService.createRecipe(
                 recipesDto, ingredientDtos, contentDtos, images, tagDtos, thumbnailBytes,
                 recipesDto.getThumbnailUrl(), // 없으면 null
-                userEmail
+                userDetails.getUsername()
         );
         return "redirect:/recipes/" + uuid;
     }
@@ -103,11 +103,11 @@ public class RecipesViewController {
     ) throws Exception {
 
         //        TODO: 개발용 테스트유저 : 다되면 지울것!!
-        String userEmail = (userDetails != null) ? userDetails.getUsername() : "test@test.com";
+//        String userEmail = (userDetails != null) ? userDetails.getUsername() : "test@test.com";
 
 //        유저 조회 : 테스트 후 살릴 것
-//        Member member = new Member();
-//        member.setUserEmail(userDetails.getUsername());
+        Member member = new Member();
+        member.setUserEmail(userDetails.getUsername());
 
         byte[] thumbnailBytes = (thumbnail != null && !thumbnail.isEmpty()) ? thumbnail.getBytes() : null;
 
@@ -133,7 +133,7 @@ public class RecipesViewController {
 //           TODO: 로그인 붙이면 userEmail -> userDetails.getUsername() 수정할 것
         recipesService.updateRecipe(
                 uuid, recipesDto, ingredientDtos, contentDtos, images, tagDtos,
-                thumbnailBytes, userEmail
+                thumbnailBytes, userDetails.getUsername()
         );
 
         return "redirect:/recipes/" + uuid;

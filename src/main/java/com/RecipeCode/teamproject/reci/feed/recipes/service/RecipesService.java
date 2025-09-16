@@ -146,10 +146,10 @@ public class RecipesService {
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
 //        작성자 검증 : 테스트 후 살릴 것
-//        if (userEmail != null &&
-//            !userEmail.equalsIgnoreCase(recipe.getMember().getUserEmail())) {
-//            throw new RuntimeException(errorMsg.getMessage("errors.unauthorized"));
-//        }
+        if (userEmail != null &&
+            !userEmail.equalsIgnoreCase(recipe.getMember().getUserEmail())) {
+            throw new RuntimeException(errorMsg.getMessage("errors.unauthorized"));
+        }
 
         // 1) 레시피 기본 정보 업데이트
         recipeMapStruct.updateRecipe(recipesDto, recipe);
