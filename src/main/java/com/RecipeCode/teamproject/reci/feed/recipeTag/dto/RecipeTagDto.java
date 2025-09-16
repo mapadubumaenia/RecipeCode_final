@@ -3,8 +3,6 @@ package com.RecipeCode.teamproject.reci.feed.recipeTag.dto;
 
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,4 +14,10 @@ public class RecipeTagDto {
     private Long tagId;         // 태그 참조
     private String tagName;     // 태그명
 
+//    등록용
+    public  RecipeTagDto(String recipeUuid,
+                         Long tagId) {
+        this.recipeUuid = recipeUuid;
+        this.tagId = tagId;
+    }
 }

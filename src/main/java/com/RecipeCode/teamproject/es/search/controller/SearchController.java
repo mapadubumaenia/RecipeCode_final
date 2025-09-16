@@ -1,7 +1,11 @@
+
 package com.RecipeCode.teamproject.es.search.controller;
 
+import com.RecipeCode.teamproject.es.reco.dto.FeedPageDto;
+import com.RecipeCode.teamproject.es.reco.service.FeedService;
 import com.RecipeCode.teamproject.es.search.service.SearchService;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -9,9 +13,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/search")
 public class SearchController {
     private final SearchService service;
+    private final FeedService feedService;
 
-    public SearchController(SearchService service) {
+    public SearchController(SearchService service, FeedService feedService) {
         this.service = service;
+        this.feedService = feedService;
     }
 
     @GetMapping
@@ -31,11 +37,28 @@ public class SearchController {
                 .collect(Collectors.toList());
 
         if ("rel".equalsIgnoreCase(sort)) {
-            // 관련도 정렬은 ES 점수 기반이라 search_after 불가 → page 방식 유지
             return service.searchAndLog(q, tags, sort, page, size);
         } else {
-            // new/hot 는 커서 우선(after). 첫 페이지면 after=null 로 호출
             return service.searchAndLog(q, tags, sort, after, size);
         }
+    }
+
+    /** 쇼츠(트렌딩) */
+    @GetMapping("/trending")
+    public Map<String, Object> trending(
+            @RequestParam(required = false) String after,
+            @RequestParam(defaultValue = "8") int size
+    ) {
+        return service.trending(after, size);
+    }
+
+    /** 사이드 For You(개인화 피드 재활용). userId 없으면 hot 폴백됨 */
+    @GetMapping("/foryou")
+    public FeedPageDto forYou(
+            @RequestParam(required = false) String userId,
+            @RequestParam(required = false) String after,
+            @RequestParam(defaultValue = "6") int size
+    ) {
+        return feedService.personalFeed(userId, after, size);
     }
 }

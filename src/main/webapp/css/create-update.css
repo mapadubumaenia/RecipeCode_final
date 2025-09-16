@@ -1,0 +1,96 @@
+
+:root{
+  --accent: #111827; --accent-foreground: #fff; --muted-foreground: #374151; --ring: #9ca3af;
+}
+
+/* 폼 레이아웃/컨트롤 */
+.form{display:grid;gap:12px}
+.grid{display:grid;gap:10px}
+.grid.cols-2{grid-template-columns:1fr 1fr}
+.select,.input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+
+/* 썸네일 업로더 */
+.thumb-uploader{display:grid;gap:8px}
+.thumb{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--card);display:grid;place-items:center;border:1px dashed #d5d5dc}
+.thumb input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.thumb .ph{color:var(--text);font-size:.95rem}
+.meta-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* Tabs */
+.tabs { display: flex; gap: 8px; align-items: center; }
+.tab {
+  appearance: none;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--bg, #fff);
+  color: var(--muted-foreground, #374151);
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+}
+.tab:not(:disabled):hover { border-color: var(--ring, #9ca3af); }
+.tab:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 활성화 상태: JS가 aria-selected와 is-active 둘 다 갱신하니 둘 다 케어 */
+.tab[aria-selected="true"],
+.tab.is-active {
+  background: var(--accent, #111827);
+  color: var(--accent-foreground, #fff);
+  border-color: var(--accent, #111827);
+}
+
+/* 메타/태그 */
+.meta{display:grid;gap:8px}
+.meta .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{background:var(--tag);border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-weight:700;display:inline-flex;gap:8px;align-items:center}
+.tag .x{cursor:pointer;font-weight:900}
+.tag-input{display:flex;gap:8px;align-items:center}
+.tag-input input{flex:1;min-width:120px}
+
+/* 재료 리스트 */
+.items{display:grid;gap:8px}
+.item-row{display:grid;grid-template-columns:1fr 100px 40px;gap:8px;align-items:center}
+.item-row .del{width:40px}
+
+/* 단계 */
+.steps{display:grid;gap:12px}
+.step{position:relative;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+.step-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border)}
+.step-title{font-weight:800}
+.step-body{display:grid;gap:10px;padding:12px}
+.step .upload{aspect-ratio:16/10;border:1px dashed #d5d5dc;border-radius:12px;display:grid;place-items:center;background:var(--card);position:relative;overflow:hidden}
+.step .upload input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.step textarea{width:100%;min-height:88px;resize:vertical;border:1px solid var(--border);border-radius:10px;padding:10px;background: var(--card);}
+.handle{cursor:grab;user-select:none}
+.step[draggable="true"]{box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.step.dragging{opacity:.7}
+.placeholder{border:2px dashed #b6c3ff;background:#f3f6ff}
+.steps-footer{display:flex;justify-content:center;margin-top:8px}
+.move-up,.move-down,.move-top,.move-bottom,.add-below{min-width:38px}
+
+/* 가이드/스위치/하단 액션 */
+.help{position:sticky;top:12px;align-self:start}
+.help .tip{font-size:.92rem;color:var(--muted)}
+.help .tip strong{color:var(--text)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.switch{display:inline-flex;align-items:center;gap:8px}
+.switch input{appearance:none;width:42px;height:24px;background:#ddd;border-radius:999px;position:relative;outline:none;cursor:pointer}
+.switch input:checked{background:#111827}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.switch input:checked::after{transform:translateX(18px)}
+
+/* 동영상 Pane */
+.video-form{display:grid;gap:10px}
+.video-preview{display:grid;gap:8px}
+.ratio-16x9{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.ratio-16x9 iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.muted{color:var(--muted)}
+.small{font-size:.92rem}
+
+/* 반응형 */
+@media (min-width:992px){
+  .form{display:flex;align-items:flex-start;gap:12px}
+  .form>main{flex:1;display:grid;gap:12px}
+  .form>.help{width:320px;position:sticky;top:12px;align-self:flex-start}
+}

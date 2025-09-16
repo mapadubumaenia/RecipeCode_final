@@ -2,8 +2,6 @@ package com.RecipeCode.teamproject.reci.feed.ingredient.dto;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,6 +13,32 @@ public class IngredientDto {
     private String ingredientAmount;
     private Long sortOrder;
     private String recipesUuid;             // fk
-    private LocalDateTime insertTime;
-    private LocalDateTime updateTime;
+
+//    상세조회용
+    public IngredientDto(Long id,
+                         String ingredientName,
+                         String ingredientAmount,
+                         Long sortOrder) {
+        this.id = id;
+        this.ingredientName = ingredientName;
+        this.ingredientAmount = ingredientAmount;
+        this.sortOrder = sortOrder;
+    }
+
+//    등록
+    public IngredientDto(String ingredientName,
+                         String ingredientAmount) {
+        this.ingredientName = ingredientName;
+        this.ingredientAmount = ingredientAmount;
+    }
+
+//    수정
+    public IngredientDto(Long id,
+                         String ingredientName,
+                         String ingredientAmount){
+        this.id = id;
+        this.ingredientName = ingredientName;
+        this.ingredientAmount = ingredientAmount;
+    }
+
 }

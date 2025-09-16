@@ -1,142 +1,315 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8"/>
-  <title>통합검색</title>
-  <style>
-    body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Malgun Gothic,sans-serif; margin: 20px; }
-    .toolbar { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
-    .toolbar input { flex:1; padding:10px; font-size:16px; }
-    .toolbar select, .toolbar button { padding:10px; font-size:16px; }
-    .item { border:1px solid #eee; border-radius:10px; padding:14px; margin:10px 0; }
-    .item h3 { margin:0 0 6px; font-size:18px; }
-    .meta { color:#666; font-size:13px; display:flex; gap:12px; }
-    #loading { text-align:center; padding:14px; color:#666; display:none; }
-    #end { text-align:center; padding:14px; color:#aaa; display:none; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Search</title>
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css">
 </head>
 <body>
-<h1>통합검색 데모</h1>
+<header class="container">
+  <div class="flex-box">
+    <h1 class="page-title">Search</h1>
+    <!-- ▶ 추가: 알림 + 로그아웃 -->
+    <div class="header-actions">
+      <a class="register" href="register_page.html">👤</a>
+      <div class="notif-wrap">
+        <button
+                id="btnNotif"
+                class="notif-btn"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+                aria-controls="notifPanel"
+                title="알림"
+        >
+          🔔
+          <span class="notif-dot" aria-hidden="true"></span>
+        </button>
 
-<div class="toolbar">
-  <!-- param.q 값이 있으면 안전하게 이스케이프해서 채워줌 -->
-  <input id="q" type="text" placeholder="#비건 / @u1234 / 김치찌개"
-         value="<c:out value='${param.q}'/>"/>
-  <select id="sort">
-    <option value="rel">관련도</option>
-    <option value="new">최신순</option>
-    <option value="hot">인기순</option>
+        <!-- 드롭다운 패널 -->
+        <div
+                id="notifPanel"
+                class="notif-panel"
+                role="dialog"
+                aria-label="알림 목록"
+        >
+          <div class="notif-head">
+            <strong>알림</strong>
+            <div class="actions">
+              <button class="btn small ghost" id="markAll">
+                모두 읽음
+              </button>
+            </div>
+          </div>
+
+          <div class="notif-list" id="notifList"><!-- JS 렌더 --></div>
+
+          <div class="notif-foot">
+            <button class="btn small ghost" id="closeNotif">닫기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 서치바 -->
+<nav class="container search-bar">
+  <!-- 정렬 (표시는 그대로, 값만 new/hot) -->
+  <select id="sortSelect" class="tabs select-box">
+    <option value="new" selected>lastes</option>
+    <option value="hot">likes</option>
   </select>
-  <button id="searchBtn">검색</button>
+
+  <aside class="search-bar">
+    <input
+            id="q"
+            class="search-input"
+            type="search"
+            placeholder="Search for recipes… (e.g. Spaghetti, Pancakes, Salad)"
+    />
+    <button id="btnSearch" class="search-btn" aria-label="검색">🔍</button>
+  </aside>
+</nav>
+
+<main class="container layout">
+  <!-- 메인 컬럼 -->
+  <section class="main">
+    <!-- 쇼츠 (기존 그대로) -->
+    <h2 class="section-title">Trending Shorts</h2>
+    <div id="trending" class="trend-grid">
+      <!-- 카드 1 -->
+      <article class="card p-12 trend-card">
+        <div class="thumb badge">
+          <img src="https://picsum.photos/seed/pasta/800/500" alt="Spaghetti Aglio e Olio" />
+        </div>
+        <div><div class="trend-title">Spaghetti Aglio e Olio</div></div>
+        <div class="actions">
+          <div>
+            <button class="btn-none">❤️ Like</button>
+            <button class="btn-none post-cmt" data-post-id="pasta_101">💬 12</button>
+          </div>
+          <button class="followbtn-sm" data-user-id="u_123" data-following="false">Follow</button>
+        </div>
+      </article>
+
+      <!-- 카드 2 -->
+      <article class="card p-12 trend-card">
+        <div class="thumb">
+          <img src="https://picsum.photos/seed/pancake/800/500" alt="Fluffy Pancakes" />
+        </div>
+        <div><div class="trend-title">Fluffy Pancakes</div></div>
+        <div class="actions">
+          <button class="act-btn">❤️ Like</button>
+          <button class="act-btn">💬 12</button>
+          <button class="act-btn">Fllowing</button>
+        </div>
+      </article>
+
+      <!-- 카드 3 -->
+      <article class="card p-12 trend-card">
+        <div class="thumb">
+          <img src="https://picsum.photos/seed/salad/800/500" alt="Caprese Salad" />
+        </div>
+        <div><div class="trend-title">Caprese Salad</div></div>
+        <div class="actions">
+          <button class="act-btn">❤️ Like</button>
+          <button class="act-btn">💬 12</button>
+          <button class="act-btn">Fllowing</button>
+        </div>
+      </article>
+
+      <!-- 카드 4 -->
+      <article class="card p-12 trend-card">
+        <div class="thumb">
+          <img src="https://picsum.photos/seed/risotto/800/500" alt="Mushroom Risotto" />
+        </div>
+        <div><div class="trend-title">Mushroom Risotto</div></div>
+        <div class="actions">
+          <button class="act-btn">❤️ Like</button>
+          <button class="act-btn">💬 12</button>
+          <button class="act-btn">Fllowing</button>
+        </div>
+      </article>
+    </div>
+
+    <!-- 서치결과 -->
+    <h2 id="foryou" class="section-title">Results</h2>
+
+    <!-- ▶ 결과가 렌더될 컨테이너 (디자인 유지) -->
+    <div id="results"></div>
+    <!-- 무한 스크롤 센티널(보이지 않음) -->
+    <div id="resultsSentinel" style="height:1px"></div>
+  </section>
+
+  <!-- 사이드바(태블릿/PC에서 오른쪽) -->
+  <aside class="sidebar">
+    <div class="card p-16 stack-btns">
+      <a class="btn pc-register text-center" href="register_page.html">register</a>
+      <a class="btn text-center" href="newfeed-ver-mypage-wireframe.html">Profile</a>
+      <a class="btn primary text-center" href="create-update.html">Upload Recipe</a>
+    </div>
+
+    <!-- For you: 맞춤피드 -->
+    <div class="followingfeed">
+      <h2 class="section-title">For you</h2>
+      <section id="following" class="card p-16 feature" style="margin-top: 12px">
+        <div class="post-head">
+          <div class="avatar-ss"><img src="" alt=""></div>
+          <div class="post-info mb-8">
+            <div class="post-id">John Do</div>
+            <div class="muted">Food Enthusiast</div>
+          </div>
+          <button class="followbtn-sm is-active" data-user-id="u_987" data-following="true"></button>
+        </div>
+        <div class="thumb">
+          <img src="https://picsum.photos/seed/smoothie/1200/800" alt="Smoothie Bowl photo" />
+        </div>
+        <p class="muted">Hand-picked favorites from our creators.</p>
+      </section>
+    </div>
+  </aside>
+</main>
+
+<div class="to-topbox">
+  <button id="backToTop" class="to-top" aria-label="맨 위로">Top</button>
 </div>
 
-<div id="list"></div>
-<div id="loading">로딩 중…</div>
-<div id="end">더 이상 결과가 없습니다.</div>
-<div id="sentinel" style="height:1px;"></div>
+<!-- 모바일:하단 고정, PC: display:none -->
+<footer>
+  <nav class="tabs">
+    <a class="tab is-active" href="newfeed-ver-mypage-wireframe.html">Profile</a>
+    <a class="tab" href="create-update.html">Upload</a>
+  </nav>
+</footer>
 
-<!-- 컨텍스트패스 안전하게 처리 -->
+<script src="${pageContext.request.contextPath}/notifs.js"></script>
+<script src="${pageContext.request.contextPath}/feed-cmt.js"></script>
+<script src="${pageContext.request.contextPath}/feed-follow-btn.js"></script>
+<script src="${pageContext.request.contextPath}/footer.js"></script>
+
+<!-- ✅ 통합검색 연동 JS (디자인 변경 없음, 무한 스크롤) -->
 <script>
-  const API = '<c:url value="/api/search"/>';
-</script>
+  (function() {
+    var ctx = '${pageContext.request.contextPath}';
+    var $q = document.getElementById('q');
+    var $sort = document.getElementById('sortSelect');
+    var $btn = document.getElementById('btnSearch');
+    var $list = document.getElementById('results');
+    var $sentinel = document.getElementById('resultsSentinel');
 
-<script>
-  let next = null;
-  let loading = false;
+    var state = {
+      q: '',
+      sort: 'new',
+      next: null,
+      loading: false,
+      size: 20
+    };
 
-  function render(items) {
-    const list = document.getElementById('list');
-    for (const it of items) {
-      // XSS 예방: textContent 사용 (브라우저가 자동 이스케이프)
-      const div = document.createElement('div');
-      div.className = 'item';
-
-      const h3 = document.createElement('h3');
-      h3.textContent = it.title ?? '(제목 없음)';
-
-      const tags = Array.isArray(it.tags) ? it.tags.join(', ') : '';
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      meta.textContent = '작성자: ' + (it.authorNick ?? '-') +
-                                  ' · 좋아요: ' + (it.likes ?? 0) +
-                                  ' · 태그: ' + tags;
-
-      div.appendChild(h3);
-      div.appendChild(meta);
-      list.appendChild(div);
+    function fmtDate(v) {
+      if (!v) return '';
+      try {
+        var d = new Date(v);
+        if (isNaN(d.getTime())) return (typeof v === 'string') ? v : '';
+        return d.getFullYear() + '-' +
+                String(d.getMonth()+1).padStart(2,'0') + '-' +
+                String(d.getDate()).padStart(2,'0');
+      } catch(e) { return ''; }
     }
-  }
 
-  function setLoading(v) {
-    loading = v;
-    document.getElementById('loading').style.display = v ? 'block' : 'none';
-  }
+    function escapeHtml(s) {
+      if (s == null) return '';
+      return String(s)
+              .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+              .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
 
-  async function loadMore(params) {
-    if (loading) return;
-    setLoading(true);
+    function renderItem(it) {
+      var thumb = (it.thumbUrl && it.thumbUrl.length > 0) ? it.thumbUrl : 'https://via.placeholder.com/1200x800?text=';
+      var title = escapeHtml(it.title || '');
+      var nick  = escapeHtml(it.authorNick || '');
+      var date  = fmtDate(it.createdAt);
+      var likes = (it.likes != null) ? it.likes : 0;
+      var cmts  = (it.comments != null) ? it.comments : 0;
+      var views = (it.views != null) ? it.views : 0;
 
-    const q = new URLSearchParams({ ...params, size: '20' });
-    if (next) q.set('after', next);
+      var el = document.createElement('article');
+      el.className = 'card p-16 post';
+      el.innerHTML =
+              '<div class="post-head">' +
+              '<div class="avatar-ss"><img src="" alt=""></div>' +
+              '<div class="post-info">' +
+              '<div class="post-id">@' + nick + '</div>' +
+              '<div class="muted">' + (date || '') + '</div>' +
+              '</div>' +
+              '<button class="followbtn-sm" data-user-id="" data-following="false">Follow</button>' +
+              '</div>' +
+              '<div class="thumb"><img src="' + thumb + '" alt=""></div>' +
+              '<p class="muted">' + title + '</p>' +
+              '<div class="post-cta">' +
+              '<button class="btn-none">❤️ ' + likes + '</button>' +
+              '<button class="btn-none">💬 ' + cmts + '</button>' +
+              '<button class="btn-none" title="views">👁 ' + views + '</button>' +
+              '</div>';
+      $list.appendChild(el);
+    }
 
-    const res = await fetch(API + '?' + q.toString(), {
-      headers: { 'Accept': 'application/json' }   // JSON 강제 (혹시 모를 406/HTML 방지)
+    async function fetchOnce(initial) {
+      if (state.loading) return;
+      state.loading = true;
+
+      var url = ctx + '/api/search?q=' + encodeURIComponent(state.q) +
+              '&sort=' + encodeURIComponent(state.sort) +
+              '&size=' + state.size;
+      if (!initial && state.next) {
+        url += '&after=' + encodeURIComponent(state.next);
+      }
+
+      try {
+        var res = await fetch(url);
+        if (!res.ok) { state.loading = false; return; }
+        var data = await res.json();
+        // 첫 페이지면 초기화
+        if (initial) $list.innerHTML = '';
+
+        (data.items || []).forEach(renderItem);
+        state.next = data.next || null;
+      } catch (e) {
+        // noop
+      } finally {
+        state.loading = false;
+      }
+    }
+
+    function startSearch() {
+      state.q = ($q.value || '').trim();
+      state.sort = $sort.value || 'new';
+      state.next = null;
+      fetchOnce(true);
+    }
+
+    // 이벤트
+    $btn.addEventListener('click', function() { startSearch(); });
+    $q.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') startSearch();
     });
-    if (!res.ok) {
-      setLoading(false);
-      console.error('API error', res.status);
-      return;
-    }
-    const data = await res.json();
+    $sort.addEventListener('change', function() { startSearch(); });
 
-    render(data.items || []);
-    next = data.next ?? null;
-    setLoading(false);
+    // 무한 스크롤
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && state.next) {
+          fetchOnce(false);
+        }
+      });
+    });
+    io.observe($sentinel);
 
-    // 더 이상 없으면 안내 문구 표시
-    if (!next) {
-      document.getElementById('end').style.display = 'block';
-      observer.disconnect();
-    }
-  }
-
-  function currentParams() {
-    const q = document.getElementById('q').value.trim();
-    const sort = document.getElementById('sort').value;
-    return { q, sort };
-  }
-
-  // 검색 버튼/엔터
-  document.getElementById('searchBtn').addEventListener('click', () => {
-    next = null;
-    document.getElementById('end').style.display = 'none';
-    document.getElementById('list').innerHTML = '';
-    loadMore(currentParams());
-  });
-  document.getElementById('q').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('searchBtn').click();
-  });
-
-  // 무한 스크롤
-  const observer = new IntersectionObserver((entries) => {
-    if (entries.some(e => e.isIntersecting)) {
-      if (next !== null) loadMore(currentParams());
-    }
-  });
-  observer.observe(document.getElementById('sentinel'));
-
-  // 초기 로딩: param.q가 있으면 그걸로, 없으면 빈 검색(전체)
-  (function init() {
-    // JSTL로 채운 input 값을 그대로 사용
-    next = null;
-    loadMore(currentParams());
+    // 초기 로드: 최신(new) 전체
+    startSearch();
   })();
-
-
 </script>
-
 </body>
 </html>

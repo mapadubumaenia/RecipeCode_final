@@ -22,4 +22,6 @@ public class CommentsDto {
     private LocalDateTime insertTime;
     private LocalDateTime updateTime;
 
+    private int replyCount;
+
 }
