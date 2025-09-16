@@ -16,7 +16,7 @@ public interface RecipeContentRepository extends JpaRepository<RecipeContent, Lo
     List<RecipeContent> findByRecipesUuidOrderByStepOrderAsc(String recipesUuid);
 
 //    레시피 삭제시 전부 삭제
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from RecipeContent rc where rc.recipes.uuid = :uuid")
     void deleteByRecipesUuid(@Param("uuid")String recipesUuid);
 }

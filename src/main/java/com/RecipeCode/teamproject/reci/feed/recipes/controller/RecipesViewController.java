@@ -1,6 +1,8 @@
 package com.RecipeCode.teamproject.reci.feed.recipes.controller;
 
+import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.auth.service.UserDetailsServiceImpl;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
 import com.RecipeCode.teamproject.reci.feed.recipecontent.dto.RecipeContentDto;
 import com.RecipeCode.teamproject.reci.feed.recipecontent.entity.RecipeContent;
@@ -15,6 +17,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,22 +35,33 @@ public class RecipesViewController {
     private final RecipesService recipesService;
     private final RecipeContentService recipeContentService;
 
-    /** 레시피 등록 폼 이동 */
+
+    /* 레시피 등록 폼 이동 */
     @GetMapping("/recipes/add")
     public String createForm() {
         return "feed/recipe_add"; // JSP or Thymeleaf 템플릿
     }
 
+    /* 레시피 수정 폼 이동 */
+    @GetMapping("/recipes/{uuid}/edit")
+    public String editForm(@PathVariable String uuid, Model model) {
+        RecipesDto dto = recipesService.getRecipeDetails(uuid);
+        model.addAttribute("recipe", dto);
+        return "feed/recipe_add";
+    }
+
+
+    /** 레시피 등록*/
     @PostMapping(path = "/recipes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createRecipe(
             @ModelAttribute RecipesDto recipesDto,                        // ingredients[i].*, contents[i].*, tags[i]
             @RequestParam(value="thumbnail", required=false) MultipartFile thumbnail,
             @RequestParam(value="stepImages", required=false) List<MultipartFile> stepImages,
-            Principal principal
+            @AuthenticationPrincipal SecurityUserDto userDetails // ✅ 현재 로그인한 유저
     ) throws Exception {
 
-        Member member = new Member();
-        member.setUserEmail(principal != null ? principal.getName() : "leetonny@naver.com");
+//        TODO: 개발용 테스트유저 : 다되면 지울것!!
+        String userEmail = (userDetails != null) ? userDetails.getUsername() : "asdf1234@naver.com";
 
         byte[] thumbnailBytes = (thumbnail != null && !thumbnail.isEmpty()) ? thumbnail.getBytes() : null;
 
@@ -68,13 +83,62 @@ public class RecipesViewController {
         for (int i = 0; i < contentDtos.size(); i++)
             if (contentDtos.get(i).getStepOrder() == null) contentDtos.get(i).setStepOrder((long)(i+1)); // 프로젝트 필드명에 맞게
 
+        // TODO: 로그인 붙이면 userEmail -> userDetails.getUsername() 수정할 것
         String uuid = recipesService.createRecipe(
                 recipesDto, ingredientDtos, contentDtos, images, tagDtos, thumbnailBytes,
                 recipesDto.getThumbnailUrl(), // 없으면 null
-                member
+                userEmail
         );
         return "redirect:/recipes/" + uuid;
     }
+
+    /* 수정 */
+    @PutMapping(value = "/recipes/{uuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String updateRecipe(
+            @PathVariable String uuid,
+            @ModelAttribute RecipesDto recipesDto,
+            @RequestParam(value = "thumbnail", required = false) MultipartFile thumbnail,
+            @RequestParam(value = "stepImages", required = false) List<MultipartFile> stepImages,
+            @AuthenticationPrincipal SecurityUserDto userDetails
+    ) throws Exception {
+
+        //        TODO: 개발용 테스트유저 : 다되면 지울것!!
+        String userEmail = (userDetails != null) ? userDetails.getUsername() : "test@test.com";
+
+//        유저 조회 : 테스트 후 살릴 것
+//        Member member = new Member();
+//        member.setUserEmail(userDetails.getUsername());
+
+        byte[] thumbnailBytes = (thumbnail != null && !thumbnail.isEmpty()) ? thumbnail.getBytes() : null;
+
+        List<byte[]> images = new ArrayList<>();
+        if (stepImages != null){
+            for(MultipartFile f : stepImages) {
+                if(f != null && !f.isEmpty()) images.add(f.getBytes());
+            }
+        }
+
+        List<TagDto> tagDtos = (recipesDto.getTags() != null) ? recipesDto.getTags() : new ArrayList<>();
+        List<IngredientDto> ingredientDtos = (
+                recipesDto.getIngredients() != null) ? recipesDto.getIngredients() : new ArrayList<>();
+                for (int i = 0; i < ingredientDtos.size(); i++) {
+                    if (ingredientDtos.get(i).getSortOrder() == null) ingredientDtos.get(i).setSortOrder((long)(i+1));
+                }
+
+        List<RecipeContentDto> contentDtos = (recipesDto.getContents() != null) ? recipesDto.getContents() : new ArrayList<>();
+                for (int i = 0; i < contentDtos.size(); i++) {
+                    if(contentDtos.get(i).getStepOrder() == null) contentDtos.get(i).setStepOrder((long)(i+1));
+                }
+
+//           TODO: 로그인 붙이면 userEmail -> userDetails.getUsername() 수정할 것
+        recipesService.updateRecipe(
+                uuid, recipesDto, ingredientDtos, contentDtos, images, tagDtos,
+                thumbnailBytes, userEmail
+        );
+
+        return "redirect:/recipes/" + uuid;
+    }
+
 
     @GetMapping("recipes/download")
     @ResponseBody
@@ -118,7 +182,7 @@ public class RecipesViewController {
         boolean isVideo = "VIDEO".equalsIgnoreCase(dto.getRecipeType());
         String embedUrl = null;
         if (isVideo && dto.getVideoUrl() != null && !dto.getVideoUrl().isBlank()) {
-            embedUrl = toYoutubeEmbed(dto.getVideoUrl()); // 유튜브면 embed로 변환
+            embedUrl = recipesService.toYoutubeEmbed(dto.getVideoUrl()); // 유튜브면 embed로 변환
             if (embedUrl == null) {
                 // 유튜브가 아니면 일단 원본 URL로 시도 (일부 사이트는 X-Frame-Options로 막힐 수 있음)
                 embedUrl = dto.getVideoUrl();
@@ -133,72 +197,6 @@ public class RecipesViewController {
         return "feed/recipe_details"; // JSP 경로
     }
 
-    private String toYoutubeEmbed(String url){
-        try {
-            java.net.URL u = new java.net.URL(url);
-            String host = u.getHost();
-            String path = u.getPath();
-            String q = u.getQuery(); // v=, t= 같은 파라미터
 
-            // youtu.be/VIDEOID
-            if (host.contains("youtu.be")) {
-                String id = path.replaceFirst("^/", "");
-                String start = parseStartSeconds(q);
-                return start == null
-                        ? "https://www.youtube.com/embed/" + id
-                        : "https://www.youtube.com/embed/" + id + "?start=" + start;
-            }
-            // youtube.com/watch?v=VIDEOID
-            if (host.contains("youtube.com")) {
-                java.util.Map<String,String> params = splitQuery(q);
-                String id = params.get("v");
-                if (id != null && !id.isBlank()) {
-                    String start = parseStartSeconds(q);
-                    return start == null
-                            ? "https://www.youtube.com/embed/" + id
-                            : "https://www.youtube.com/embed/" + id + "?start=" + start;
-                }
-                // shorts/VIDEOID
-                if (path.startsWith("/shorts/")) {
-                    String ids = path.substring("/shorts/".length());
-                    return "https://www.youtube.com/embed/" + ids;
-                }
-                // 재생목록
-                if (path.startsWith("/playlist")) {
-                    String list = splitQuery(q).get("list");
-                    if (list != null) return "https://www.youtube.com/embed/videoseries?list=" + list;
-                }
-            }
-        } catch (Exception ignore) {}
-        return null;
-    }
-
-    private java.util.Map<String,String> splitQuery(String query) {
-        java.util.Map<String,String> map = new java.util.HashMap<>();
-        if (query == null) return map;
-        for (String p : query.split("&")) {
-            int i = p.indexOf('=');
-            if (i > 0) map.put(p.substring(0, i), p.substring(i+1));
-        }
-        return map;
-    }
-
-    private String parseStartSeconds(String query) {
-        if (query == null) return null;
-        // t=1m30s / t=90s / start=90 지원
-        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?:(?:^|&)t=([^&]+))|(?:^|&)start=(\\d+)").matcher(query);
-        if (!m.find()) return null;
-        String t = m.group(1) != null ? m.group(1) : m.group(2);
-        if (t == null) return null;
-        if (t.matches("\\d+")) return t; // 초
-        int secs = 0;
-        java.util.regex.Matcher mh = java.util.regex.Pattern.compile("(\\d+)h").matcher(t);
-        java.util.regex.Matcher mm = java.util.regex.Pattern.compile("(\\d+)m").matcher(t);
-        java.util.regex.Matcher ms = java.util.regex.Pattern.compile("(\\d+)s").matcher(t);
-        if (mh.find()) secs += Integer.parseInt(mh.group(1)) * 3600;
-        if (mm.find()) secs += Integer.parseInt(mm.group(1)) * 60;
-        if (ms.find()) secs += Integer.parseInt(ms.group(1));
-        return secs > 0 ? String.valueOf(secs) : null;
-    }
 
 }

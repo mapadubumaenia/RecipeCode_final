@@ -39,11 +39,11 @@ public class RecipeContentDto {
     public RecipeContentDto(Long stepId,
                             String stepExplain,
                             Long stepOrder,
-                            String recipes){
+                            String recipeImageUrl){
         this.stepId = stepId;
         this.stepExplain = stepExplain;
         this.stepOrder = stepOrder;
-        this.recipes = recipes;
+        this.recipeImageUrl = recipeImageUrl;
     }
 
 }

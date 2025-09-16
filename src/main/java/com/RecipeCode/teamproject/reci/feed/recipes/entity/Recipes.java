@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@EqualsAndHashCode(of = "uuid", callSuper = false)
+@EqualsAndHashCode(of = "UUID", callSuper = false)
 @Entity
 @Table(name = "RECIPES")
 public class Recipes extends BaseTimeEntity {
@@ -45,7 +45,7 @@ public class Recipes extends BaseTimeEntity {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userEmail", nullable = false)
+    @JoinColumn(name = "USER_EMAIL", nullable = false)
     private Member member;
 
     //    TODO: Tag 테이블 추가

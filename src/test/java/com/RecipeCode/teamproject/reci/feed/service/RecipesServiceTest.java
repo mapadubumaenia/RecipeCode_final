@@ -102,7 +102,7 @@ class RecipesServiceTest {
         byte[] thumbnail = "thumb".getBytes(StandardCharsets.UTF_8);
 
         // when
-        String uuid = recipeService.createRecipe(dto, ingredients, contents, images, tags, thumbnail, null, member);
+        String uuid = recipeService.createRecipe(dto, ingredients, contents, images, tags, thumbnail, null, member.getUserEmail());
         em.flush();
         em.clear();
 
@@ -113,6 +113,52 @@ class RecipesServiceTest {
         assertThat(ingredientRepository.findByRecipesUuidAndDeletedFalseOrderBySortOrderAsc(uuid)).hasSize(1);
         assertThat(recipeContentRepository.findByRecipesUuidOrderByStepOrderAsc(uuid)).hasSize(1);
         log.info("저장된 정보 조회:{}",saved.toString());
+
+
+        // ------------------ update 시작 ------------------
+        RecipesDto updateDto = new RecipesDto(
+                "된장찌개", "구수한 된장찌개", "한식",
+                "PRIVATE", "보통", 40L,
+                null, null, null,
+                "IMAGE", null, null
+        );
+
+        List<IngredientDto> newIngredients = List.of(
+                new IngredientDto(null, "된장", "100g", 1L),
+                new IngredientDto(null, "두부", "200g", 2L)
+        );
+        List<RecipeContentDto> newContents = List.of(
+                new RecipeContentDto("된장을 푼다", 10L, null),
+                new RecipeContentDto("두부를 넣는다", 20L, null)
+        );
+        List<TagDto> newTags = List.of(new TagDto(null, "국물요리"));
+
+        List<byte[]> newImages = List.of("new-step-img".getBytes(StandardCharsets.UTF_8));
+        byte[] newThumb = "new-thumb".getBytes(StandardCharsets.UTF_8);
+
+        recipeService.updateRecipe(
+                uuid, updateDto, newIngredients, newContents, newImages, newTags,
+                newThumb, member.getUserEmail()
+        );
+        em.flush();
+        em.clear();
+
+        // update 검증
+        Recipes updated = recipeRepository.findById(uuid).orElseThrow();
+        assertThat(updated.getRecipeTitle()).isEqualTo("된장찌개");
+        assertThat(updated.getPostStatus()).isEqualTo("PRIVATE");
+        assertThat(updated.getDifficulty()).isEqualTo("보통");
+        assertThat(ingredientRepository.findByRecipesUuidAndDeletedFalseOrderBySortOrderAsc(uuid))
+                .extracting("ingredientName")
+                .containsExactly("된장", "두부");
+        assertThat(recipeContentRepository.findByRecipesUuidOrderByStepOrderAsc(uuid))
+                .extracting("stepExplain")
+                .containsExactly("된장을 푼다", "두부를 넣는다");
+        assertThat(recipeTagRepository.findAll())
+                .extracting(rt -> rt.getTag().getTag())
+                .containsExactly("국물요리");
+
+        log.info("수정된 레시피 조회: {}", updated.toString());
     }
 
     @Test
@@ -146,7 +192,7 @@ class RecipesServiceTest {
         byte[] thumbnail = null;
 
         // when
-        String uuid = recipeService.createRecipe(dto, ingredients, contents, images, tags, thumbnail, null, member);
+        String uuid = recipeService.createRecipe(dto, ingredients, contents, images, tags, thumbnail, null, member.getUserEmail());
         em.flush();
         em.clear();
 
@@ -194,7 +240,7 @@ class RecipesServiceTest {
         List<byte[]> images = List.of("img-step1".getBytes(), "img-step2".getBytes());
         byte[] thumbnail = "thumb".getBytes();
 
-        String uuid = recipeService.createRecipe(dto, ingredients, contents, images, tags, thumbnail, null, member);
+        String uuid = recipeService.createRecipe(dto, ingredients, contents, images, tags, thumbnail, null, member.getUserEmail());
         em.flush();
         em.clear();
 

@@ -31,4 +31,7 @@ public interface RecipeTagRepository extends JpaRepository<RecipeTag, Long> {
     @Query("delete from RecipeTag rt where rt.recipes.uuid = :uuid")
     void deleteByRecipesUuid(@Param("uuid") String uuid);
 
+    @Query(value = "select rt from RecipeTag rt join fetch rt.tag where rt.recipes.uuid = :uuid")
+    List<RecipeTag> findByRecipesUuidWithTag(@Param("uuid") String uuid);
+
 }

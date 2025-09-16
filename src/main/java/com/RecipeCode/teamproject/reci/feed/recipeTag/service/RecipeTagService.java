@@ -12,8 +12,11 @@ import com.RecipeCode.teamproject.reci.tag.repository.TagRepository;
 import com.RecipeCode.teamproject.reci.tag.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -73,6 +76,57 @@ public class RecipeTagService {
                 tagRepository.save(tag);
             }
         }
+    }
+
+    /** 태그 더티체킹 적용 : **/
+    @Transactional
+    public void syncTagsForRecipe(Recipes recipe, List<TagDto> incomingDtos) {
+        List<TagDto> safeDtos = (incomingDtos == null) ? List.of() : incomingDtos;
+
+        // 1) 현재 연결된 RecipeTag들(Tag까지 fetch)
+        List<RecipeTag> currentLinks = recipeTagRepository.findByRecipesUuidWithTag(recipe.getUuid());
+
+        // 2) 현재 연결을 "정규화된 태그문자열" -> RecipeTag로 맵핑
+        //  정규화 : trim + 내부연속공백 1개 + Lower - case (TagService.saveOrGetTag와 동일 규칙)
+        java.util.function.Function<String,String> norm = s ->
+                (s == null) ? "" : s.trim().replaceAll("\\s+", " ").toLowerCase();
+        // 3) 현재 연결 맵(정규화된 문자열 -> 링크)
+        java.util.Map<String, RecipeTag> currentMap = new java.util.HashMap<>();
+        for (RecipeTag rt : currentLinks) {
+            currentMap.put(norm.apply(rt.getTag().getTag()), rt);
+        }
+
+        // 4) 폼에서 들어온 태그를 정규화 + 중복 제거(입력 중복 방지)
+        java.util.LinkedHashSet<String> want = new java.util.LinkedHashSet<>();
+        for (TagDto dto : safeDtos) {
+            String key = norm.apply(dto.getTag());
+            if (!key.isBlank()) want.add(key);
+        }
+
+        // 5) 추가 또는 유지 판단
+        for (String key : want) {
+            RecipeTag link = currentMap.remove(key); // 존재하면 여기서 제거(유지)
+            if(link == null) {
+                // 추가: Tag가 있으면 재사용 / 없으면 생성(삭제된 상태면 재활성화)
+                Tag tag = tagService.saveOrGetTag(key); // 내부에서 normalize + 재활성화 처리됨
+                RecipeTag newLink = new RecipeTag();
+                newLink.setRecipes(recipe);
+                newLink.setTag(tag);
+                recipe.getRecipeTag().add(newLink);
+                recipeTagRepository.save(newLink);
+            }
+        }
+
+        // 5) 남아있는 것 = 더이상 원치 않는 연결 -> 삭제
+        if (!currentMap.isEmpty()) {
+            java.util.Collection<RecipeTag> toDelete = currentMap.values();
+            recipe.getRecipeTag().removeAll(toDelete);
+            recipeTagRepository.deleteAll(toDelete);
+        }
+
+        // 6) 연결이 하나도 남지 않은 태그는 soft delete
+        cleanupUnusedTags();
+
     }
 
     //    레시피별 태그 조회
