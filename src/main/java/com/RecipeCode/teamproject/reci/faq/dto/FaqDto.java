@@ -8,8 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class FaqDto {
-    private Long faq_num;  //기본키
-    private String faq_question;
-    private String faq_answer;
-    private String faq_tag;
+    private Long faqNum;  //기본키
+    private String faqQuestion;
+    private String faqAnswer;
+    private String faqTag;
 }

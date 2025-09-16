@@ -32,9 +32,9 @@ public class FaqService {
         Faq faq=mapStruct.toEntity(faqDto);
         faqRepository.save(faq);
     }
-    public FaqDto findById(long faq_num) {
+    public FaqDto findById(long faqNum) {
 //        JPA 상세조회 함수 실행
-        Faq faq = faqRepository.findById(faq_num)
+        Faq faq = faqRepository.findById(faqNum)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
         return mapStruct.toDto(faq);
@@ -42,13 +42,13 @@ public class FaqService {
     @Transactional
     public void updateFromDto(FaqDto faqDto) {
 //        JPA 저장 함수 실행 : return 값 : 저장된 객체
-        Faq faq=faqRepository.findById(faqDto.getFaq_num())
+        Faq faq=faqRepository.findById(faqDto.getFaqNum())
                 .orElseThrow(() -> new RuntimeException("정보를 찾을 수 없습니다."));
 
         mapStruct.updateFromDto(faqDto, faq);
     }
     //    삭제 함수
-    public void deleteById(long faq_num) {
-        faqRepository.deleteById(faq_num);
+    public void deleteById(long faqNum) {
+        faqRepository.deleteById(faqNum);
     }
 }

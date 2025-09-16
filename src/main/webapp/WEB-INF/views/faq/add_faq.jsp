@@ -1,24 +1,41 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<html lang="ko">
 <head>
+    <meta charset="UTF-8">
     <title>FAQ 등록</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/add_faq.css">
 </head>
 <body>
-<h2>FAQ 등록</h2>
+<div class="card">
+    <div class="hd">
+        <h3>FAQ 등록</h3>
+    </div>
+    <div class="bd">
+        <form action="/faq/add" method="post" class="faq-form">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-<form action="/faq/add" method="post">
-    <label for="faq_question">질문</label><br>
-    <input type="text" id="faq_question" name="faq_question" required><br><br>
+            <div class="mb-12">
+                <label for="faqQuestion">질문</label><br/>
+                <input type="text" id="faqQuestion" name="faqQuestion" class="input" required />
+            </div>
 
-    <label for="faq_answer">답변</label><br>
-    <textarea id="faq_answer" name="faq_answer" rows="5" required></textarea><br><br>
+            <div class="mb-12">
+                <label for="faqAnswer">답변</label><br/>
+                <textarea id="faqAnswer" name="faqAnswer" rows="5" class="input" required></textarea>
+            </div>
 
-    <label for="faq_tag">태그</label><br>
-    <input type="text" id="faq_tag" name="faq_tag"><br><br>
+            <div class="mb-12">
+                <label for="faqTag">태그</label><br/>
+                <input type="text" id="faqTag" name="faqTag" class="input" />
+            </div>
 
-    <button type="submit">저장</button>
-</form>
-
-<a href="/faq">목록으로</a>
+            <div class="actions">
+                <button type="submit" class="btn primary">저장</button>
+                <button type="button" class="btn primary" onclick="location.href='/faq'">목록</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

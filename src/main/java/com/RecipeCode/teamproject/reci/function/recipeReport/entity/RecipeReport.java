@@ -1,6 +1,9 @@
 package com.RecipeCode.teamproject.reci.function.recipeReport.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
+import com.RecipeCode.teamproject.reci.admin.entity.Admin;
+import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,17 +19,26 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@EqualsAndHashCode(of = "", callSuper = false)
+@EqualsAndHashCode(of = "reportId", callSuper = false)
 public class RecipeReport extends BaseTimeEntity {
-//    REPORT_ID	NUMBER
-//    ADMIN_EMAIL	VARCHAR2(100 BYTE)
-//    USER_EMAIL	VARCHAR2(100 BYTE)
-//    UUID VARCHAR2(36BYTE)
-//    REASON	VARCHAR2(500 BYTE)
-//    REPORT_STATUS	NUMBER
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE
             , generator = "SQ_RECIPE_REPORT_JPA")
     private Long reportId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "adminEmail")
+    private Admin admin;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userEmail")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uuid")
+    private Recipes recipes;
+    private String reason;
+    private Long reportStatus; // 신고 상태 (0=대기중, 1=처리중, 2=답변완료)
+    private Long reportType;   // 신고 유형 (0=욕설, 1=스팸, 2=저작권)
 
 }
