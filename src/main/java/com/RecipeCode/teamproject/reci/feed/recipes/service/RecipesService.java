@@ -226,9 +226,6 @@ public class RecipesService {
         recipeContentRepository.deleteByRecipesUuid(uuid);
         recipesRepository.deleteById(uuid);
 
-        em.flush(); // ✅ DB 반영 먼저
-        // ✅ 태그 정리
-        recipeTagService.cleanupUnusedTags();
     }
 
     public byte[] findThumbnailByUuid(String uuid) {
@@ -236,6 +233,15 @@ public class RecipesService {
                 .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
         return recipes.getThumbnail();
     }
+
+
+    public void increaseViewCount(String uuid) {
+        Recipes recipe = recipesRepository.findByUuid(uuid)
+                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+        recipe.setViewCount(recipe.getViewCount() + 1);
+    }
+
+
 
 
     public String toYoutubeEmbed(String url){
