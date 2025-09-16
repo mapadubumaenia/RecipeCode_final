@@ -5,7 +5,7 @@ import com.RecipeCode.teamproject.reci.feed.recipes.service.RecipesService;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
 import com.RecipeCode.teamproject.reci.feed.recipeTag.entity.RecipeTag;
 import com.RecipeCode.teamproject.reci.feed.recipeTag.repository.RecipeTagRepository;
-import com.RecipeCode.teamproject.reci.recipecontent.dto.RecipeContentDto;
+
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 import com.RecipeCode.teamproject.reci.feed.recipes.repository.RecipesRepository;

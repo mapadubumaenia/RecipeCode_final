@@ -14,7 +14,7 @@ import java.util.Collections;
 public class SecurityUserDto extends User  {
 
 
-    public SecurityUserDto(String userEmail, String password) {
-        super(userEmail, password, Collections.emptyList());
+    public SecurityUserDto(String userEmail, String password, Collection<? extends GrantedAuthority> authorities) {
+        super(userEmail, password, authorities);
     }
 }

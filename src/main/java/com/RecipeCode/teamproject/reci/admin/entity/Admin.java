@@ -14,6 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@EqualsAndHashCode(of = "adminEmail", callSuper = false)
 public class Admin extends BaseTimeEntity {
     @Id
     private String adminEmail;   // PK
@@ -31,5 +32,5 @@ public class Admin extends BaseTimeEntity {
     private String adminBlog;
     private String adminInterestTag;
     private String profileStatus;   // PUBLIC, FOLLOW, PRIVATE
-
+    private String role;
 }

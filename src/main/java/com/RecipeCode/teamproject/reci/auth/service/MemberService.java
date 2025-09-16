@@ -2,6 +2,7 @@ package com.RecipeCode.teamproject.reci.auth.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.MapStruct;
+import com.RecipeCode.teamproject.reci.admin.repository.AdminRepository;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+    private final AdminRepository adminRepository;
     private final MemberRepository memberRepository;
     private final MapStruct mapStruct;
     private final PasswordEncoder passwordEncoder;
