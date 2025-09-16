@@ -136,8 +136,9 @@ public class SearchService {
             return Query.of(b -> b.term(t -> t.field("tags").value(tag)));
         }
         if (qv.startsWith("@") && qv.length() > 1) {
-            String uid = qv.substring(1).trim();
-            return Query.of(b -> b.term(t -> t.field("authorId").value(uid)));
+            String nick = qv.substring(1).trim();
+            // ✅ @검색을 authorNick으로 정확 일치
+            return Query.of(b -> b.term(t -> t.field("authorNick").value(nick)));
         }
         return Query.of(b -> b.bool(bb -> bb
                 .should(s -> s.multiMatch(mm -> mm

@@ -227,7 +227,9 @@
     }
 
     function renderItem(it) {
-      var thumb = (it.thumbUrl && it.thumbUrl.length > 0) ? it.thumbUrl : 'https://via.placeholder.com/1200x800?text=';
+      var thumb = (it.thumbUrl && it.thumbUrl.length > 0)
+              ? it.thumbUrl
+              : 'https://via.placeholder.com/1200x800?text=';
       var title = escapeHtml(it.title || '');
       var nick  = escapeHtml(it.authorNick || '');
       var date  = fmtDate(it.createdAt);
@@ -235,8 +237,12 @@
       var cmts  = (it.comments != null) ? it.comments : 0;
       var views = (it.views != null) ? it.views : 0;
 
+      // 상세페이지 링크 (컨텍스트패스 + /recipes/{id})
+      var detailHref = ctx + '/recipes/' + encodeURIComponent(it.id);
+
       var el = document.createElement('article');
       el.className = 'card p-16 post';
+
       el.innerHTML =
               '<div class="post-head">' +
               '<div class="avatar-ss"><img src="" alt=""></div>' +
@@ -246,13 +252,19 @@
               '</div>' +
               '<button class="followbtn-sm" data-user-id="" data-following="false">Follow</button>' +
               '</div>' +
+
+              // 🔗 클릭영역: 이미지와 제목을 링크로 감쌈
+              '<a class="post-link" href="' + detailHref + '" aria-label="상세 보기: ' + title + '">' +
               '<div class="thumb"><img src="' + thumb + '" alt=""></div>' +
               '<p class="muted">' + title + '</p>' +
+              '</a>' +
+
               '<div class="post-cta">' +
               '<button class="btn-none">❤️ ' + likes + '</button>' +
               '<button class="btn-none">💬 ' + cmts + '</button>' +
               '<button class="btn-none" title="views">👁 ' + views + '</button>' +
               '</div>';
+
       $list.appendChild(el);
     }
 
