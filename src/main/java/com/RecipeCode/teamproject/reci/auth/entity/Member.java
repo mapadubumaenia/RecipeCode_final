@@ -28,6 +28,8 @@ public class Member extends BaseTimeEntity {
     private String userInterestTag;
     private String profileStatus;
     private String role;
+    private String provider;      // local, google, kakao
+    private String providerId;
 
     @Lob
     private byte[] profileImage;
