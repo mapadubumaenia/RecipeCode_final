@@ -1,3 +1,8 @@
+
+:root{
+  --accent: #111827; --accent-foreground: #fff; --muted-foreground: #374151; --ring: #9ca3af;
+}
+
 /* 폼 레이아웃/컨트롤 */
 .form{display:grid;gap:12px}
 .grid{display:grid;gap:10px}
@@ -10,6 +15,29 @@
 .thumb input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
 .thumb .ph{color:var(--text);font-size:.95rem}
 .meta-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* Tabs */
+.tabs { display: flex; gap: 8px; align-items: center; }
+.tab {
+  appearance: none;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--bg, #fff);
+  color: var(--muted-foreground, #374151);
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+}
+.tab:not(:disabled):hover { border-color: var(--ring, #9ca3af); }
+.tab:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 활성화 상태: JS가 aria-selected와 is-active 둘 다 갱신하니 둘 다 케어 */
+.tab[aria-selected="true"],
+.tab.is-active {
+  background: var(--accent, #111827);
+  color: var(--accent-foreground, #fff);
+  border-color: var(--accent, #111827);
+}
 
 /* 메타/태그 */
 .meta{display:grid;gap:8px}

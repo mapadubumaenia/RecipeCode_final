@@ -2,8 +2,10 @@ package com.RecipeCode.teamproject.reci.feed.recipes.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.RecipeMapStruct;
+import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 
+import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
 import com.RecipeCode.teamproject.reci.feed.ingredient.repository.IngredientRepository;
 import com.RecipeCode.teamproject.reci.feed.ingredient.service.IngredientService;
@@ -22,6 +24,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -40,6 +43,7 @@ public class RecipesService {
     private final IngredientRepository ingredientRepository;
     private final RecipeContentRepository recipeContentRepository;
     private final RecipeTagRepository recipeTagRepository;
+    private final MemberRepository memberRepository;
     private final RecipeMapStruct recipeMapStruct;
     private final ErrorMsg errorMsg;
     @PersistenceContext
@@ -66,7 +70,11 @@ public class RecipesService {
                                List<TagDto> tagDtos,
                                byte[] thumbnail,
                                String thumbnailUrlIgnored,
-                               Member member) {
+                               String userEmail) {
+
+        Member member = memberRepository.findByUserEmail(userEmail)
+                .orElseThrow(()->new RuntimeException(errorMsg.getMessage("errors.unauthorized")));
+
         // 1) 레시피 엔티티 변환 및 기본값 설정
         Recipes recipe = recipeMapStruct.toRecipeEntity(recipesDto);
         String uuid = UUID.randomUUID().toString();
@@ -104,7 +112,7 @@ public class RecipesService {
 
         // 3) 연관 엔티티 저장
         ingredientService.saveAll(ingredientDtos, recipe);
-        recipeContentService.saveRecipeContent(contentDtos, images, recipe);
+//        recipeContentService.saveRecipeContent(contentDtos, images, recipe);
         recipeTagService.saveTagsForRecipe(tagDtos, recipe);
 
         return savedRecipe.getUuid();
@@ -130,26 +138,48 @@ public class RecipesService {
                              List<IngredientDto> ingredientDtos,
                              List<RecipeContentDto> contentDtos,
                              List<byte[]> images,
-                             List<TagDto> tagDtos){
+                             List<TagDto> tagDtos,
+                             byte[] thumbnail,
+                             String userEmail) {
         Recipes recipe = recipesRepository.findById(uuid)
-                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+
+//        작성자 검증 : 테스트 후 살릴 것
+//        if (userEmail != null &&
+//            !userEmail.equalsIgnoreCase(recipe.getMember().getUserEmail())) {
+//            throw new RuntimeException(errorMsg.getMessage("errors.unauthorized"));
+//        }
 
         // 1) 레시피 기본 정보 업데이트
         recipeMapStruct.updateRecipe(recipesDto, recipe);
 
+//        IMAGE / VIDEO 전환 처리
+        if ("VIDEO".equalsIgnoreCase(recipesDto.getRecipeType())) {
+            recipe.setRecipeType("VIDEO");
+            recipe.setVideoUrl(recipesDto.getVideoUrl());
+            recipe.setThumbnail(null);
+            String youtubeThumb = toYoutubeEmbed(recipesDto.getVideoUrl());
+            recipe.setThumbnailUrl(youtubeThumb); // 이미지 썸네일로 사용
+        } else {
+            recipe.setRecipeType("IMAGE");
+            recipe.setVideoUrl(null);
+            if (thumbnail != null && thumbnail.length > 0) {
+                recipe.setThumbnail(thumbnail);
+                recipe.setThumbnailUrl(generateDownloadUrl(uuid));
+            }
+        }
+
         // 2) 하위 엔티티 전체 교체
+        // 2-1) 재료
         ingredientService.replaceAll(ingredientDtos, recipe);
-        recipeContentService.saveRecipeContent(contentDtos, images, recipe);
+        // 2-2) 조리 단계
+        recipeContentService.updateRecipeContents(recipe, contentDtos, images);
 
         // 🔥 기존 태그 삭제 후 새로 추가
-        recipeTagRepository.deleteByRecipesUuid(uuid);
-        em.flush(); // DB 반영
-        recipe.getRecipeTag().clear(); // 영속성 컨텍스트에서도 비워줌
-        recipeTagService.saveTagsForRecipe(tagDtos, recipe);
+        recipeTagService.syncTagsForRecipe(recipe, tagDtos);
 
-        // ✅ 태그 정리
-        recipeTagService.cleanupUnusedTags();
-    }
+       }
+
 
     /* 상세 조회*/
     @Transactional(readOnly = true)
@@ -169,6 +199,16 @@ public class RecipesService {
         dto.setContents(recipeMapStruct.toRecipeContentDtoList(contents));
 
         return dto;
+    }
+
+    public void updateRecipe(String uuid,
+                             RecipesDto recipesDto,
+                             List<IngredientDto> ingredientDtos,
+                             List<RecipeContentDto> contentDtos,
+                             List<byte[]> images,
+                             List<TagDto> tagDtos){
+        updateRecipe(uuid, recipesDto, ingredientDtos, contentDtos, images,
+                tagDtos, null, null);
     }
 
     //    상세조회
@@ -195,6 +235,75 @@ public class RecipesService {
         Recipes recipes = recipesRepository.findByUuid(uuid)
                 .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
         return recipes.getThumbnail();
+    }
+
+
+    public String toYoutubeEmbed(String url){
+        try {
+            java.net.URL u = new java.net.URL(url);
+            String host = u.getHost();
+            String path = u.getPath();
+            String q = u.getQuery(); // v=, t= 같은 파라미터
+
+            // youtu.be/VIDEOID
+            if (host.contains("youtu.be")) {
+                String id = path.replaceFirst("^/", "");
+                String start = parseStartSeconds(q);
+                return start == null
+                        ? "https://www.youtube.com/embed/" + id
+                        : "https://www.youtube.com/embed/" + id + "?start=" + start;
+            }
+            // youtube.com/watch?v=VIDEOID
+            if (host.contains("youtube.com")) {
+                java.util.Map<String,String> params = splitQuery(q);
+                String id = params.get("v");
+                if (id != null && !id.isBlank()) {
+                    String start = parseStartSeconds(q);
+                    return start == null
+                            ? "https://www.youtube.com/embed/" + id
+                            : "https://www.youtube.com/embed/" + id + "?start=" + start;
+                }
+                // shorts/VIDEOID
+                if (path.startsWith("/shorts/")) {
+                    String ids = path.substring("/shorts/".length());
+                    return "https://www.youtube.com/embed/" + ids;
+                }
+                // 재생목록
+                if (path.startsWith("/playlist")) {
+                    String list = splitQuery(q).get("list");
+                    if (list != null) return "https://www.youtube.com/embed/videoseries?list=" + list;
+                }
+            }
+        } catch (Exception ignore) {}
+        return null;
+    }
+
+    private java.util.Map<String,String> splitQuery(String query) {
+        java.util.Map<String,String> map = new java.util.HashMap<>();
+        if (query == null) return map;
+        for (String p : query.split("&")) {
+            int i = p.indexOf('=');
+            if (i > 0) map.put(p.substring(0, i), p.substring(i+1));
+        }
+        return map;
+    }
+
+    private String parseStartSeconds(String query) {
+        if (query == null) return null;
+        // t=1m30s / t=90s / start=90 지원
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?:(?:^|&)t=([^&]+))|(?:^|&)start=(\\d+)").matcher(query);
+        if (!m.find()) return null;
+        String t = m.group(1) != null ? m.group(1) : m.group(2);
+        if (t == null) return null;
+        if (t.matches("\\d+")) return t; // 초
+        int secs = 0;
+        java.util.regex.Matcher mh = java.util.regex.Pattern.compile("(\\d+)h").matcher(t);
+        java.util.regex.Matcher mm = java.util.regex.Pattern.compile("(\\d+)m").matcher(t);
+        java.util.regex.Matcher ms = java.util.regex.Pattern.compile("(\\d+)s").matcher(t);
+        if (mh.find()) secs += Integer.parseInt(mh.group(1)) * 3600;
+        if (mm.find()) secs += Integer.parseInt(mm.group(1)) * 60;
+        if (ms.find()) secs += Integer.parseInt(ms.group(1));
+        return secs > 0 ? String.valueOf(secs) : null;
     }
 
 

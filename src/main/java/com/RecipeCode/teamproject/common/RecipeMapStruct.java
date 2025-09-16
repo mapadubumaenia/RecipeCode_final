@@ -33,6 +33,7 @@ public interface RecipeMapStruct {
 
     // Entity → DTO
     @Mapping(source = "recipes.uuid", target = "recipesUuid")
+
     IngredientDto toIngredientDto(Ingredient entity);
 
     // 더티체킹
@@ -137,7 +138,7 @@ public interface RecipeMapStruct {
     List<RecipeContent> toRecipeContentEntityList(List<RecipeContentDto> dtos);
 
     // Dirty Checking용 업데이트
-//    @Mapping(target = "recipes", ignore = true)
-//    @Mapping(target = "recipeImage", ignore = true)
-//    void updateRecipeContent(RecipeContentDto dto, @MappingTarget RecipeContent entity);
+    @Mapping(target = "recipes", ignore = true)
+    @Mapping(target = "recipeImage", ignore = true)
+    void updateRecipeContent(RecipeContentDto dto, @MappingTarget RecipeContent entity);
 }
