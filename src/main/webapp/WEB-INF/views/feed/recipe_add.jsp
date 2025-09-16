@@ -55,7 +55,7 @@
 
 
         <!-- Spring Security CSRF(있다면) -->
-<%--        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>--%>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
 
         <!-- 폼 상태 관리용 hidden -->
