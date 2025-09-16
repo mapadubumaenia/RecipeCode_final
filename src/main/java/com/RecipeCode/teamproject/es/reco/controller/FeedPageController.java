@@ -1,22 +1,18 @@
+// src/main/java/com/RecipeCode/teamproject/es/reco/controller/FeedPageController.java
 package com.RecipeCode.teamproject.es.reco.controller;
 
-
+import com.RecipeCode.teamproject.es.reco.dto.FeedPageDto;
 import com.RecipeCode.teamproject.es.reco.service.FeedService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Map;
-
 @Controller
+@RequiredArgsConstructor
 public class FeedPageController {
 
     private final FeedService feed;
-
-    public FeedPageController(FeedService feed) {
-        this.feed = feed;
-    }
 
     @GetMapping("/feed")
     public String feed(@RequestParam(required = false) String userId,
@@ -24,20 +20,20 @@ public class FeedPageController {
                        @RequestParam(defaultValue = "20") int size,
                        Model model) {
 
-        boolean hasUser = (userId != null && !userId.isBlank());
-        model.addAttribute("userId", hasUser ? userId : "");
+        String uid = (userId == null) ? "" : userId.trim();
+        boolean hasUser = !uid.isBlank();
+
+        // ★ SSR 단계에서도 분기: 개인화 or hot
+        FeedPageDto res = hasUser ? feed.personalFeed(uid, after, size)
+                : feed.hot(after, size);
+
+        model.addAttribute("userId", uid);
         model.addAttribute("size", size);
         model.addAttribute("hasUser", hasUser);
+        model.addAttribute("items", res.getItems());
+        model.addAttribute("next",  res.getNext());
 
-        if (hasUser) {
-            Map<String, Object> res = feed.personalFeed(userId, after, size);
-            model.addAttribute("items", res.get("items"));
-            model.addAttribute("next",  res.get("next"));
-        } else {
-            model.addAttribute("items", Collections.emptyList());
-            model.addAttribute("next",  null);
-        }
-        return "feed"; // → /WEB-INF/views/feed.jsp
+        return "feed"; // /WEB-INF/views/feed.jsp
     }
 
     @ResponseBody

@@ -1,6 +1,7 @@
 package com.RecipeCode.teamproject.es.search.document;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -14,7 +15,8 @@ public class SearchLogDoc {
     @Id
     private String id = UUID.randomUUID().toString();
 
-    @Field(type = FieldType.Date)    private Instant at;
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
+    private Instant at;
     @Field(type = FieldType.Keyword) private String userId;   // 미로그인 시 "ANON"
     @Field(type = FieldType.Keyword) private String q;        // 원문 그대로 집계하려고 keyword
     @Field(type = FieldType.Keyword) private List<String> filters;

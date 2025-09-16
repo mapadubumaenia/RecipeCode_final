@@ -55,4 +55,8 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
         "left join fetch rt.tag\n" +
         "where r.uuid = :uuid")
 Optional<Recipes> findByIdWithTags(@Param("uuid") String uuid);
+
+
+
+
 }
