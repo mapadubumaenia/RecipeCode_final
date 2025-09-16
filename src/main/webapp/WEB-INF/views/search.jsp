@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -12,6 +13,7 @@
 <header class="container">
   <div class="flex-box">
     <h1 class="page-title">Search</h1>
+    <a class="home-btn" href="${contextPath}/">home</a>
     <!-- ▶ 추가: 알림 + 로그아웃 -->
     <div class="header-actions">
       <a class="register" href="register_page.html">👤</a>
@@ -54,6 +56,8 @@
     </div>
   </div>
 </header>
+
+
 
 <!-- 서치바 -->
 <nav class="container search-bar">
@@ -147,9 +151,16 @@
   <!-- 사이드바(태블릿/PC에서 오른쪽) -->
   <aside class="sidebar">
     <div class="card p-16 stack-btns">
-      <a class="btn pc-register text-center" href="register_page.html">register</a>
-      <a class="btn text-center" href="newfeed-ver-mypage-wireframe.html">Profile</a>
-      <a class="btn primary text-center" href="create-update.html">Upload Recipe</a>
+      <!-- 1) 회원가입: GET /auth/register -->
+      <a class="btn pc-register text-center"
+         href="<c:url value='/auth/register'/>">register</a>
+
+      <!-- 2) 마이페이지: 아직 미구현이므로 비활성 처리 -->
+      <button class="btn text-center" type="button" disabled aria-disabled="true" title="준비중">Profile</button>
+
+      <!-- 3) 레시피 등록: GET /recipes/add -->
+      <a class="btn primary text-center"
+         href="<c:url value='/recipes/add'/>">Upload Recipe</a>
     </div>
 
     <!-- For you: 맞춤피드 -->

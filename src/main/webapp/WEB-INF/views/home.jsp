@@ -61,13 +61,17 @@
     </div>
 </header>
 <div class="container search-bar">
-    <input
-            class="search-input"
-            type="search"
-            placeholder="Search for recipes… (e.g. Spaghetti, Pancakes, Salad)"
-    />
-    <button class="search-btn" aria-label="검색">🔍</button>
+    <form action="${pageContext.request.contextPath}/search" method="get">
+        <input
+                name="q"
+                class="search-input"
+                type="search"
+                placeholder="Search for recipes… (e.g. Spaghetti, Pancakes, Salad)"
+        />
+        <button class="search-btn" aria-label="검색">🔍</button>
+    </form>
 </div>
+
 
 <main class="container layout">
     <!-- 메인 컬럼 -->
