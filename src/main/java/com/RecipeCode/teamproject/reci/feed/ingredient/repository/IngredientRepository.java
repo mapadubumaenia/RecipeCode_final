@@ -20,4 +20,12 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
     @Modifying
     @Query("delete from Ingredient i where i.recipes.uuid = :uuid")
     void deleteByRecipesUuid(@Param("uuid") String uuid);
+
+//    소프트 삭제 제외하고 조회
+    @Query(value = "select i from Ingredient i \n" +
+            "where i.recipes.uuid = :uuid\n" +
+            "and i.recipes.deleted = false\n" +
+            "order by i.sortOrder asc")
+    List<Ingredient> findVisibleByRecipeUuid(String uuid);
+
 }

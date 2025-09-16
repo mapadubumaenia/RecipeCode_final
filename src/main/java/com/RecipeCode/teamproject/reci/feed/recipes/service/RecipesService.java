@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -218,13 +219,24 @@ public class RecipesService {
     }
 
     /* 삭제 */
+//    @Transactional
+//    public void deleteRecipe(String uuid) {
+//        // 부모에 재료/단계 컬렉션 안 들고 있으니 FK 제약 피하려면 수동 삭제 필요
+//        recipeTagRepository.deleteByRecipesUuid(uuid);
+//        ingredientRepository.deleteByRecipesUuid(uuid);
+//        recipeContentRepository.deleteByRecipesUuid(uuid);
+//        recipesRepository.deleteById(uuid);
+//
+//    }
+
+    /* 소프트 삭제 */
     @Transactional
-    public void deleteRecipe(String uuid) {
-        // 부모에 재료/단계 컬렉션 안 들고 있으니 FK 제약 피하려면 수동 삭제 필요
-        recipeTagRepository.deleteByRecipesUuid(uuid);
-        ingredientRepository.deleteByRecipesUuid(uuid);
-        recipeContentRepository.deleteByRecipesUuid(uuid);
-        recipesRepository.deleteById(uuid);
+    public void softDeleteRecipe(String uuid) {
+        Recipes r = recipesRepository.findByUuid(uuid)
+                        .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+        if (Boolean.TRUE.equals(r.isDeleted())) return;  // 이미 삭제면 무시
+        r.setDeleteDate(LocalDateTime.now()); // 삭제 시각 기록 (원하면)
+        recipesRepository.delete(r);
 
     }
 
@@ -234,7 +246,7 @@ public class RecipesService {
         return recipes.getThumbnail();
     }
 
-
+    /* 조회수 */
     public void increaseViewCount(String uuid) {
         Recipes recipe = recipesRepository.findByUuid(uuid)
                 .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));

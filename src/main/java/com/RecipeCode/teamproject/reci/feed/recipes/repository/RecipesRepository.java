@@ -53,6 +53,14 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
         "where r.uuid = :uuid")
 Optional<Recipes> findByIdWithTags(@Param("uuid") String uuid);
 
+    // 삭제 포함 단건 조회 (native로 @Where 무시)
+    @Query(value = "SELECT * FROM RECIPES WHERE UUID = :uuid", nativeQuery = true)
+    Optional<Recipes> findIncludingDeleted(@Param("uuid") String uuid);
+
+    // 목록도 필요하면 비슷하게…
+    @Query(value = "SELECT * FROM RECIPES WHERE DELETED IN ('Y','N') ORDER BY CREATED_AT DESC",
+            nativeQuery = true)
+    List<Recipes> findAllIncludingDeleted();
 
 
 
