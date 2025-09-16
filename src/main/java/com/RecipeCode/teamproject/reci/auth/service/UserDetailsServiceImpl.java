@@ -7,6 +7,8 @@ import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
