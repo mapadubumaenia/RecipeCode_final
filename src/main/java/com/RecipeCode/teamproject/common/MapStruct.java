@@ -93,6 +93,7 @@ public interface MapStruct {
     @Mapping(source = "admin.adminEmail", target = "adminEmail")
     @Mapping(source = "member.userEmail", target = "userEmail")
     @Mapping(source = "recipes.uuid", target = "uuid")
+    @Mapping(source = "recipes.recipeTitle", target = "recipeTitle")
     RecipeReportDto toDto(RecipeReport recipeReport);
     @Mapping(source = "adminEmail", target = "admin.adminEmail")
     @Mapping(source = "userEmail", target = "member.userEmail")

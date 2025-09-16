@@ -51,8 +51,8 @@
                 <c:forEach var="report" items="${reports}">
                     <tr>
                         <td>
-<%--                            <a href="/recipes/detail?uuid=${report.recipes.uuid}">--%>
-<%--                                <c:out value="${report.recipes.recipeTitle}"/>--%>
+                            <a href="/recipes/detail?uuid=${report.uuid}">
+                                <c:out value="${report.recipeTitle}"/>
                             </a>
                         </td>
                         <td>
@@ -64,12 +64,9 @@
                             </c:choose>
                         </td>
                         <td class="muted">${report.reason}</td>
-                        <td>5</td> <!-- 중복 카운트 예시, 추후 countByRecipesUuid() 연결 -->
+                        <td>${report.duplicateCount}</td>
                         <td>
                             <c:choose>
-                                <c:when test="${report.reportStatus == 0}">
-                                    <span class="status pending">미처리</span>
-                                </c:when>
                                 <c:when test="${report.reportStatus == 1}">
                                     <span class="status processing">처리중</span>
                                 </c:when>
@@ -79,20 +76,21 @@
                             </c:choose>
                         </td>
                         <td class="right">
-                            <!-- 차단 -->
-                            <form action="/report/edit" method="post" style="display:inline;">
+                            <!-- 삭제 -->
+                            <form action="/report/delete" method="post" style="display:inline;"
+                                  onsubmit="return confirm('정말 해당 글을 삭제하시겠습니까?');">
                                 <input type="hidden" name="reportId" value="${report.reportId}">
-                                <input type="hidden" name="newStatus" value="1">
-                                <button type="submit" class="btn small red">차단</button>
+                                <input type="hidden" name="uuid" value="${report.uuid}">
+                                <button type="submit" class="btn small red">삭제</button>
                             </form>
 
-                            <!-- 완료 -->
-                            <form action="/report/edit" method="post" style="display:inline;">
+                            <!-- 유지 -->
+                            <form action="/report/edit" method="post" style="display:inline;"
+                                  onsubmit="return confirm('신고를 처리 완료하시겠습니까? (글은 유지됩니다)');">
                                 <input type="hidden" name="reportId" value="${report.reportId}">
-                                <input type="hidden" name="newStatus" value="2">
-                                <button type="submit" class="btn small green">완료</button>
+                                <button type="submit" class="btn small green">유지</button>
                             </form>
-                        </td>
+
                     </tr>
                 </c:forEach>
                 </tbody>
