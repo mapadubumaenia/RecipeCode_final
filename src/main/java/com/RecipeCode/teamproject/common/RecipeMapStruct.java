@@ -9,6 +9,8 @@ import com.RecipeCode.teamproject.reci.feed.recipecontent.dto.RecipeContentDto;
 import com.RecipeCode.teamproject.reci.feed.recipecontent.entity.RecipeContent;
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
+import com.RecipeCode.teamproject.reci.feed.recipeslikes.dto.RecipesLikesDto;
+import com.RecipeCode.teamproject.reci.feed.recipeslikes.entity.RecipesLikes;
 import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
 import com.RecipeCode.teamproject.reci.tag.entity.Tag;
 import org.mapstruct.Mapper;
@@ -42,6 +44,15 @@ public interface RecipeMapStruct {
     // 리스트 변환
     List<IngredientDto> toIngredientDtoList(List<Ingredient> entities);
     List<Ingredient> toIngredientEntityList(List<IngredientDto> dtos);
+
+    /*
+    *  RecipesLikes
+    * */
+    // DTO -> Entity
+    @Mapping(source = "uuid", target = "recipes.uuid")
+    RecipesLikes toRecipesLikesEntity(RecipesLikesDto dto);
+    @Mapping(source = "recipes.uuid", target = "uuid")
+    RecipesLikesDto toRecipesLikesDto(RecipesLikes entity);
 
     /*
      * Tag

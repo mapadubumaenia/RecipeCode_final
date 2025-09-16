@@ -165,8 +165,8 @@ public class RecipesViewController {
     /** ✅ 상세 페이지 (리다이렉트 목적지) */
     @GetMapping("/recipes/{uuid}")
     public String detail(@PathVariable String uuid, Model model) {
-        // 선택: 조회수 +1
-        // recipesService.increaseViewCount(uuid);
+        // 조회수 +1
+         recipesService.increaseViewCount(uuid);
 
         // 서비스에서 DTO로 가져와 뷰에 그대로 바인딩
         RecipesDto dto = recipesService.getRecipeDetails(uuid); // 서비스에 맞게 메서드명 조정
