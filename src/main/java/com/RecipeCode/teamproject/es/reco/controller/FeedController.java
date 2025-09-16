@@ -1,25 +1,33 @@
+// src/main/java/com/RecipeCode/teamproject/es/reco/controller/FeedController.java
 package com.RecipeCode.teamproject.es.reco.controller;
 
+import com.RecipeCode.teamproject.es.reco.dto.FeedPageDto;
 import com.RecipeCode.teamproject.es.reco.service.FeedService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/feed")
+@RequiredArgsConstructor
 public class FeedController {
 
     private final FeedService feed;
 
-    public FeedController(FeedService feed) { this.feed = feed; }
-
-    // 로그인 연동 전: userId 파라미터로 테스트
     @GetMapping("/personal")
-    public Map<String, Object> personal(
+    public FeedPageDto personal(
             @RequestParam String userId,
             @RequestParam(required = false) String after,
             @RequestParam(defaultValue = "20") int size
     ) {
         return feed.personalFeed(userId, after, size);
+    }
+
+    // ★ hot 전용 엔드포인트
+    @GetMapping("/hot")
+    public FeedPageDto hot(
+            @RequestParam(required = false) String after,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return feed.hot(after, size);
     }
 }
