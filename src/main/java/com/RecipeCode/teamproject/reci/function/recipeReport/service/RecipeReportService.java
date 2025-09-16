@@ -21,7 +21,13 @@ public class RecipeReportService {
     // 전체 신고 목록 조회 (페이징 포함)
     public Page<RecipeReportDto> findAll(Pageable pageable) {
         Page<RecipeReport> page = recipeReportRepository.findAll(pageable);
-        return page.map(recipeReport -> mapStruct.toDto(recipeReport));
+        return page.map(recipeReport -> {
+            RecipeReportDto dto = mapStruct.toDto(recipeReport);
+            dto.setDuplicateCount(
+                    recipeReportRepository.countByRecipesUuid(dto.getUuid())
+            );
+            return dto;
+        });
     }
 
     // 신고 저장
@@ -47,10 +53,6 @@ public class RecipeReportService {
         return page.map(recipeReport -> mapStruct.toDto(recipeReport));
     }
 
-    // 특정 게시글(UUID) 신고 건수
-    public Long countByRecipesUuid(String uuid) {
-        return recipeReportRepository.countByRecipesUuid(uuid);
-    }
 
     // 특정 신고 유형별 조회 (0=욕설, 1=스팸, 2=저작권)
     public Page<RecipeReportDto> findByReportType(Long reportType, Pageable pageable) {

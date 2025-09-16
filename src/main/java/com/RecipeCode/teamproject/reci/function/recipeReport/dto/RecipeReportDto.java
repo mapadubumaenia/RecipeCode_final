@@ -15,4 +15,6 @@ public class RecipeReportDto {
     private String reason;
     private Long reportStatus; // 신고 상태 (0=대기중, 1=처리중, 2=답변완료)
     private Long reportType;   // 신고 유형 (0=욕설, 1=스팸, 2=저작권)
+    private String recipeTitle;
+    private Long duplicateCount;
 }
