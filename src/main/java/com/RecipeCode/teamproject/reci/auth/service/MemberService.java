@@ -32,7 +32,8 @@ public class MemberService {
         member.setPassword(encodedPassword);
         if (member.getProfileStatus() == null || member.getProfileStatus().isBlank()) {
             member.setProfileStatus("PUBLIC");
-
+            member.setProvider("local");
+            member.setRole("R_USER");
             memberRepository.save(member);
         }
     }
