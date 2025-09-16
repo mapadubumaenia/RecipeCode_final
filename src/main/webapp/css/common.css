@@ -170,3 +170,10 @@ footer{display:flex;align-items:center;justify-content:space-between;position:fi
   .stack-btns{display:flex;flex-direction:column;gap:8px;margin:16px 0}
 }
 
+.search-bar form {
+  display: flex;         /* 부모 .search-bar와 동일하게 */
+  align-items: center;
+  gap: 8px;              /* 기존 간격 사용 */
+  width: 100%;
+}
+.search-bar form .search-input { flex: 1; }

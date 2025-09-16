@@ -54,3 +54,26 @@ footer{display:flex;justify-content:flex-end;}
   .sidebar{position:sticky;top:16px;align-self:start;height:max-content}
   footer{display:none}
 }
+
+
+.search-bar form {
+  display: flex;         /* 부모 .search-bar와 동일하게 */
+  align-items: center;
+  gap: 8px;              /* 기존 간격 사용 */
+  width: 100%;
+}
+.search-bar form .search-input { flex: 1; }
+
+/* 헤더: title + home을 왼쪽 묶음, 액션은 오른쪽 */
+header .flex-box{
+  justify-content: flex-start;   /* 공통의 space-between 덮어쓰기 */
+  align-items: center;
+  gap: 8px;                      /* Search와 home 사이 간격 */
+  flex-wrap: nowrap;
+}
+
+/* 오른쪽 액션은 끝으로 밀기 */
+header .header-actions{ margin-left: auto; }
+
+/* home 모양/간격(선택) */
+header .home-btn{ margin-left: 4px; white-space: nowrap; }
