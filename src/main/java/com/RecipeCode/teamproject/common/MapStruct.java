@@ -5,18 +5,10 @@ import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
-
 import com.RecipeCode.teamproject.reci.feed.comments.dto.CommentsDto;
 import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
-
 import com.RecipeCode.teamproject.reci.function.recipeReport.dto.RecipeReportDto;
 import com.RecipeCode.teamproject.reci.function.recipeReport.entity.RecipeReport;
-import com.RecipeCode.teamproject.reci.recipecontent.dto.RecipeContentDto;
-import com.RecipeCode.teamproject.reci.recipecontent.entity.RecipeContent;
-import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
-import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
-
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
