@@ -153,7 +153,7 @@
     <div class="card p-16 stack-btns">
       <!-- 1) 회원가입: GET /auth/register -->
       <a class="btn pc-register text-center"
-         href="<c:url value='/auth/register'/>">register</a>
+         href="<c:url value='/auth/login'/>">login</a>
 
       <!-- 2) 마이페이지: 아직 미구현이므로 비활성 처리 -->
       <button class="btn text-center" type="button" disabled aria-disabled="true" title="준비중">Profile</button>
