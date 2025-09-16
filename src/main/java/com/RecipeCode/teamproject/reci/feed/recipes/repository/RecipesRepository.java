@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RecipesRepository extends JpaRepository<Recipes, String> {
@@ -16,13 +17,6 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
 //  특정 유저(ID검색) 레시피 최신순(피드)
     Page<Recipes> findByMember_UserIdInAndPostStatusOrderByInsertTimeDesc(
             List<String> userIds,
-            String postStatus,
-            Pageable pageable
-    );
-
-//  최신순(email 조회-관리자에 필요할까 싶어서 만들어둠)
-    Page<Recipes> findByMember_UserEmailInAndPostStatusOrderByInsertTimeDesc(
-            List<String> userEmails,
             String postStatus,
             Pageable pageable
     );
@@ -43,5 +37,26 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
             @Param("status") String status,
             Pageable pageable
     );
+
+    @Query("SELECT r FROM Recipes r\n " +
+            "LEFT JOIN FETCH RecipeContent\n " +
+            "WHERE r.uuid = :uuid")
+    Optional<Recipes> findByUuid(String uuid);
+
+
+//    섬네일만 바로 가져옴
+    @Query(value = "select r.thumbnail from Recipes r where r.uuid = :uuid")
+    byte[] findThumbnailByUuid(@Param("uuid") String uuid);
+
+
+//    레시피 태그조회 : 태그 테이블과 조인패치
+@Query(value = "select DISTINCT r from Recipes r\n" +
+        "left join fetch r.recipeTag rt\n" +
+        "left join fetch rt.tag\n" +
+        "where r.uuid = :uuid")
+Optional<Recipes> findByIdWithTags(@Param("uuid") String uuid);
+
+
+
 
 }

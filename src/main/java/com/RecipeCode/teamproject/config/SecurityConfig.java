@@ -24,7 +24,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 // 개발용: 전부 열어두기
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/search").permitAll() // JSP 뷰
+                        .requestMatchers("/", "/search","/recipes/**").permitAll() // JSP 뷰
                         .requestMatchers("/css/**","/js/**","/images/**","/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll() // 검색 API
                         .anyRequest().permitAll()
@@ -34,8 +34,12 @@ public class SecurityConfig {
                         .loginPage("/auth/login")                                // 사용자 정의 로그인 페이지
                         .loginProcessingUrl("/auth/loginProcess")                // 로그인 처리 URL
                         .usernameParameter("userEmail")                              // form에서 name="email"
-                        .defaultSuccessUrl("/auth/login", true)     // 로그인 성공 시 이동
+                        .defaultSuccessUrl("/", true)     // 로그인 성공 시 이동
                         .failureUrl("/errors") // 실패 시 이동
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login")
                         .permitAll())
                 .httpBasic(basic -> basic.disable())
                 .build();

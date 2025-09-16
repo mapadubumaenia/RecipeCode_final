@@ -5,13 +5,10 @@ import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
-import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
-import com.RecipeCode.teamproject.reci.feed.ingredient.entity.Ingredient;
-import com.RecipeCode.teamproject.reci.feed.recipeTag.dto.RecipeTagDto;
-import com.RecipeCode.teamproject.reci.feed.recipeTag.entity.RecipeTag;
 
 import com.RecipeCode.teamproject.reci.feed.comments.dto.CommentsDto;
 import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
+
 import com.RecipeCode.teamproject.reci.function.recipeReport.dto.RecipeReportDto;
 import com.RecipeCode.teamproject.reci.function.recipeReport.entity.RecipeReport;
 import com.RecipeCode.teamproject.reci.recipecontent.dto.RecipeContentDto;
@@ -19,8 +16,7 @@ import com.RecipeCode.teamproject.reci.recipecontent.entity.RecipeContent;
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 
-import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
-import com.RecipeCode.teamproject.reci.tag.entity.Tag;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -36,25 +32,6 @@ public interface MapStruct {
     // TODO: 수정 시 사용: dirty checking 기능(save() 없이 수정 가능)
     void updateFromDto(FaqDto faqDto, @MappingTarget Faq faq);
 
-    //  TODO: RecipeTag <-> RecipeTagDto
-    @Mapping(source = "recipes.uuid", target = "recipeUuid")
-    @Mapping(source = "tag.tagId", target = "tagId")
-    @Mapping(source = "tag.tag", target = "tagName")
-    RecipeTagDto toDto(RecipeTag recipeTag);
-    @Mapping(target = "recipes", ignore = true)
-    @Mapping(target = "tag", ignore = true)
-    RecipeTag toEntity(RecipeTagDto recipeTagDto);
-
-// Tag <-> TagDto
-    TagDto toDto(Tag tag);
-    Tag toEntity(TagDto tagDto);
-
-// Recipes <-> RecipesDto
-    @Mapping(source = "member.userEmail", target = "userEmail")
-    RecipesDto toDto(Recipes recipes);
-    @Mapping(target = "thumbnail", ignore = true)
-    @Mapping(target = "member", ignore = true)
-    Recipes toEntity(RecipesDto recipesDto);
 
 // Comments <-> CommentsDto
 
@@ -70,20 +47,7 @@ public interface MapStruct {
     Comments toEntity(CommentsDto commentsDto);
 
 
-//  RecipeContent <-> RecipeContentDto
-    @Mapping(source = "recipes.uuid", target = "recipes")
-    RecipeContentDto toDto(RecipeContent recipeContent);
-    @Mapping(target = "recipes", ignore = true)                  // uuid -> Recipes 변환은 서비스에서 처리
-    @Mapping(target = "recipeImage", ignore = true)
-    RecipeContent toEntity(RecipeContentDto recipeContentDto);
 
-
-//  Ingredient <-> IngredientDto
-    @Mapping(source = "recipes.uuid", target = "recipesUuid")
-    IngredientDto toDto(Ingredient ingredient);
-
-    @Mapping(target = "recipes", ignore = true)                 // UUID -> Recipes 객체 변환은 서비스에서 직접 처리
-    Ingredient toEntity(IngredientDto ingredientDto);
 
 // Member <-> MemberDto
     MemberDto toDto(Member member);
