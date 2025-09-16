@@ -3,8 +3,8 @@
 <html>
 <head>
     <title>FAQ</title>
-    <link rel="stylesheet" href="./css/common.css">
-    <link rel="stylesheet" href="./css/faq.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/faq_all.css">
 </head>
 <body>
 <div class="container">
@@ -42,13 +42,13 @@
             <section id="faqList" class="faq-list" aria-live="polite">
 
                 <c:forEach var="faq" items="${faqs}" varStatus="st">
-                    <article class="card faq-item" data-cat="${faq.faq_tag}" id="q-${st.count}">
+                    <article class="card faq-item" data-cat="${faq.faqTag}" id="q-${st.count}">
                         <button class="faq-q" aria-expanded="false" aria-controls="a${st.count}">
-                            <span>${faq.faq_question}</span>
+                            <span>${faq.faqQuestion}</span>
                             <span class="arrow">▶</span>
                         </button>
                         <div class="faq-a" id="a${st.count}" hidden>
-                            <p>${faq.faq_answer}</p>
+                            <p>${faq.faqAnswer}</p>
                             <div class="help">
                                 <span class="meta">도움이 되었나요?</span>
                                 <button class="btn small" data-vote>예</button>
@@ -68,7 +68,7 @@
                 <nav class="toc" aria-label="FAQ 바로가기">
                     <c:forEach var="faq" items="${faqs}" varStatus="st">
                         <a href="#q-${st.count}">
-                                ${faq.faq_question}
+                                ${faq.faqQuestion}
                         </a>
                     </c:forEach>
                 </nav>

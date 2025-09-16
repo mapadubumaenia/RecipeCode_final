@@ -31,7 +31,7 @@ public class SecurityConfig {
         return http
                 // 개발용: 전부 열어두기
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/search").permitAll() // JSP 뷰
+                        .requestMatchers("/", "/search","/recipes/**").permitAll() // JSP 뷰
                         .requestMatchers("/css/**","/js/**","/images/**","/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll() // 검색 API
                         .anyRequest().permitAll()

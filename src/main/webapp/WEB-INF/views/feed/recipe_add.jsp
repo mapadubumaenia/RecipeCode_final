@@ -71,57 +71,88 @@
                 <!-- 작성 유형 탭 -->
                 <article class="card p-16">
                     <div class="tabs" role="tablist" aria-label="레시피 유형 선택">
-                        <button class="tab" id="tabImage" role="tab" aria-selected="true">이미지 레시피</button>
-                        <button class="tab" id="tabVideo" role="tab" aria-selected="false">동영상 레시피</button>
+                        <c:choose>
+                            <c:when test="${isEdit}">
+                                <!-- 수정 모드: 비활성화 -->
+                                <button type="button" class="tab" id="tabImage" role="tab"
+                                        aria-controls="imagePane"
+                                        aria-selected="${recipe.recipeType eq 'IMAGE'}"
+                                        disabled>이미지 레시피</button>
+                                <button type="button" class="tab" id="tabVideo" role="tab"
+                                        aria-controls="videoPane"
+                                        aria-selected="${recipe.recipeType eq 'VIDEO'}"
+                                        disabled>동영상 레시피</button>
+                            </c:when>
+                            <c:otherwise>
+                                <!-- 등록 모드: 자유롭게 전환 가능 -->
+                                <button type="button" class="tab" id="tabImage" role="tab"
+                                        aria-controls="imagePane"
+                                        aria-selected="true">이미지 레시피</button>
+                                <button type="button" class="tab" id="tabVideo" role="tab"
+                                        aria-controls="videoPane"
+                                        aria-selected="false">동영상 레시피</button>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
-                    <p class="tab-help"> 탭 전환 시 내용이 사라질 수 있으니 주의하세요! 🙌</p>
+                    <p class="tab-help"> 레시피 타입(이미지 / 동영상)은 등록 때만 선택 할 수 있어요! 🙌</p>
                 </article>
 
-                <!-- 썸네일 -->
-                <article class="card p-16">
+                <!-- 썸네일 Pane (IMAGE 전용) -->
+                <article class="card p-16" id="thumbPane"
+                         style="<c:if test='${recipe.recipeType eq "VIDEO"}'>display:none;</c:if>">
                     <h3 style="margin:0 0 8px; font-weight:800">대표 이미지</h3>
-                    <div class="thumb-uploader">
-                        <%-- 이미지모드 섬네일 --%>
-                        <label class="thumb" id="thumbBox">
-                            <input id="thumb" name="thumbnail" type="file" accept="image/*" />
-                            <span class="ph <c:if test='${not empty recipe.thumbnailUrl}'>hidden</c:if>'">썸네일을 업로드하세요</span>
-                            <img id="thumbPreview" alt=""
-                                 class="<c:if test='${empty recipe.thumbnailUrl}'>hidden</c:if>"
-                                 <c:if test='${not empty recipe.thumbnailUrl}'>src='${recipe.thumbnailUrl}'</c:if> />
-                        </label>
+                    <label class="thumb mb-8" id="thumbBox">
+                        <input id="thumb" name="thumbnail" type="file" accept="image/*" />
 
-                            <!-- VIDEO 모드일 때 썸네일 자리에 뜨는 프리뷰 -->
-                            <div id="videoThumbBox" class="ratio-16x9 hidden" aria-hidden="true">
-                                <iframe id="videoThumbFrame" title="동영상 미리보기" allowfullscreen
-                                        referrerpolicy="strict-origin-when-cross-origin"></iframe>
-                            </div>
+                        <c:choose>
+                            <c:when test="${not empty recipe.thumbnailUrl}">
 
+                                <!-- 기존 썸네일이 있으면 -->
+                                <img id="thumbPreview" src="${recipe.thumbnailUrl}" alt="썸네일" />
+                            </c:when>
+                            <c:otherwise>
 
-                        <div class="meta-row">
-                            <input class="input" id="title" name="recipeTitle" maxlength="80"
-                                   value="<c:out value='${recipe.recipeTitle}'/>" placeholder="레시피 제목"/>
-                            <input class="input" id="subtitle" name="recipeIntro"
-                                   value="<c:out value='${recipe.recipeIntro}'/>" placeholder="간단 설명 (선택)"/>
-                        </div>
-                    </div>
+                                <!-- 없으면 placeholder 문구 -->
+                                <span class="ph">썸네일을 업로드하세요</span>
+                                <img id="thumbPreview" alt="" class="hidden" />
+                            </c:otherwise>
+                        </c:choose>
+                    </label>
+                    <!-- 여기 앵커 -->
+                    <div id="metaAnchorImage"></div>
+<%--                    <div class="meta-row">--%>
+<%--                        <input class="input" id="title" name="recipeTitle" maxlength="80"--%>
+<%--                               value="<c:out value='${recipe.recipeTitle}'/>" placeholder="레시피 제목"/>--%>
+<%--                        <input class="input" id="subtitle" name="recipeIntro"--%>
+<%--                               value="<c:out value='${recipe.recipeIntro}'/>" placeholder="간단 설명 (선택)"/>--%>
+<%--                    </div>--%>
                 </article>
 
-                <!-- 동영상 레시피 Pane -->
-                <article class="card p-16 hidden" id="videoPane" aria-hidden="true">
+                <!-- 동영상 Pane (VIDEO 전용) -->
+                <article class="card p-16" id="videoPane"
+                         style="<c:if test='${recipe.recipeType eq "IMAGE"}'>display:none;</c:if>">
                     <h3 style="margin:0 0 12px; font-weight:800">동영상 레시피</h3>
-                    <div class="video-form">
-                        <input class="input" id="videoUrl" name="videoUrl"
-                               value="<c:out value='${recipe.videoUrl}'/>"
-                               placeholder="동영상 URL을 붙여넣기 (예: https://youtu.be/VIDEO_ID)" />
-                        <div class="video-preview" id="videoPreviewWrap">
-                            <div class="ratio-16x9">
-                                <iframe id="videoPreview" title="동영상 미리보기" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
-                            </div>
-                            <p class="muted small" id="videoHint">YouTube 링크는 자동으로 미리보기가 보여요. 기타 플랫폼은 임베드 허용 여부에 따라 미리보기가 제한될 수 있어요.</p>
+                    <input class="input mb-8" id="videoUrl" name="videoUrl"
+                           value="<c:out value='${recipe.videoUrl}'/>"
+                           placeholder="동영상 URL 붙여넣기" />
+                    <div class="video-preview mb-8">
+                        <div class="ratio-16x9">
+                            <iframe id="videoPreview"
+                                    src="<c:if test='${not empty recipe.videoUrl}'>${recipe.videoUrl}</c:if>"
+                                    allowfullscreen></iframe>
                         </div>
-                        <textarea class="input" id="videoText" name="videoText" placeholder="설명(예: 조리 포인트, 대체 재료, 주의사항 등)"><c:out value='${recipe.videoText}'/></textarea>
                     </div>
+                        <!-- 여기 앵커 -->
+                        <div id="metaAnchorVideo"></div>
                 </article>
+
+                <!-- 공용 타이틀/인트로 (단 한 번만 정의) -->
+                <div class="meta-row" id="metaTitleIntro">
+                    <input class="input" id="title" name="recipeTitle" maxlength="80"
+                           value="<c:out value='${recipe.recipeTitle}'/>" placeholder="레시피 제목"/>
+                    <input class="input" id="subtitle" name="recipeIntro"
+                           value="<c:out value='${recipe.recipeIntro}'/>" placeholder="간단 설명 (선택)"/>
+                </div>
 
                 <!-- 메타 정보 -->
                 <article class="card p-16 meta">
@@ -213,21 +244,23 @@
                 <article class="card p-16">
                     <div class="actions">
                         <button class="btn" type="button" id="btnCancel">취소</button>
-                        <button class="btn" id="saveDraft" type="button">임시 저장</button>
+<%--                        <button class="btn" id="saveDraft" type="button">임시 저장</button>--%>
                         <button class="btn primary" id="publish" type="button"><c:choose><c:when test='${isEdit}'>수정 완료</c:when><c:otherwise>발행</c:otherwise></c:choose></button>
                     </div>
                 </article>
 
                 <!-- 조리 단계 (드래그 정렬) — 이미지 레시피 Pane -->
-                <article class="card p-16" id="imagePane">
+                <article class="card p-16" id="imagePane"
+                         style="<c:if test='${recipe.recipeType eq "VIDEO"}'>display:none;</c:if>">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                         <h3 style="margin:0;font-weight:800">조리 단계</h3>
-                        <button type="button" class="btn ghost" id="addStep">+ 추가</button>
+<%--                        <button type="button" class="btn ghost" id="addStep">+ 추가</button>--%>
                     </div>
                     <div class="steps" id="steps">
                         <c:choose>
                         <c:when test="${not empty recipe.contents}">
                             <c:forEach var="c" items="${recipe.contents}" varStatus="cs">
+<%--                                <input type="hidden" name="contents[${cs.index}].stepId" value="${c.stepId}" />--%>
                                 <article class="step" data-index="${cs.index}">
                                     <div class="step-head">
                                         <div class="step-title">Step <span class="no">${cs.index + 1}</span></div>
@@ -248,7 +281,10 @@
                                                  <c:if test='${not empty c.recipeImageUrl}'>src='${c.recipeImageUrl}'</c:if> />
                                         </label>
                                         <textarea name="contents[${cs.index}].stepExplain" placeholder="설명(예: 팬에 올리브오일을 두르고 마늘을 볶습니다.)"><c:out value='${c.stepExplain}'/></textarea>
-                                        <input type="hidden" name="contents[${cs.index}].stepOrder" value="${cs.index + 1}"/>
+
+                                        <!-- 히든 -->
+                                        <input type="hidden" class="fld-order" name="contents[${cs.index}].stepOrder" value="${cs.index + 1}"/>
+                                        <input type="hidden" class="fld-id" name="contents[${cs.index}].stepId" value="${c.stepId}"/>
                                     </div>
                                 </article>
                             </c:forEach>
@@ -274,7 +310,8 @@
                                         <img class="hidden" alt="">
                                     </label>
                                     <textarea name="contents[0].stepExplain" placeholder="설명(예: 팬에 올리브오일을 두르고 마늘을 볶습니다.)"></textarea>
-                                    <input type="hidden" name="contents[0].stepOrder" value="1"/>
+                                    <input type="hidden" class="fld-order" name="contents[0].stepOrder" value="1"/>
+                                    <input type="hidden" class="fld-id" name="contents[0].stepId" value=""/>
                                 </div>
                             </article>
                             <article class="step" data-index="1">
@@ -296,7 +333,8 @@
                                         <img class="hidden" alt="">
                                     </label>
                                     <textarea name="contents[1].stepExplain" placeholder="설명(예: 물 1L를 끓입니다.)"></textarea>
-                                    <input type="hidden" name="contents[1].stepOrder" value="2"/>
+                                    <input type="hidden" class="fld-order" name="contents[1].stepOrder" value="2"/>
+                                    <input type="hidden" class="fld-id" name="contents[1].stepId" value=""/>
                                 </div>
                             </article>
                         </c:otherwise>
@@ -310,10 +348,10 @@
 <!-- 작성 가이드 / 사이드 -->
 <aside class="card p-16 help">
     <h3 style="margin:0 0 8px; font-weight:800">작성 가이드</h3>
-    <p class="tip"><strong>제목은 핵심만</strong> (검색에 잘 걸리게)</p>
+<%--    <p class="tip"><strong>제목은 핵심만</strong> (검색에 잘 걸리게)</p>--%>
     <p class="tip">대표 이미지는 가로 비율(16:9)을 추천해요.</p>
     <p class="tip">재료와 단계는 <strong>+</strong> 버튼으로 자유롭게 추가/삭제!</p>
-    <p class="tip">발행 전 <strong>임시저장</strong>으로 초안을 안전하게 보관.</p>
+<%--    <p class="tip">발행 전 <strong>임시저장</strong>으로 초안을 안전하게 보관.</p>--%>
 </aside>
 </section>
 </form>
