@@ -79,7 +79,7 @@ public class RecipeTagService {
     }
 
     /** 태그 더티체킹 적용 : **/
-    @Transactional
+
     public void syncTagsForRecipe(Recipes recipe, List<TagDto> incomingDtos) {
         List<TagDto> safeDtos = (incomingDtos == null) ? List.of() : incomingDtos;
 

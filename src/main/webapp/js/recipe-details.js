@@ -41,3 +41,34 @@
 })();
 
 // 좋아요/댓글 AJAX는 추후 여기서 fetch 붙이면 됨 (data-recipe-uuid 이용)
+
+(function(){
+    const btnLike = document.getElementById("btnLike");
+    const likeCnt = document.getElementById("likeCnt");
+    const recipeBox = document.querySelector(".container[data-recipe-uuid]");
+    if (!btnLike || !likeCnt || !recipeBox) return;
+
+    const recipeUuid = recipeBox.dataset.recipeUuid;
+
+    btnLike.addEventListener("click", async () => {
+        try {
+            const resp = await fetch(`${ctx}/recipes/${recipeUuid}/like`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            if (!resp.ok) throw new Error("서버 오류");
+            const data = await resp.json();
+
+            // 서버에서 내려준 dto 값 반영
+            likeCnt.textContent = data.likesCount;
+            if (data.liked) {
+                btnLike.classList.add("active"); // CSS로 하트 색 변환
+            } else {
+                btnLike.classList.remove("active");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("좋아요 처리 중 오류 발생 😢");
+        }
+    });
+})();

@@ -38,9 +38,6 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
             Pageable pageable
     );
 
-    @Query("SELECT r FROM Recipes r\n " +
-            "LEFT JOIN FETCH RecipeContent\n " +
-            "WHERE r.uuid = :uuid")
     Optional<Recipes> findByUuid(String uuid);
 
 
