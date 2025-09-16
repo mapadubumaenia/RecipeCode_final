@@ -86,8 +86,8 @@
                 <!-- 소셜 (옵션, 와이어프레임용) -->
                 <div class="divider">또는</div>
                 <div class="social">
-                    <button type="button" class="btn social" disabled>🔵 Continue with Google</button>
-                    <button type="button" class="btn social" disabled>🟡 Continue with Kakao</button>
+                    <button type="button" class="btn social" onclick="location.href='<c:url value='/oauth2/authorization/google'/>'">🔵 Continue with Google</button>
+                    <button type="button" class="btn social" onclick="location.href='<c:url value='/oauth2/authorization/kakao'/>'">🟡 Continue with Kakao</button>
                 </div>
 
                 <!-- 제출 -->

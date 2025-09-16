@@ -20,6 +20,7 @@ public class MemberDto {
     private String userBlog;
     private String userInterestTag;
     private String profileStatus;
+    private String role;
     private String profileImageUrl;
     private byte[] profileImage;
 }

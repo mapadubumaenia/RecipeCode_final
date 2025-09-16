@@ -20,6 +20,8 @@ public class AdminDto {
     private String adminInsta;
     private String adminYoutube;
     private String adminBlog;
+    private String role;
+
     private String adminInterestTag;
     private String profileStatus;   // PUBLIC, FOLLOW, PRIVATE
 }

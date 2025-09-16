@@ -27,6 +27,7 @@ public class Member extends BaseTimeEntity {
     private String userBlog;
     private String userInterestTag;
     private String profileStatus;
+    private String role;
 
     @Lob
     private byte[] profileImage;
