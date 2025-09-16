@@ -3,6 +3,7 @@ package com.RecipeCode.teamproject.reci.feed.recipes.repository;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,13 +31,24 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
 
 //  마이페이지 서치용(id 뿐 아니라 다른 검색을 넣을거라면 사용)
     @Query(value = "select r from Recipes r\n"+
-                    "where r.member.userId in :userIds\n"+
-                    "and r.postStatus = :status")
+            "where r.member.userId in :userIds\n"+
+            "and r.postStatus = :status")
     Page<Recipes> findFeedRecipes(
             @Param("userIds") List<String> userEmails,
             @Param("status") String status,
             Pageable pageable
     );
+
+// 마이페이지 내 피드조회
+//    Slice<> : Spring Data JPA 같은 프레임워크에서 Slice는 페이징 처리 시 사용
+//    전체 데이터의 총 개수나 총 페이지 수를 제공하지 않고, 다음 페이지 존재 여부만을 알려주어 무한 스크롤과 같은 구현
+    @Query(value = "select r from Recipes r\n"+
+                   "where r.member.userEmail = :useremail\n"+
+                   "and r.deleted = false "+
+                   "order by r.insertTime desc")
+    Slice<Recipes> findByUserEmail(@Param("userEmail") String userEmail,
+                                   Pageable pageable);
+
 
     Optional<Recipes> findByUuid(String uuid);
 
@@ -61,6 +73,7 @@ Optional<Recipes> findByIdWithTags(@Param("uuid") String uuid);
     @Query(value = "SELECT * FROM RECIPES WHERE DELETED IN ('Y','N') ORDER BY CREATED_AT DESC",
             nativeQuery = true)
     List<Recipes> findAllIncludingDeleted();
+
 
 
 
