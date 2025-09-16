@@ -1,0 +1,67 @@
+/* FAQ 수정/삭제 전용 폼 */
+.card {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+}
+.card .hd {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.faq-form .input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.faq-form textarea.input {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.faq-form label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.faq-form .actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+}
+
+/* 버튼 스타일 */
+.btn {
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+/* 수정 버튼: 파란색 */
+.btn.primary {
+    background-color: #007BFF;
+    color: white;
+    border-color: #007BFF;
+}
+
+/* 삭제 버튼: 빨간색 */
+.btn.danger {
+    background-color: #DC3545;
+    color: white;
+    border-color: #DC3545;
+}

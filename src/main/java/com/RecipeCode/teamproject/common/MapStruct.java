@@ -12,6 +12,8 @@ import com.RecipeCode.teamproject.reci.feed.recipeTag.entity.RecipeTag;
 
 import com.RecipeCode.teamproject.reci.feed.comments.dto.CommentsDto;
 import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
+import com.RecipeCode.teamproject.reci.function.recipeReport.dto.RecipeReportDto;
+import com.RecipeCode.teamproject.reci.function.recipeReport.entity.RecipeReport;
 import com.RecipeCode.teamproject.reci.recipecontent.dto.RecipeContentDto;
 import com.RecipeCode.teamproject.reci.recipecontent.entity.RecipeContent;
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
@@ -87,4 +89,13 @@ public interface MapStruct {
     MemberDto toDto(Member member);
     Member toEntity(MemberDto memberDto);
 
+    //  TODO: RecipeReportDto
+    @Mapping(source = "admin.adminEmail", target = "adminEmail")
+    @Mapping(source = "member.userEmail", target = "userEmail")
+    @Mapping(source = "recipes.uuid", target = "uuid")
+    RecipeReportDto toDto(RecipeReport recipeReport);
+    @Mapping(source = "adminEmail", target = "admin.adminEmail")
+    @Mapping(source = "userEmail", target = "member.userEmail")
+    @Mapping(source = "uuid", target = "recipes.uuid")
+    RecipeReport toEntity(RecipeReportDto recipeReportDto);
 }

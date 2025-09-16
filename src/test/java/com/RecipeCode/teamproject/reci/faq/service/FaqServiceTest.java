@@ -30,9 +30,9 @@ class FaqServiceTest {
     void save() {
         //		1) 테스트 조건
         FaqDto faqDto = new FaqDto();
-        faqDto.setFaq_answer("테스트1");
-        faqDto.setFaq_question("테스트1");
-        faqDto.setFaq_tag("테스트1");
+        faqDto.setFaqAnswer("테스트1");
+        faqDto.setFaqQuestion("테스트1");
+        faqDto.setFaqTag("테스트1");
 //		2) 실제 메소드실행
         faqService.save(faqDto);
 //		3) 검증(확인):  DB 확인
