@@ -85,7 +85,6 @@ public RecipesDto(String uuid,
                   Long commentCount,
                   String recipeType,
                   String videoUrl,
-                  String videoText,
                   LocalDateTime insertTime,
                   LocalDateTime updateTime) {
     this.uuid = uuid;
@@ -107,7 +106,6 @@ public RecipesDto(String uuid,
     this.tags = tags;
     this.recipeType = recipeType;
     this.videoUrl = videoUrl;
-    this.videoText = videoText;
 }
 
 //  등록 수정용 생성자

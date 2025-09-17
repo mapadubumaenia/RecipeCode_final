@@ -15,8 +15,8 @@
     <title>Profile</title>
 
     <!-- 공통 CSS: contextPath 기준 -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/newfeed-ver-mypage-wireframe.css">
+    <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
+    <link rel="stylesheet" href="<c:url value='/css/profile-mypage.css'/>">
 </head>
 <body>
 <main class="container profile-page">
@@ -75,7 +75,7 @@
             </div>
             <div class="profile-actions btn-none">
                 <a class="followbtn-md" href="${pageContext.request.contextPath}/mypage/followers">
-                    Followers ${user.followersCount}
+                    Followers ${user.followerCount}
                 </a>
                 <a class="followbtn-md" href="${pageContext.request.contextPath}/mypage/following">
                     Following ${user.followingCount}
@@ -83,6 +83,13 @@
             </div>
         </div>
     </section>
+
+    <!-- (옵션) 팔로잉 사용자 검색 -->
+        <div class="search-bar search-following">
+            <input type="text" id="searchInput" placeholder="팔로잉한 사용자 아이디 검색 (@username)" >
+            <button id="searchBtn" class="btn">Search</button>
+        </div>
+        <div id="searchResult"></div>
 
     <!-- 내 피드 -->
     <section class="container layout">
@@ -92,36 +99,31 @@
                 <button class="tab" data-tab="likes">Likes</button>
             </nav>
 
-            <!-- JSTL 반복문으로 내 글 뿌리기 -->
-            <c:forEach var="post" items="${myRecipes}">
-                <article class="card p-16 post">
-                    <div class="post-head">
-                        <div class="avatar-ss">
-                            <img src="${post.member.profileImageUrl}" alt="${post.member.nickname}">
-                        </div>
-                        <div class="post-info">
-                            <div class="post-id">@${post.member.nickname}</div>
-                            <div class="muted">
-                                <fmt:formatDate value="${post.createdDate}" pattern="yyyy-MM-dd" />
-                            </div>
-                        </div>
-                        <div class="post-meta">
-              <span class="privacy ${post.postStatus == 'PUBLIC' ? 'public' : 'private'}">
-                      ${post.postStatus == 'PUBLIC' ? '🔓 Public' : '🔒 Private'}
-              </span>
-                        </div>
-                    </div>
-                    <div class="thumb">
-                        <img src="${post.thumbnailUrl}" alt="thumbnail" />
-                    </div>
-                    <p class="muted">${post.recipeIntro}</p>
-                    <div class="post-cta">
-                        <button class="btn-none">❤️ ${post.likeCount}</button>
-                        <button class="btn-none post-cmt" data-post-id="${post.uuid}">💬 ${post.commentCount}</button>
-                        <button class="btn-none">↗ Share</button>
-                    </div>
-                </article>
-            </c:forEach>
+            <!-- 무한 스크롤 피드 / mypage-feed.js - innerHtml  -->
+            <div id="feedContainer"></div>
+
+        </aside>
+
+        <!-- 좋아요 피드 -->
+        <aside id="likes" class="feed-list hidden">
+            <article class="card post">
+                <div class="thumb"><img src="https://picsum.photos/seed/like1/800/500" alt="Liked Recipe"></div>
+                <p class="muted">Liked: Chocolate Cake</p>
+            </article>
+        </aside>
+
+        <!-- 팔로우/팔로잉 -->
+        <aside id="myfollowing" class="feed-list sidebar">
+            <h2 class="section-title m-0">New</h2>
+            <!-- 팔로우 탭 -->
+            <nav class="tabs">
+                <button class="tab is-active" data-tab="following">Following ${user.followingCount}</button>
+                <button class="tab" data-tab="followers">Follower ${user.followerCount}</button>
+            </nav>
+
+            <!-- pc 버전에서만 보임 : 내 팔로잉/팔로우가 새로 올린 피드만 -->
+            <div id="followContainer"></div>
+
         </aside>
     </section>
 </main>
@@ -129,8 +131,13 @@
 <!-- FAQ 플로팅 버튼 -->
 <button id="faq-btn" class="faq-btn">FAQ</button>
 
-<script src="${pageContext.request.contextPath}/js/feed-cmt.js"></script>
-<script src="${pageContext.request.contextPath}/js/notifs.js"></script>
-<script src="${pageContext.request.contextPath}/js/position-fixed.js"></script>
+<%--<script src="${pageContext.request.contextPath}/js/notifs.js"></script>--%>
+<%--<script src="${pageContext.request.contextPath}/js/position-fixed.js"></script>--%>
+<%--<script>const currentUserEmail = "${user.userEmail}";</script>--%>
+<script>const currentUserEmail = "asdf1234@naver.com";</script>
+<script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
+<script src="${pageContext.request.contextPath}/js/mypage/mypage-searchResult.js"></script>
+<script src="${pageContext.request.contextPath}/js/mypage/mypage-feed.js"></script>
+<script src="${pageContext.request.contextPath}/js/mypage/mypage-sidebar.js"></script>
 </body>
 </html>
