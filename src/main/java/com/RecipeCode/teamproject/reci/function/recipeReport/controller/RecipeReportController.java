@@ -75,7 +75,7 @@ public class RecipeReportController {
 
         // 2. uuid가 넘어왔다는 건 "삭제" 버튼을 누른 경우
         if (uuid != null && newStatus == 2L) {
-            recipesService.deleteRecipe(uuid); // 게시글 삭제
+            recipesService.softDeleteRecipe(uuid); // 게시글 삭제
         }
 
         return "redirect:/report";

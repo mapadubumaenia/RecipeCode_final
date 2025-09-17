@@ -43,9 +43,9 @@ public interface RecipesRepository extends JpaRepository<Recipes, String> {
 //    Slice<> : Spring Data JPA 같은 프레임워크에서 Slice는 페이징 처리 시 사용
 //    전체 데이터의 총 개수나 총 페이지 수를 제공하지 않고, 다음 페이지 존재 여부만을 알려주어 무한 스크롤과 같은 구현
     @Query(value = "select r from Recipes r\n"+
-                   "where r.member.userEmail = :useremail\n"+
+                   "where r.member.userEmail = :userEmail\n"+
                    "and r.deleted = false "+
-                   "order by r.insertTime desc")
+                   "order by r.insertTime desc, r.uuid desc")
     Slice<Recipes> findByUserEmail(@Param("userEmail") String userEmail,
                                    Pageable pageable);
 
