@@ -2,14 +2,11 @@ package com.RecipeCode.teamproject.reci.feed.recipes.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.RecipeMapStruct;
-import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
-
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
 import com.RecipeCode.teamproject.reci.feed.ingredient.repository.IngredientRepository;
 import com.RecipeCode.teamproject.reci.feed.ingredient.service.IngredientService;
-
 import com.RecipeCode.teamproject.reci.feed.recipeTag.repository.RecipeTagRepository;
 import com.RecipeCode.teamproject.reci.feed.recipeTag.service.RecipeTagService;
 import com.RecipeCode.teamproject.reci.feed.recipecontent.dto.RecipeContentDto;
@@ -24,7 +21,6 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -325,4 +321,6 @@ public class RecipesService {
     }
 
 
+    public void deleteRecipe(String uuid) {
+    }
 }
