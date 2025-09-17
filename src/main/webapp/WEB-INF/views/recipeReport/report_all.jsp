@@ -13,45 +13,60 @@
     <div class="card">
         <div class="hd">
             <h3>이용자 신고</h3>
-            <div class="actions">
-                <span class="chip">미처리 ${pages.totalElements}</span>
-                <span class="chip">SLA 24h</span>
+            <!-- 탭 -->
+            <div class="tabs">
+                <a href="/report" class="${param.status == null ? 'active' : ''}">
+                    전체 (${pages.totalElements})
+                </a>
+                <a href="/report?status=1" class="${param.status == '1' ? 'active' : ''}">
+                    처리중 (${processingCount})
+                </a>
+                <a href="/report?status=2" class="${param.status == '2' ? 'active' : ''}">
+                    처리완료 (${doneCount})
+                </a>
             </div>
         </div>
 
         <div class="bd">
             <!-- 필터/정렬 -->
             <div class="toolbar">
-                <select class="input">
-                    <option>유형 전체</option>
-                    <option value="1">스팸</option>
-                    <option value="0">욕설</option>
-                    <option value="2">저작권</option>
-                </select>
-                <select class="input">
-                    <option>정렬: 최신</option>
-                    <option>정렬: 중복 많은순</option>
-                </select>
-                <label class="chip"><input type="checkbox"/> 증거 스냅샷 보기</label>
+                <form method="get" action="/report">
+                    <select name="reportType" class="input" onchange="this.form.submit()">
+                        <option value="" ${empty reportType ? 'selected' : ''}>유형 전체</option>
+                        <option value="0" ${reportType != null and reportType == 0 ? 'selected' : ''}>욕설</option>
+                        <option value="1" ${reportType != null and reportType == 1 ? 'selected' : ''}>스팸</option>
+                        <option value="2" ${reportType != null and reportType == 2 ? 'selected' : ''}>저작권</option>
+                    </select>
+                </form>
             </div>
 
             <!-- 신고 목록 -->
             <table class="table">
                 <thead>
                 <tr>
-                    <th>대상</th>
-                    <th>유형</th>
-                    <th>사유</th>
-                    <th>중복</th>
-                    <th>상태</th>
+                    <th>대상 게시글</th>
+                    <th>신고 유형</th>
+                    <th>신고 사유</th>
+                    <th>신고 횟수</th>
+                    <th>처리 상태</th>
                     <th class="right">처리</th>
                 </tr>
                 </thead>
                 <tbody>
+                <!-- 리스트가 비었을 때 -->
+                <c:if test="${empty reports}">
+                    <tr>
+                        <td colspan="6" class="empty-row">
+                            조건에 맞는 신고가 없습니다.
+                        </td>
+                    </tr>
+                </c:if>
+
+                <!-- 리스트가 있을 때 -->
                 <c:forEach var="report" items="${reports}">
                     <tr>
                         <td>
-                            <a href="/recipes/detail?uuid=${report.uuid}">
+                            <a href="/recipes/${report.uuid}">
                                 <c:out value="${report.recipeTitle}"/>
                             </a>
                         </td>
@@ -77,9 +92,10 @@
                         </td>
                         <td class="right">
                             <!-- 삭제 -->
-                            <form action="/report/delete" method="post" style="display:inline;"
+                            <form action="/report/edit" method="post" style="display:inline;"
                                   onsubmit="return confirm('정말 해당 글을 삭제하시겠습니까?');">
                                 <input type="hidden" name="reportId" value="${report.reportId}">
+                                <input type="hidden" name="newStatus" value="2">
                                 <input type="hidden" name="uuid" value="${report.uuid}">
                                 <button type="submit" class="btn small red">삭제</button>
                             </form>
@@ -88,9 +104,10 @@
                             <form action="/report/edit" method="post" style="display:inline;"
                                   onsubmit="return confirm('신고를 처리 완료하시겠습니까? (글은 유지됩니다)');">
                                 <input type="hidden" name="reportId" value="${report.reportId}">
+                                <input type="hidden" name="newStatus" value="2">
                                 <button type="submit" class="btn small green">유지</button>
                             </form>
-
+                        </td>
                     </tr>
                 </c:forEach>
                 </tbody>

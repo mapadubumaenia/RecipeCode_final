@@ -10,8 +10,11 @@ import java.util.List;
 
 @Repository
 public interface RecipeReportRepository extends JpaRepository<RecipeReport, Long> {
-    // 상태별 조회 (0=대기중, 1=처리중, 2=답변완료) 상태별로 신고 필터링용
+    // 상태별 조회 (1=처리중, 2=처리완료) 상태별로 신고 필터링용
     Page<RecipeReport> findByReportStatus(Long reportStatus, Pageable pageable);
+
+    // 상태별 총 개수
+    Long countByReportStatus(Long reportStatus);
 
     // 게시글 별 신고 내역 확인
     List<RecipeReport> findByRecipesUuid(String uuid);
@@ -27,4 +30,7 @@ public interface RecipeReportRepository extends JpaRepository<RecipeReport, Long
 
     // 특정 게시글의 총 신고 건수
     Long countByRecipesUuid(String uuid);
+    // 동시조건용
+    Page<RecipeReport> findByReportStatusAndReportType(Long status, Long reportType, Pageable pageable);
+
 }

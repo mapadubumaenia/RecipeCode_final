@@ -226,9 +226,6 @@ public class RecipesService {
         recipeContentRepository.deleteByRecipesUuid(uuid);
         recipesRepository.deleteById(uuid);
 
-        em.flush(); // ✅ DB 반영 먼저
-        // ✅ 태그 정리
-        recipeTagService.cleanupUnusedTags();
     }
 
     public byte[] findThumbnailByUuid(String uuid) {

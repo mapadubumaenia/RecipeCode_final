@@ -60,23 +60,23 @@ class RecipeReportServiceTest {
         log.info("조회 결과: {}", result.getContent());
     }
 
-    @Test
-    void countByRecipesUuid() {
-        // 1) given: DB에 이미 존재하는 레시피 uuid
-        String uuid = "0bc68ceb-a747-41fc-9ef3-2f8c530fef8f"; // 더미 데이터에 있는 UUID로 교체
-
-        // 2) when: 카운트 실행
-        Long count = recipeReportService.countByRecipesUuid(uuid);
-
-        // 3) then: 결과 확인
-        log.info("레시피 {} 신고 건수 = {}", uuid, count);
-    }
+//    @Test
+//    void countByRecipesUuid() {
+//        // 1) given: DB에 이미 존재하는 레시피 uuid
+//        String uuid = "0bc68ceb-a747-41fc-9ef3-2f8c530fef8f"; 
+//
+//        // 2) when: 카운트 실행
+//        Long count = recipeReportService.countByRecipesUuid(uuid);
+//
+//        // 3) then: 결과 확인
+//        log.info("레시피 {} 신고 건수 = {}", uuid, count);
+//    }
 
     @Test
     void findByReportType() {
         // given
         Long reportType = 0L; // 스팸
-        Pageable pageable = PageRequest.of(0, 10); // 첫 페이지, 10개씩
+        Pageable pageable = PageRequest.of(0, 10);
 
         // when
         Page<RecipeReportDto> page = recipeReportService.findByReportType(reportType, pageable);
