@@ -47,6 +47,9 @@ public class SearchService {
         // 2) 필터
         List<Query> filters = new ArrayList<>();
         filters.add(Query.of(b -> b.term(t -> t.field("visibility").value("PUBLIC"))));
+        filters.add(Query.of(b -> b.bool(bb -> bb
+                .mustNot(mn -> mn.term(t -> t.field("deleted").value(true)))
+        )));
         if (tags != null && !tags.isEmpty()) {
             List<FieldValue> vals = tags.stream().map(FieldValue::of).toList();
             filters.add(Query.of(b -> b.terms(t -> t.field("tags").terms(v -> v.value(vals)))));
@@ -88,20 +91,22 @@ public class SearchService {
         SearchHits<RecipeSearchDoc> hits = es.search(nq, RecipeSearchDoc.class);
 
         // 8) 결과 매핑
+        // 변경
         var items = hits.getSearchHits().stream().map(h -> {
             var d = h.getContent();
-            return Map.<String, Object>of(
-                    "id", d.getId(),
-                    "title", d.getTitle(),
-                    "tags", d.getTags(),
-                    "authorNick", d.getAuthorNick(),
-                    "likes", d.getLikes(),
-                    "createdAt", d.getCreatedAt(),
-                    "score", h.getScore(),
-                    "thumbUrl", d.getThumbUrl(),
-                    "comments", d.getComments(),
-                    "views", d.getViews()
-            );
+            var m = new LinkedHashMap<String, Object>(12);
+            m.put("id", h.getId()); // ✅ 핵심 수정
+            m.put("title", d.getTitle() != null ? d.getTitle() : "");
+            m.put("tags", d.getTags() != null ? d.getTags() : List.of());
+            m.put("authorId",  d.getAuthorId()  != null ? d.getAuthorId()  : "");
+            m.put("authorNick", d.getAuthorNick() != null ? d.getAuthorNick() : "");
+            m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
+            m.put("createdAt", d.getCreatedAt());
+            m.put("score", h.getScore());
+            m.put("thumbUrl", d.getThumbUrl() != null ? d.getThumbUrl() : "");
+            m.put("comments", d.getComments() != null ? d.getComments() : 0L);
+            m.put("views", d.getViews() != null ? d.getViews() : 0L);
+            return m;
         }).toList();
 
         // 9) next 커서
@@ -158,28 +163,34 @@ public class SearchService {
 
         var qb = NativeQuery.builder()
                 .withQuery(Query.of(b -> b.bool(bb -> bb
-                        .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC"))))))
+                        .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
+                        .filter(f -> f.bool(b2 -> b2.mustNot(mn -> mn.term(t -> t.field("deleted").value(true))))) // ✅ 추가
+                )))
+
                 .withPageable(PageRequest.of(0, size))
                 .withSort(s -> s.field(f -> f.field("likes").order(SortOrder.Desc)))
                 .withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)))
                 .withSort(s -> s.field(f -> f.field("id").order(SortOrder.Desc)));
+
 
         var afterValues = CursorUtil.decode(after);
         if (afterValues != null) qb.withSearchAfter(afterValues);
 
         SearchHits<RecipeSearchDoc> hits = es.search(qb.build(), RecipeSearchDoc.class);
 
+        // 변경
         var items = hits.getSearchHits().stream().map(h -> {
             var d = h.getContent();
-            return Map.<String, Object>of(
-                    "id", d.getId(),
-                    "title", d.getTitle(),
-                    "authorNick", d.getAuthorNick(),
-                    "likes", d.getLikes(),
-                    "createdAt", d.getCreatedAt(),
-                    "tags", d.getTags(),
-                    "thumbUrl", ""
-            );
+            var m = new LinkedHashMap<String, Object>(10);
+            m.put("id", h.getId());
+            m.put("title", d.getTitle() != null ? d.getTitle() : "");
+            m.put("authorId", d.getAuthorId() != null ? d.getAuthorId() : "");
+            m.put("authorNick", d.getAuthorNick() != null ? d.getAuthorNick() : "");
+            m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
+            m.put("createdAt", d.getCreatedAt());
+            m.put("tags", d.getTags() != null ? d.getTags() : List.of());
+            m.put("thumbUrl", d.getThumbUrl() != null ? d.getThumbUrl() : "");
+            return m;
         }).toList();
 
         String next = null;
