@@ -2,6 +2,7 @@ package com.RecipeCode.teamproject.reci.feed.comments.controller;
 
 import com.RecipeCode.teamproject.reci.feed.comments.dto.CommentsDto;
 import com.RecipeCode.teamproject.reci.feed.comments.service.CommentsService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +28,15 @@ public class CommentsController {
 
     // 댓글 작성
     @PostMapping("/{recipeUuid}")
-    public void saveComment(@RequestParam CommentsDto commentsDto,
+    public void saveComment(@RequestBody CommentsDto commentsDto,
                             @PathVariable String recipeUuid,
-                            @RequestParam String userEmail) {
+                            HttpSession session) {
+        //세션
+        String userEmail = (String) session.getAttribute("userEmail");
+        if (userEmail == null) {
+            throw new RuntimeException("로그인 후 이용 가능합니다.");
+        }
+
         log.info("댓글 작성: commentsDto={}, recipeUuid={}, userEmail={}", commentsDto, recipeUuid, userEmail);
         commentsService.saveComment(commentsDto, recipeUuid, userEmail);
     }
