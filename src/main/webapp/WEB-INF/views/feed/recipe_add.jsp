@@ -276,7 +276,7 @@
                                     <div class="step-body">
                                         <label class="upload">
                                             <input type="file" name="stepImages" accept="image/*" />
-                                            <span class="ph <c:if test='${not empty c.recipeImageUrl}'>hidden</c:if>'">이미지 업로드</span>
+                                            <span class="ph <c:if test='${not empty c.recipeImageUrl}'>hidden</c:if>">이미지 업로드</span>
                                             <img class="<c:if test='${empty c.recipeImageUrl}'>hidden</c:if>" alt=""
                                                  <c:if test='${not empty c.recipeImageUrl}'>src='${c.recipeImageUrl}'</c:if> />
                                         </label>

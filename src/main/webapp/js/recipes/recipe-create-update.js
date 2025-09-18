@@ -411,6 +411,13 @@
         else form.submit();
     }
 
+    // TODO: 디버깅
+    // const fd = new FormData(document.querySelector('#recipeForm'));
+    // console.log('intro=', fd.get('recipeIntro'));
+    // console.log('title=', fd.get('recipeTitle'));
+    // console.log([...fd.entries()].filter(([k])=>k.startsWith('ingredients[')));
+
+
     btnPublish?.addEventListener('click', (e)=>{
         disableOnce(e.currentTarget);
         postStatus.value = isPublic?.checked ? 'PUBLIC' : 'PRIVATE';
