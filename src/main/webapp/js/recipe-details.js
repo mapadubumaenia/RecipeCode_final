@@ -1,3 +1,5 @@
+
+
 // 본문 "더보기" 토글
 (function(){
     const box = document.getElementById('postDesc');
@@ -84,128 +86,231 @@
 })();
 
 document.addEventListener("DOMContentLoaded", () => {
-    // TODO: 댓글 디버깅 코드 추가 -- 여기서 시작
-    const elRecipe = document.querySelector('.container[data-recipe-uuid]');
-    const recipeUuid = elRecipe?.dataset.recipeUuid || '';
-    console.log('recipeUuid', recipeUuid, 'el:', elRecipe);
-    if (!recipeUuid) {
-        console.error('recipeUuid가 비었음. html 확인:', elRecipe?.outerHTML);
-        return;
-    }
-    // TODO: --------- 여기까지
-
-    // const recipeUuid = document.querySelector(".container").dataset.recipeUuid;
-    const cmtList = document.getElementById("cmtList");
-    const btnCmtSubmit = document.getElementById("btnCmtSubmit");
-    const cmtInput = document.getElementById("cmt");
-    const btnCmtMore = document.getElementById("btnCmtMore");
-
-    const COMMENTS_PAGE_SIZE = 5; // 한 번에 표시할 댓글 수
-    let page = 0;
-    let sort = "desc"; // 최신순
-
-    // 댓글 불러오기
-    async function loadComments(reset = false) {
-        try {
-            if (reset) {
-                cmtList.innerHTML = "";
-                page = 0;
-            }
-
-            const res = await fetch(
-                // TODO : 디버깅 ----------------- 여기부터
-                `${ctx}/comments/${encodeURIComponent(recipeUuid)}?page=${page}&size=${COMMENTS_PAGE_SIZE}&sort=${sort}`);
-            // TODO : ---------------------- 여기까지
-            // `${ctx}/comments/${recipeUuid}?page=${page}&size=${COMMENTS_PAGE_SIZE}&sort=${sort}`);
-            if (!res.ok) throw new Error("댓글 조회 실패");
-            const data = await res.json();
-            // TODO : 디버깅 ----------------- 여기부터
-            if(!Array.isArray(data)){
-                console.error('댓글 응답 형식이 배열이 아님:',data)
-                return;
-            }
-
-            // TODO : ---------------------- 여기까지
-            data.forEach(c => {
-                const commentElem = createCommentElem(c);
-                cmtList.appendChild(commentElem);
-            });
-
-            // 더보기 버튼 표시 여부
-            btnCmtMore.style.display = data.length === COMMENTS_PAGE_SIZE ? "block" : "none";
-            page++; // 다음 페이지 준비
-        } catch (e) {
-            console.error(e);
+        // TODO: 댓글 디버깅 코드 추가 -- 여기서 시작
+        const elRecipe = document.querySelector('.container[data-recipe-uuid]');
+        const recipeUuid = elRecipe?.dataset.recipeUuid || '';
+        console.log('recipeUuid', recipeUuid, 'el:', elRecipe);
+        if (!recipeUuid) {
+            console.error('recipeUuid가 비었음. html 확인:', elRecipe?.outerHTML);
+            return;
         }
-    }
+        // TODO: --------- 여기까지
 
-    // 댓글 DOM 생성 (XSS 방지)
-    function createCommentElem(c) {
-        const div = document.createElement("div");
-        div.className = "comment";
-        div.dataset.commentsId = c.commentsId;
+        // const recipeUuid = document.querySelector(".container").dataset.recipeUuid;
+        const cmtList = document.getElementById("cmtList");
+        const btnCmtSubmit = document.getElementById("btnCmtSubmit");
+        const cmtInput = document.getElementById("cmt");
+        const btnCmtMore = document.getElementById("btnCmtMore");
 
-        // 작성자: userId
-        const user = document.createElement("b");
-        user.textContent = c.userId;
+        const COMMENTS_PAGE_SIZE = 5; // 한 번에 표시할 댓글 수
+        let page = 0;
+        let sort = "desc"; // 최신순
 
-        // 댓글 내용
-        const content = document.createElement("span");
-        content.textContent = c.commentsContent;
 
-        // 작성자, 내용, 작성시간을 댓글 div에 추가
-        div.appendChild(user);
-        div.appendChild(content);
+        // 날짜 포맷 함수
+        function formatDate(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
 
-        return div;
-    }
+        // 댓글 DOM 생성 (XSS 방지)
+        function createCommentElem(c) {
+            const div = document.createElement("div");
+            div.className = "comment";
+            div.dataset.commentsId = c.commentsId;
 
-    // 댓글 작성
-    btnCmtSubmit.addEventListener("click", async () => {
-        // 비어있으면 경고
-        const content = cmtInput.value.trim();
-        if (!content) return alert("댓글 내용을 입력해주세요.");
+            // 댓글창
+            const header = document.createElement("div");
+            header.className = "comment-header";
+            header.innerHTML = `<b>${c.userId}</b> • <span class="time">${formatDate(c.insertTime)}</span>`;
 
-        try {
-            const res = await fetch(`${ctx}/comments/${recipeUuid}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"}
-                // 👉 [운영 시 다시 활성화]
-                // const csrfMeta = document.querySelector('meta[name="_csrf"]');
-                // const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-                // const headers = { "Content-Type": "application/json" };
-                // if (csrfMeta && csrfHeaderMeta) {
-                //     headers[csrfHeaderMeta.content] = csrfMeta.content;
-                // }
-                // const res = await fetch(`${ctx}/comments/${recipeUuid}`, {
-                //     method: "POST",
-                //     headers,
-                //     body: JSON.stringify({ commentsContent: content })
-                // });
-                ,
-                body: JSON.stringify({ commentsContent: content })
-            });
+            // 댓글 내용
+            const content = document.createElement("div");
+            content.className = "comment-content";
+            content.textContent = c.commentsContent;
+
+            const actions = document.createElement("div");
+            actions.className = "comment-actions";
+            actions.innerHTML = `
+            <button class="btnReply">답글</button>
+            <button class="btnEdit">수정</button>
+            <button class="btnDelete">삭제</button>
+            <button class="btnLike">좋아요 (${c.likeCount || 0})</button>
+            <button class="btnReport">신고 (${c.reportCount || 0})</button>
+        `;
+
+            // 댓글 div에 추가
+            div.appendChild(header);
+            div.appendChild(content);
+            div.appendChild(actions);
+
+            // 대댓
+            const repliesDiv = document.createElement("div");
+            repliesDiv.className = "replies";
+            div.appendChild(repliesDiv);
+
+            actions.querySelector(".btnReply").addEventListener("click", () => openReplyInput(c.commentsId, repliesDiv));
+            actions.querySelector(".btnEdit").addEventListener("click", () => editComment(c.commentsId, content));
+            actions.querySelector(".btnDelete").addEventListener("click", () => deleteComment(c.commentsId, div));
+            actions.querySelector(".btnLike").addEventListener("click", () => likeComment(c.commentsId, actions.querySelector(".btnLike")));
+            actions.querySelector(".btnReport").addEventListener("click", () => reportComment(c.commentsId, actions.querySelector(".btnReport")));
+
+            // 대댓 항상 띄우기
+            loadReplies(c.commentsId, repliesDiv);
+
+            return div;
+        }
+
+        // 댓글 불러오기
+        async function loadComments(reset = false) {
+            try {
+                if (reset) {
+                    cmtList.innerHTML = "";
+                    page = 0;
+                }
+
+                const res = await fetch(
+                    // TODO : 디버깅 ----------------- 여기부터
+                    `${ctx}/comments/${encodeURIComponent(recipeUuid)}?page=${page}&size=${COMMENTS_PAGE_SIZE}&sort=${sort}`);
+                // TODO : ---------------------- 여기까지
+                // `${ctx}/comments/${recipeUuid}?page=${page}&size=${COMMENTS_PAGE_SIZE}&sort=${sort}`);
+                if (!res.ok) throw new Error("댓글 조회 실패");
+                const data = await res.json();
+                // TODO : 디버깅 ----------------- 여기부터
+                if (!Array.isArray(data)) {
+                    console.error('댓글 응답 형식이 배열이 아님:', data)
+                    return;
+                }
+
+                // TODO : ---------------------- 여기까지
+                data.forEach(c => {
+                    const commentElem = createCommentElem(c);
+                    cmtList.appendChild(commentElem);
+                });
+
+                // 더보기 버튼 표시 여부
+                btnCmtMore.style.display = data.length === COMMENTS_PAGE_SIZE ? "block" : "none";
+                page++; // 다음 페이지 준비
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // 댓글 작성
+        btnCmtSubmit.addEventListener("click", async () => {
+            // 비어있으면 경고
+            const content = cmtInput.value.trim();
+            if (!content) return alert("댓글 내용을 입력해주세요.");
+
+            try {
+                const res = await fetch(`${ctx}/comments/${recipeUuid}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                    // [운영 시 다시 활성화]
+                    // const csrfMeta = document.querySelector('meta[name="_csrf"]');
+                    // const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+                    // const headers = { "Content-Type": "application/json" };
+                    // if (csrfMeta && csrfHeaderMeta) {
+                    //     headers[csrfHeaderMeta.content] = csrfMeta.content;
+                    // }
+                    // const res = await fetch(`${ctx}/comments/${recipeUuid}`, {
+                    //     method: "POST",
+                    //     headers,
+                    //     body: JSON.stringify({ commentsContent: content })
+                    // });
+                    ,
+                    body: JSON.stringify({commentsContent: content})
+                });
 
             if (!res.ok) throw new Error("댓글 작성 실패");
 
-            // 작성 후 초기화
-            cmtInput.value = "";
-            loadComments(true); // 새로 불러오기
-        } catch (e) {
-            console.error(e);
-            alert("댓글 작성 중 오류가 발생했습니다.");
+                // 작성 후 초기화
+                cmtInput.value = "";
+                loadComments(true); // 새로 불러오기
+            } catch (e) {
+                console.error(e);
+                alert("댓글 작성 중 오류가 발생했습니다.");
+            }
+        });
+
+        // 삭제
+        async function deleteComment(commentsId, CommentElem) {
+            if (!confirm("정말 삭제?")) return;
+
+            try {
+                const res = await fetch(`${ctx}/comments/${commentsId}`, {
+                    method: "DELETE"
+                });
+                if (!res.ok) throw new Error("삭제 실패");
+                CommentElem.remove();
+            } catch (err) {
+                console.error(err);
+                alert("댓글 삭제 중 오류발생");
+            }
         }
-    });
 
-    // 더보기 버튼 클릭
-    btnCmtMore.addEventListener("click", () => {
+        // 대댓 불러오기
+        async function loadReplies(parentId, container) {
+            const res = await fetch(`${ctx}/comments/replies/${parentId}`);
+            if (!res.ok) return;
+            const replies = await res.json();
+            container.innerHTML = "";
+            replies.forEach(r => container.appendChild(createCommentElem(r)));
+        }
+
+        // 대댓작성
+        function openReplyInput(parentId, container) {
+            const textarea = document.createElement("textarea");
+            const btn = document.createElement("button");
+            btn.textContent = "등록";
+
+            btn.addEventListener("click", async () => {
+                const content = textarea.value.trim();
+                if (!content) return;
+                const res = await fetch(`${ctx}/comments/replies/${parentId}`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({commentsContent: content})
+                });
+                if (res.ok) {
+                    loadReplies(parentId, container);
+                    textarea.remove();
+                    btn.remove();
+                }
+            });
+
+            container.appendChild(textarea);
+            container.appendChild(btn);
+        }
+
+        // 대댓 삭제
+        async function deleteReply(parentId, CommentElem) {
+            if (!confirm("삭제?")) return;
+
+            try {
+                const res = await fetch(`${ctx}/comments/replies/${parentId}`, {
+                    method: "DELETE"
+                });
+                if (!res.ok) throw new Error("삭제 실패");
+                CommentElem.remove();
+            } catch (err) {
+                console.error(err);
+                alert("댓글 삭제 중 오류발생");
+            }
+        }
+
+        // 더보기 버튼 클릭
+        btnCmtMore.addEventListener("click", () => {
+            loadComments();
+        });
+
+        // 초기 댓글 로드
         loadComments();
-    });
-
-    // 초기 댓글 로드
-    loadComments();
-});
+    }
+);
 
 // 신고 모달 열기/닫기, 서버 전송
 document.addEventListener("DOMContentLoaded", () => {
