@@ -9,11 +9,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController      // JSON 반환전용, @ResponseBody 필요없게
+@RestController      // JSON 반환 전용, @ResponseBody 불필요
 @RequiredArgsConstructor
-@RequestMapping("/api/comments")
+@RequestMapping("/comments")
 @Log4j2
 public class CommentsController {
+
     private final CommentsService commentsService;
 
     // 댓글 불러오기
@@ -31,30 +32,20 @@ public class CommentsController {
     // 댓글 작성
     @PostMapping("/{recipeUuid}")
     public CommentsDto saveComment(@RequestBody CommentsDto commentsDto,
-                            @PathVariable String recipeUuid,
-                            HttpSession session) {
-<<<<<<< Updated upstream
-        //세션
+                                   @PathVariable String recipeUuid,
+                                   HttpSession session) {
+        // 세션 확인
         String userEmail = (String) session.getAttribute("userEmail");
         if (userEmail == null) {
-            userEmail = "sj12@naver.com";  //하드코딩
+            userEmail = "sj12@naver.com";  // 하드코딩 (테스트용)
             session.setAttribute("userEmail", userEmail);
             throw new RuntimeException("로그인 후 이용 가능합니다.");
         }
-=======
-//        //세션
-//        String userEmail = (String) session.getAttribute("userEmail");
-//        if (userEmail == null) throw new RuntimeException("로그인 후 이용 가능합니다.");
-
-        String userEmail = "sj12@naver.com"; // 일단
->>>>>>> Stashed changes
 
         log.info("댓글 작성: commentsDto={}, recipeUuid={}, userEmail={}", commentsDto, recipeUuid, userEmail);
         commentsService.saveComment(commentsDto, recipeUuid, userEmail);
         return commentsDto;
     }
-
-
 
     // 대댓글 불러오기
     @GetMapping("/replies/{parentId}")
@@ -63,24 +54,22 @@ public class CommentsController {
         return commentsService.getReplies(parentId);
     }
 
-    // 대댓작성
+    // 대댓글 작성
     @PostMapping("/replies/{parentId}")
     public void saveReply(@PathVariable Long parentId,
                           @RequestBody CommentsDto commentsDto,
                           HttpSession session) {
-        //세션
+        // 세션 확인
         String userEmail = (String) session.getAttribute("userEmail");
         if (userEmail == null) {
-            userEmail = "sj12@naver.com";  //하드코딩
+            userEmail = "sj12@naver.com";  // 하드코딩 (테스트용)
             session.setAttribute("userEmail", userEmail);
-
         }
+
         commentsService.saveReply(commentsDto, parentId, userEmail);
     }
 
-
-
-    // 삭제
+    // 댓글 삭제
     @DeleteMapping("/{commentsId}")
     public void deleteComment(@PathVariable Long commentsId) {
         commentsService.deleteComment(commentsId);
