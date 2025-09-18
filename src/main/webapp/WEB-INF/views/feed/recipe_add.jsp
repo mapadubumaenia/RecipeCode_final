@@ -358,10 +358,20 @@
 </div>
 
 
+<!-- 1) jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" defer></script>
+
+<!-- 2) jQuery Validation 플러그인 -->
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.21.0/dist/jquery.validate.min.js" defer></script>
+
+<!-- 3) 내 validation 설정 (여기서 window.RecipesValidation 전역에 올림) -->
+<script src="${contextPath}/js/recipes/recipes-validation-config.js" defer></script>
+
+<!-- 4) 페이지 로직 (맨 마지막) -->
+<script src="${contextPath}/js/recipes/recipe-create-update.js" defer></script>
+
 <!-- JSP에서 contextPath 전역 변수 내려주기 (필요 시) -->
 <script>window.contextPath = '${contextPath}';</script>
-<!-- 기능 스크립트: 뷰 렌더링(폼 전송) 방식 -->
-<script src="${contextPath}/js/recipe-create-update.js"></script>
 
 </body>
 </html>

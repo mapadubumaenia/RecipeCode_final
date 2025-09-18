@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/css/**","/js/**","/images/**","/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll() // 검색 API
                         .anyRequest().permitAll()
+
                 )
                 // 로그인/기본인증 비활성화
                 .formLogin(form -> form

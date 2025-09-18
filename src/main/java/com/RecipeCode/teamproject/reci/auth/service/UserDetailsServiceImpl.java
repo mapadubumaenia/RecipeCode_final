@@ -7,6 +7,7 @@ import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class UserDetailsServiceImpl implements UserDetailsService {
 //    DB Member 레포지토리 DI
     private final AdminRepository adminRepository;
@@ -36,7 +38,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (memberOt.isPresent()) {
             Member member = memberOt.get();
             authorities.add(new SimpleGrantedAuthority(member.getRole()));
-
             return new SecurityUserDto(
                     member,
                     authorities,

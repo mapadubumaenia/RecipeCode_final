@@ -81,10 +81,11 @@ public class RecipesService {
 
         if ("VIDEO".equalsIgnoreCase(recipesDto.getRecipeType())) {
             recipe.setRecipeType("VIDEO");
-            recipe.setVideoUrl(recipesDto.getVideoUrl());
+            String embedUrl = toYoutubeEmbed(recipesDto.getVideoUrl());
+            recipe.setVideoUrl(embedUrl);
             // 동영상은 내부 썸네일/다운로드 URL 불필요
             recipe.setThumbnail(null);
-            recipe.setThumbnailUrl(recipesDto.getVideoUrl()); // 피드 썸네일 쓰려면(선택)
+            recipe.setThumbnailUrl(embedUrl); // 피드 썸네일 쓰려면(선택)
         } else {
             recipe.setRecipeType("IMAGE");
             recipe.setVideoUrl(null);
@@ -152,10 +153,10 @@ public class RecipesService {
 
 //        IMAGE / VIDEO 전환 처리
         if ("VIDEO".equalsIgnoreCase(recipesDto.getRecipeType())) {
-            recipe.setRecipeType("VIDEO");
-            recipe.setVideoUrl(recipesDto.getVideoUrl());
-            recipe.setThumbnail(null);
             String youtubeThumb = toYoutubeEmbed(recipesDto.getVideoUrl());
+            recipe.setRecipeType("VIDEO");
+            recipe.setVideoUrl(youtubeThumb);
+            recipe.setThumbnail(null);
             recipe.setThumbnailUrl(youtubeThumb); // 이미지 썸네일로 사용
         } else {
             recipe.setRecipeType("IMAGE");

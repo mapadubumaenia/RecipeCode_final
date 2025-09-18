@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -36,5 +38,11 @@ public class MemberService {
             member.setRole("R_USER");
             memberRepository.save(member);
         }
+    }
+
+//    상세조회(Profile 페이지용)
+    public Member getByUserEmail(String email) {
+        return memberRepository.findByUserEmail(email)
+                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.register")));
     }
 }

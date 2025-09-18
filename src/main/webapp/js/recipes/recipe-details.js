@@ -54,8 +54,9 @@
 
     btnLike.addEventListener("click", async () => {
         try {
-            const resp = await fetch(`${ctx}/recipes/${recipeUuid}/like`, {
+            const resp = await fetch(`${ctx}/api/recipes/${recipeUuid}/like`, {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" }
                     // 👉 [운영 시 다시 활성화]
                     // const csrfMeta = document.querySelector('meta[name="_csrf"]');
@@ -64,7 +65,7 @@
                     // if (csrfMeta && csrfHeaderMeta) {
                     //     headers[csrfHeaderMeta.content] = csrfMeta.content;
                     // }
-                    // const resp = await fetch(`${ctx}/recipes/${recipeUuid}/like`, {
+                    // const resp = await fetch(`${ctx}/api/recipes/${recipeUuid}/like`, {
                     //     method: "POST",
                     //     headers
             });
