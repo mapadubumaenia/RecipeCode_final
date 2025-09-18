@@ -5,7 +5,7 @@
   Time: 오전 11:21
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
@@ -15,16 +15,15 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title><c:out value="${recipe.recipeTitle}"/> - Details</title>
-    <c:set var="ctx" value="${pageContext.request.contextPath}" />
-    <link rel="stylesheet" href="${ctx}/css/common.css" />
-    <link rel="stylesheet" href="${ctx}/css/recipe-details.css" />
+    <c:set var="ctx" value="${pageContext.request.contextPath}"/>
+    <link rel="stylesheet" href="${ctx}/css/common.css"/>
+    <link rel="stylesheet" href="${ctx}/css/recipe-details.css"/>
 </head>
 <body>
 <div class="container" data-recipe-uuid="${recipe.uuid}">
-    <!-- 헤더 -->
     <header class="container">
         <div class="flex-box">
             <div class="flex-row">
@@ -42,17 +41,20 @@
                     <div id="notifPanel" class="notif-panel" role="dialog" aria-label="알림 목록">
                         <div class="notif-head">
                             <strong>알림</strong>
-                            <div class="actions"><button class="btn small ghost" id="markAll">모두 읽음</button></div>
+                            <div class="actions">
+                                <button class="btn small ghost" id="markAll">모두 읽음</button>
+                            </div>
                         </div>
                         <div class="notif-list" id="notifList"></div>
-                        <div class="notif-foot"><button class="btn small ghost" id="closeNotif">닫기</button></div>
+                        <div class="notif-foot">
+                            <button class="btn small ghost" id="closeNotif">닫기</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- MAIN -->
     <div class="layout">
         <main>
             <!-- 메인 콘텐츠 -->
@@ -68,67 +70,67 @@
                     </div>
                 </div>
 
-                    <!-- 메인 비주얼 영역 -->
-        <c:choose>
-            <c:when test="${isVideo}">
-                 <div class="ratio-16x9 mb-12">
-                     <iframe src="${embedUrl}" allowfullscreen
-                             referrerpolicy="strict-origin-when-cross-origin"
-                             style="width:100%;height:100%;border:0"></iframe>
-                 </div>
-            </c:when>
-            <c:otherwise>
-                    <!-- 이미지/텍스트 슬라이드 -->
-                <div class="step-slider mb-12">
-                    <div class="slides" id="imgSlides">
-                        <c:forEach var="c" items="${recipe.contents}">
-                               <c:set var="imgSrc" value="${c.recipeImageUrl}"/>
-                                     <c:if test="${fn:startsWith(imgSrc, '/')}">
-                                         <c:set var="imgSrc" value="${ctx}${imgSrc}"/>
-                                    </c:if>
-                               <div class="slide"><img src="${imgSrc}" alt="" /></div>
-                        </c:forEach>
-                        <!-- 컨텐츠 이미지 없으면 썸네일/플레이스홀더 -->
-                        <div class="slide">
-                            <c:set var="thumbSrc" value="${recipe.thumbnailUrl}"/>
-                            <c:if test="${fn:startsWith(thumbSrc, '/')}">
-                                <c:set var="thumbSrc" value="${ctx}${thumbSrc}"/>
-                            </c:if>
-                            <c:if test="${empty thumbSrc}">
-                                <c:set var="thumbSrc" value="https://placehold.co/600x400"/>
-                            </c:if>
-                            <img src="${thumbSrc}" alt="대표 이미지"/>
+                <!-- 메인 비주얼 영역 -->
+                <c:choose>
+                    <c:when test="${isVideo}">
+                        <div class="ratio-16x9 mb-12">
+                            <iframe src="${embedUrl}" allowfullscreen
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    style="width:100%;height:100%;border:0"></iframe>
                         </div>
-                    </div>
-                    <button class="prev" type="button" aria-label="이전">◀</button>
-                    <button class="next" type="button" aria-label="다음">▶</button>
-                </div>
-            </c:otherwise>
-        </c:choose>
-            <!-- 조리 순서: VIDEO면 숨김 -->
-            <c:if test="${not isVideo}">
-                <aside class="panel mb-12">
-                    <h3>👣 조리 순서</h3>
-                    <div id="textPanel">
-                        <div class="text-viewport">
-                            <div class="slides" id="textSlides">
-                                <c:choose>
-                                    <c:when test="${not empty recipe.contents}">
-                                        <c:forEach var="c" items="${recipe.contents}">
-                                            <div class="slide">
-                                                <p><c:out value="${c.stepExplain}" /></p>
-                                            </div>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="slide"><p>등록된 조리 단계가 없습니다.</p></div>
-                                    </c:otherwise>
-                                </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <!-- 이미지/텍스트 슬라이드 -->
+                        <div class="step-slider mb-12">
+                            <div class="slides" id="imgSlides">
+                                <c:forEach var="c" items="${recipe.contents}">
+                                    <c:set var="imgSrc" value="${c.recipeImageUrl}"/>
+                                    <c:if test="${fn:startsWith(imgSrc, '/')}">
+                                        <c:set var="imgSrc" value="${ctx}${imgSrc}"/>
+                                    </c:if>
+                                    <div class="slide"><img src="${imgSrc}" alt="" /></div>
+                                </c:forEach>
+                                <!-- 컨텐츠 이미지 없으면 썸네일/플레이스홀더 -->
+                                <div class="slide">
+                                    <c:set var="thumbSrc" value="${recipe.thumbnailUrl}"/>
+                                    <c:if test="${fn:startsWith(thumbSrc, '/')}">
+                                        <c:set var="thumbSrc" value="${ctx}${thumbSrc}"/>
+                                    </c:if>
+                                    <c:if test="${empty thumbSrc}">
+                                        <c:set var="thumbSrc" value="https://placehold.co/600x400"/>
+                                    </c:if>
+                                    <img src="${thumbSrc}" alt="대표 이미지"/>
+                                </div>
+                            </div>
+                            <button class="prev" type="button" aria-label="이전">◀</button>
+                            <button class="next" type="button" aria-label="다음">▶</button>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+                <!-- 조리 순서: VIDEO면 숨김 -->
+                <c:if test="${not isVideo}">
+                    <aside class="panel mb-12">
+                        <h3>👣 조리 순서</h3>
+                        <div id="textPanel">
+                            <div class="text-viewport">
+                                <div class="slides" id="textSlides">
+                                    <c:choose>
+                                        <c:when test="${not empty recipe.contents}">
+                                            <c:forEach var="c" items="${recipe.contents}">
+                                                <div class="slide">
+                                                    <p><c:out value="${c.stepExplain}" /></p>
+                                                </div>
+                                            </c:forEach>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="slide"><p>등록된 조리 단계가 없습니다.</p></div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </aside>
-            </c:if>
+                    </aside>
+                </c:if>
                 <aside class="panel">
                     <h3>🧾 재료</h3>
                     <ul class="grid">
@@ -201,7 +203,6 @@
             </section>
         </main>
 
-        <!-- 사이드 추천 (옵션) -->
         <aside class="side" id="sideList" aria-live="polite">
             <div class="loader" id="loader" hidden>
                 <div class="spinner"></div>
@@ -211,7 +212,6 @@
         </aside>
     </div>
 </div>
-
 <script>
     const ctx = "${pageContext.request.contextPath}";
 </script>
@@ -289,7 +289,7 @@
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ commentsContent: content })
+                    body: JSON.stringify({commentsContent: content})
                 });
 
                 if (!res.ok) throw new Error("댓글 작성 실패");
@@ -312,6 +312,35 @@
         loadComments();
     });
 </script>
+<%-- TODO: 신고 모달 --%>
+<div id="reportModal" class="modal" hidden>
+    <div class="modal-content report-modal">
+        <h3 class="modal-title">🚩 레시피 신고</h3>
+        <form id="reportForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <input type="hidden" name="uuid" value="${recipe.uuid}"/>
 
+            <div class="form-group">
+                <label class="form-label">신고 유형</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="reportType" value="0" required> 욕설</label>
+                    <label><input type="radio" name="reportType" value="1"> 스팸</label>
+                    <label><input type="radio" name="reportType" value="2"> 저작권</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="reason">사유</label>
+                <textarea name="reason" id="reason" rows="4" maxlength="500" placeholder="신고 사유를 입력해주세요."
+                          required></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="submit" class="btn-submit">제출</button>
+                <button type="button" id="btnClose" class="btn-cancel">취소</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

@@ -46,12 +46,11 @@ public interface MapStruct {
     Member toEntity(MemberDto memberDto);
 
     //  TODO: RecipeReportDto
-    @Mapping(source = "admin.adminEmail", target = "adminEmail")
     @Mapping(source = "member.userEmail", target = "userEmail")
-    @Mapping(source = "recipes.uuid", target = "uuid")
-    @Mapping(source = "recipes.recipeTitle", target = "recipeTitle")
+    @Mapping(target = "uuid", ignore = true)
+    // recipeTitle은 무시 (삭제된 경우 안전하게 처리하기 위해)
+    @Mapping(target = "recipeTitle", ignore = true)
     RecipeReportDto toDto(RecipeReport recipeReport);
-    @Mapping(source = "adminEmail", target = "admin.adminEmail")
     @Mapping(source = "userEmail", target = "member.userEmail")
     @Mapping(source = "uuid", target = "recipes.uuid")
     RecipeReport toEntity(RecipeReportDto recipeReportDto);

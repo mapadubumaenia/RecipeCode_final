@@ -72,3 +72,43 @@
         }
     });
 })();
+
+// 신고 모달 열기/닫기, 서버 전송
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("reportModal");
+    const btnReport = document.getElementById("btnReport");
+    const btnClose = document.getElementById("btnClose");
+    const form = document.getElementById("reportForm");
+
+    // 🚩 신고 버튼 → 모달 열기
+    btnReport?.addEventListener("click", () => modal.hidden = false);
+    // 취소 버튼 → 모달 닫기
+    btnClose?.addEventListener("click", () => modal.hidden = true);
+
+    // 폼 제출 → 서버에 전송
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+            const res = await fetch(`${ctx}/report/add`, {
+                method: "POST",
+                body: new URLSearchParams(formData)
+            });
+            if (!res.ok) throw new Error("신고 실패");
+
+            const data = await res.json(); // 컨트롤러 JSON 응답 파싱
+
+            if (data.status === "ok") {
+                alert(data.message); // "신고가 접수되었습니다."
+                modal.hidden = true;
+            } else {
+                alert(data.message); // "로그인이 필요합니다." 등
+                modal.hidden = true; // 필요시 닫지 않고 로그인 페이지로 유도 가능
+            }
+        } catch (err) {
+            console.error(err);
+            alert("신고 중 오류가 발생했습니다.");
+        }
+    });
+});

@@ -31,6 +31,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -57,7 +58,7 @@ public class RecipesService {
 
         Page<Recipes> recipesPage = recipesRepository
                 .findByMember_UserIdInAndPostStatusOrderByInsertTimeDesc(
-                    followIds, status, pageable);
+                        followIds, status, pageable);
 
         return recipesPage.map(recipesDto -> recipeMapStruct.toRecipeDto(recipesDto));
     }
@@ -74,7 +75,7 @@ public class RecipesService {
                                String userEmail) {
 
         Member member = memberRepository.findByUserEmail(userEmail)
-                .orElseThrow(()->new RuntimeException(errorMsg.getMessage("errors.unauthorized")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.unauthorized")));
 
         // 1) 레시피 엔티티 변환 및 기본값 설정
         Recipes recipe = recipeMapStruct.toRecipeEntity(recipesDto);
@@ -97,11 +98,10 @@ public class RecipesService {
 
         // 3) 본문/카운터 기본값 보정 (선택)
         //  └ 엔티티가 기본형 long 이면 생략 가능
-        if (recipe.getViewCount() == null)  recipe.setViewCount(0L);
-        if (recipe.getLikeCount() == null)  recipe.setLikeCount(0L);
+        if (recipe.getViewCount() == null) recipe.setViewCount(0L);
+        if (recipe.getLikeCount() == null) recipe.setLikeCount(0L);
         if (recipe.getCommentCount() == null) recipe.setCommentCount(0L);
         if (recipe.getReportCount() == null) recipe.setReportCount(0L);
-
 
 
         // 2) 레시피 저장
@@ -147,7 +147,7 @@ public class RecipesService {
 
 //        작성자 검증 : 테스트 후 살릴 것
         if (userEmail != null &&
-            !userEmail.equalsIgnoreCase(recipe.getMember().getUserEmail())) {
+                !userEmail.equalsIgnoreCase(recipe.getMember().getUserEmail())) {
             throw new RuntimeException(errorMsg.getMessage("errors.unauthorized"));
         }
 
@@ -179,14 +179,15 @@ public class RecipesService {
         // 🔥 기존 태그 삭제 후 새로 추가
         recipeTagService.syncTagsForRecipe(recipe, tagDtos);
 
-       }
+    }
 
-
-    /* 상세 조회*/
+    /* 상세 조회 */
     @Transactional(readOnly = true)
     public RecipesDto getRecipeDetails(String uuid) {
-        Recipes recipe = recipesRepository.findByIdWithTags(uuid)
-                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+        Recipes recipe = recipesRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException(
+                        errorMsg.getMessage("errors.not.found")
+                ));
 
         // 재료/단계는 단방향이라 개별 repo 조회
         var ingredients = ingredientRepository
@@ -194,20 +195,21 @@ public class RecipesService {
         var contents = recipeContentRepository
                 .findByRecipesUuidOrderByStepOrderAsc(uuid);
 
-        // 엔티티 -> DTO
         RecipesDto dto = recipeMapStruct.toRecipeDto(recipe);
         dto.setIngredients(recipeMapStruct.toIngredientDtoList(ingredients));
         dto.setContents(recipeMapStruct.toRecipeContentDtoList(contents));
-
         return dto;
+
+
     }
+
 
     public void updateRecipe(String uuid,
                              RecipesDto recipesDto,
                              List<IngredientDto> ingredientDtos,
                              List<RecipeContentDto> contentDtos,
                              List<byte[]> images,
-                             List<TagDto> tagDtos){
+                             List<TagDto> tagDtos) {
         updateRecipe(uuid, recipesDto, ingredientDtos, contentDtos, images,
                 tagDtos, null, null);
     }
@@ -215,7 +217,7 @@ public class RecipesService {
     //    상세조회
     public Recipes findById(String uuid) {
         return recipesRepository.findById(uuid)
-                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
     }
 
     /* 삭제 */
@@ -232,17 +234,17 @@ public class RecipesService {
     /* 소프트 삭제 */
     @Transactional
     public void softDeleteRecipe(String uuid) {
-        Recipes r = recipesRepository.findByUuid(uuid)
-                        .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
-        if (Boolean.TRUE.equals(r.isDeleted())) return;  // 이미 삭제면 무시
-        r.setDeleteDate(LocalDateTime.now()); // 삭제 시각 기록 (원하면)
-        recipesRepository.delete(r);
+        Recipes recipes = recipesRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+        if (Boolean.TRUE.equals(recipes.isDeleted())) return;  // 이미 삭제면 무시
+        recipes.setDeleteDate(LocalDateTime.now()); // 삭제 시각 기록 (원하면)
+        recipesRepository.delete(recipes);
 
     }
 
     public byte[] findThumbnailByUuid(String uuid) {
         Recipes recipes = recipesRepository.findByUuid(uuid)
-                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
         return recipes.getThumbnail();
     }
 
@@ -254,9 +256,7 @@ public class RecipesService {
     }
 
 
-
-
-    public String toYoutubeEmbed(String url){
+    public String toYoutubeEmbed(String url) {
         try {
             java.net.URL u = new java.net.URL(url);
             String host = u.getHost();
@@ -273,7 +273,7 @@ public class RecipesService {
             }
             // youtube.com/watch?v=VIDEOID
             if (host.contains("youtube.com")) {
-                java.util.Map<String,String> params = splitQuery(q);
+                java.util.Map<String, String> params = splitQuery(q);
                 String id = params.get("v");
                 if (id != null && !id.isBlank()) {
                     String start = parseStartSeconds(q);
@@ -292,16 +292,17 @@ public class RecipesService {
                     if (list != null) return "https://www.youtube.com/embed/videoseries?list=" + list;
                 }
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return null;
     }
 
-    private java.util.Map<String,String> splitQuery(String query) {
-        java.util.Map<String,String> map = new java.util.HashMap<>();
+    private java.util.Map<String, String> splitQuery(String query) {
+        java.util.Map<String, String> map = new java.util.HashMap<>();
         if (query == null) return map;
         for (String p : query.split("&")) {
             int i = p.indexOf('=');
-            if (i > 0) map.put(p.substring(0, i), p.substring(i+1));
+            if (i > 0) map.put(p.substring(0, i), p.substring(i + 1));
         }
         return map;
     }
