@@ -39,11 +39,7 @@ public class Comments extends BaseTimeEntity {
 
 //  대댓글용(자기참조객체)
     @ManyToOne(fetch = FetchType.LAZY)
-<<<<<<< Updated upstream
     @JoinColumn(name = "PARENT_ID")
-=======
-    @JoinColumn(name = "parentId")
->>>>>>> Stashed changes
     private Comments parentId;
 
 //  댓글 작성자
