@@ -45,9 +45,18 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             profileImageUrl = oAuth2User.getAttribute("picture");
             providerId = oAuth2User.getAttribute("sub"); // 구글 고유 ID
         } else if ("kakao".equals(provider)) {
-            Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttribute("kakao_account");
-            Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+            //unchecked cast 경고 방지
+            Object kakaoAccountObj = oAuth2User.getAttribute("kakao_account");
+            Map<String, Object> kakaoAccount = Collections.emptyMap();
+            if (kakaoAccountObj instanceof Map) {
+                kakaoAccount = (Map<String, Object>) kakaoAccountObj;
+            }
 
+            Object profileObj = kakaoAccount.get("profile");
+            Map<String, Object> profile = Collections.emptyMap();
+            if (profileObj instanceof Map) {
+                profile = (Map<String, Object>) profileObj;
+            }
             email = (String) kakaoAccount.get("email");
             nickname = (String) profile.get("nickname");
             profileImageUrl = (String) profile.get("profile_image_url");
