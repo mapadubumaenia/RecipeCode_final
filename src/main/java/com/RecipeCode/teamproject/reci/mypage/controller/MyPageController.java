@@ -25,24 +25,24 @@ public class MyPageController {
 
     @GetMapping("/my-recipes")
     public Slice<RecipesDto> getMyRecipes(
-//            @AuthenticationPrincipal SecurityUserDto user,
+            @AuthenticationPrincipal SecurityUserDto user,
             @PageableDefault(size = 5, sort = "insertTime",
                             direction = Sort.Direction.DESC) Pageable pageable) {
 //        TODO: 테스트유저 : 테스트 후 수정
-        String fakeUserEmail = "asdf1234@naver.com";
+//        String fakeUserEmail = "asdf1234@naver.com";
         // fakeUserEmail -> user.getUsername() 로 변경할 것
-        return myPageService.getMyRecipes(fakeUserEmail, pageable);
+        return myPageService.getMyRecipes(user.getUsername(), pageable);
     }
 
     @GetMapping("/my-liked")
     public Slice<RecipesDto> getMyLikedRecipes(
-//            @AuthenticationPrincipal SecurityUserDto user,
+            @AuthenticationPrincipal SecurityUserDto user,
             @PageableDefault(size = 5, sort = "insertTime",
                             direction = Sort.Direction.DESC) Pageable pageable) {
 //        TODO: 테스트유저 : 테스트 후 수정
-        String fakeUserEmail = "asdf1234@naver.com";
+//        String fakeUserEmail = "asdf1234@naver.com";
         // fakeUserEmail -> user.getUsername() 로 변경할 것
-        return myPageService.getMyLikedRecipes(fakeUserEmail, pageable);
+        return myPageService.getMyLikedRecipes(user.getUsername(), pageable);
     }
 
 }
