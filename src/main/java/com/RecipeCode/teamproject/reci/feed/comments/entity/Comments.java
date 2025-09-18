@@ -25,7 +25,7 @@ public class Comments extends BaseTimeEntity {
 
 //  댓글이 달린 레시피
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uuid", nullable = false)
+    @JoinColumn(name = "UUID", nullable = false)
     private Recipes recipes;
 
     @Id

@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentTab = "myposts";
 
     function getApiUrl(){
+        const base = (typeof ctx === "string" ? ctx : "");
         return currentTab === "myposts"
             ? `/api/mypage/my-recipes?page=${page}&size=5`
             : `/api/mypage/my-liked?page=${page}&size=5`;
