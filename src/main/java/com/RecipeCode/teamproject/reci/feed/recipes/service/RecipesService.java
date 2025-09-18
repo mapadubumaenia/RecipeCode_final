@@ -235,6 +235,8 @@ public class RecipesService {
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
         if (Boolean.TRUE.equals(recipes.isDeleted())) return;  // 이미 삭제면 무시
         recipes.setDeleteDate(LocalDateTime.now()); // 삭제 시각 기록 (원하면)
+        // TODO : 물리 삭제 아님(entity @Where, @SQLDelete 사용)
+        //   Hibernate가 soft delete로 변환 실행
         recipesRepository.delete(recipes);
 
     }
