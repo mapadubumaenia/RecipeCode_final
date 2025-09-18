@@ -54,10 +54,10 @@ public class RecipesViewController {
     /** 레시피 등록*/
     @PostMapping(path = "/recipes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createRecipe(
-            @ModelAttribute RecipesDto recipesDto,                        // ingredients[i].*, contents[i].*, tags[i]
+            @ModelAttribute RecipesDto recipesDto,      // ingredients[i].*, contents[i].*, tags[i]
             @RequestParam(value="thumbnail", required=false) MultipartFile thumbnail,
             @RequestParam(value="stepImages", required=false) List<MultipartFile> stepImages,
-            @AuthenticationPrincipal SecurityUserDto userDetails // ✅ 현재 로그인한 유저
+            @AuthenticationPrincipal SecurityUserDto userDetails // 현재 로그인한 유저
     ) throws Exception {
 
 //        TODO: 개발용 테스트유저 : 다되면 지울것!!

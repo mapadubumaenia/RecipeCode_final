@@ -1,0 +1,47 @@
+
+
+/* 프로필 카드 */
+.profile-card {display:flex; gap:16px; align-items:center; margin-bottom:20px; padding: 12px;}
+.profile-info {flex:1;}
+.profile-top {display:flex; gap:8px; align-items:center;}
+.profile-name{margin: 4px;}
+.edit-profile {font-size:.85rem; color:#666;}
+.edit-feed {font-size:.85rem; color:#666;}
+.profile-actions {display:flex; gap:8px; margin-top:8px;}
+
+/* 서치 */
+.search-following {display:flex; gap:8px; margin:8px 0 16px;}
+.search-following input {flex:1; padding:10px 12px; border:1px solid var(--border);
+        border-radius:12px; background:#fff;}
+.search-following button {padding:10px 14px; border:1px solid #111; border-radius:12px; background:#fff; font-weight:700; cursor:pointer;}
+
+/* 배지/내피드 */
+.privacy{font-size:.8rem;padding:2px 8px;border-radius:6px}
+.privacy.public{background:#e0f7e9;color:#0a7}
+.privacy.private{background:#fde2e2;color:#c00}
+.feed-list{display:grid;gap:12px}
+
+/* 사이드 특징 배너 */
+.feature{display:flex;flex-direction:column;gap:10px}
+.feature .thumb{aspect-ratio:16/9}
+
+/* 커뮤니티 피드 카드 */
+.post{display:flex;flex-direction:column;gap:10px;margin-bottom: 8px;}
+.post-head{display:flex;flex-direction: row; align-items:center;gap:10px}
+.post-info{flex:1;}
+.post-id{font-weight: 700;}
+.post-cta{display:flex;gap:14px}
+
+
+/* 반응형: 사이드 노출 */
+.sidebar{display:none}
+@media (min-width:768px){
+  .layout{display:grid;grid-template-columns:1fr 280px;gap:18px}
+  .sidebar{display:block;position:sticky;top:16px;align-self:start;height:max-content}
+  .profile-actions{display: none;}
+}
+@media (min-width:1024px){
+  .layout{grid-template-columns:1fr 320px}
+  .profile-info{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:6px 12px}
+  .page-title{margin-bottom:8px}
+}

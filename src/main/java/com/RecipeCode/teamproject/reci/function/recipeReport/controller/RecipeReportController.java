@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-
 @Log4j2
 @Controller
 @RequiredArgsConstructor
@@ -97,6 +96,7 @@ public class RecipeReportController {
 
         return "redirect:/report";
     }
+
     // 신고 삭제
     @PostMapping("/report/delete")
     public String deleteById(@RequestParam Long reportId) {

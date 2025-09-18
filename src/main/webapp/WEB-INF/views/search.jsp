@@ -13,7 +13,7 @@
 <header class="container">
   <div class="flex-box">
     <h1 class="page-title">Search</h1>
-    <a class="home-btn" href="${contextPath}/">home</a>
+    <a class="home-btn" href="<c:url value='/'/>">home</a>
     <!-- ▶ 추가: 알림 + 로그아웃 -->
     <div class="header-actions">
       <a class="register" href="register_page.html">👤</a>
@@ -219,6 +219,11 @@
       size: 20
     };
 
+    // ✅ UUID(36자) 형식 가드
+    function isUuid36(s){
+      return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || '');
+    }
+
     function fmtDate(v) {
       if (!v) return '';
       try {
@@ -242,14 +247,15 @@
               ? it.thumbUrl
               : 'https://via.placeholder.com/1200x800?text=';
       var title = escapeHtml(it.title || '');
-      var nick  = escapeHtml(it.authorNick || '');
+      var nickForAt = (it.authorNick || '');
       var date  = fmtDate(it.createdAt);
       var likes = (it.likes != null) ? it.likes : 0;
       var cmts  = (it.comments != null) ? it.comments : 0;
       var views = (it.views != null) ? it.views : 0;
 
-      // 상세페이지 링크 (컨텍스트패스 + /recipes/{id})
-      var detailHref = ctx + '/recipes/' + encodeURIComponent(it.id);
+      // ✅ 상세 링크 가드: id가 uuid가 아니면 링크 비활성화
+      var idOk = isUuid36(it.id);
+      var detailHref = idOk ? (ctx + '/recipes/' + encodeURIComponent(it.id)) : '#';
 
       var el = document.createElement('article');
       el.className = 'card p-16 post';
@@ -258,23 +264,35 @@
               '<div class="post-head">' +
               '<div class="avatar-ss"><img src="" alt=""></div>' +
               '<div class="post-info">' +
-              '<div class="post-id">@' + nick + '</div>' +
+              '<div class="post-id">@' + nickForAt + '</div>' +
               '<div class="muted">' + (date || '') + '</div>' +
               '</div>' +
               '<button class="followbtn-sm" data-user-id="" data-following="false">Follow</button>' +
               '</div>' +
 
-              // 🔗 클릭영역: 이미지와 제목을 링크로 감쌈
-              '<a class="post-link" href="' + detailHref + '" aria-label="상세 보기: ' + title + '">' +
+              // 🔗 클릭영역: id 유효하면 <a>, 아니면 <div>로 대체
+              (idOk
+                              ? ('<a class="post-link" href="' + detailHref + '" aria-label="상세 보기: ' + title + '">')
+                              : ('<div class="post-link disabled" aria-disabled="true" title="상세 ID 없음">')
+              ) +
               '<div class="thumb"><img src="' + thumb + '" alt=""></div>' +
               '<p class="muted">' + title + '</p>' +
-              '</a>' +
+              (idOk ? '</a>' : '</div>') +
 
               '<div class="post-cta">' +
               '<button class="btn-none">❤️ ' + likes + '</button>' +
               '<button class="btn-none">💬 ' + cmts + '</button>' +
               '<button class="btn-none" title="views">👁 ' + views + '</button>' +
               '</div>';
+
+      // id가 유효하지 않으면 클릭 막기 + 콘솔에 원인 남김
+      if (!idOk) {
+        el.querySelector('.post-link.disabled')?.addEventListener('click', function(e){
+          e.preventDefault();
+        });
+        // 디버깅에 도움: 어떤 id가 잘못 내려왔는지 확인
+        console.warn('[search] invalid id:', it.id, 'title=', it.title);
+      }
 
       $list.appendChild(el);
     }
@@ -291,11 +309,14 @@
       }
 
       try {
-        var res = await fetch(url);
+        var res = await fetch(url, { headers: { 'Accept': 'application/json' }});
         if (!res.ok) { state.loading = false; return; }
         var data = await res.json();
-        // 첫 페이지면 초기화
+
         if (initial) $list.innerHTML = '';
+
+        // (옵션) 초간단 디버깅: 첫 5개 id 출력
+        // console.log('ids:', (data.items || []).slice(0,5).map(it => it.id));
 
         (data.items || []).forEach(renderItem);
         state.next = data.next || null;
