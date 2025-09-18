@@ -1,15 +1,11 @@
 package com.RecipeCode.teamproject.reci.feed.recipes.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
-import com.RecipeCode.teamproject.common.BooleanToYNConverter;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.feed.recipeTag.entity.RecipeTag;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +18,6 @@ import java.util.List;
 @EqualsAndHashCode(of = "UUID", callSuper = false)
 @Entity
 @Table(name = "RECIPES")
-
-@SQLDelete(sql="UPDATE RECIPES SET DELETED='Y',  DELETE_DATE = SYSDATE WHERE UUID=?")
-@Where(clause = "DELETED='N'")
 public class Recipes extends BaseTimeEntity {
 
     @Id
@@ -59,14 +52,6 @@ public class Recipes extends BaseTimeEntity {
     @OneToMany(mappedBy = "recipes", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<RecipeTag> recipeTag = new ArrayList<>();
-
-    /* TODO : 소프트 삭제 추가! */
-    //    기본값(null) -> DB에 "N"
-    @Convert(converter = BooleanToYNConverter.class)
-    private boolean deleted;
-
-    private LocalDateTime deleteDate;
-
 
 /*
  *   단방향 매핑

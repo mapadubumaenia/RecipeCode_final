@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController      // JSON 반환전용, @ResponseBody 필요없게
 @RequiredArgsConstructor
-@RequestMapping("/comments")
+@RequestMapping("/api/comments")
 @Log4j2
 public class CommentsController {
     private final CommentsService commentsService;
@@ -23,14 +23,17 @@ public class CommentsController {
                                          @RequestParam(defaultValue = "10") int size,
                                          @RequestParam(defaultValue = "desc") String sort) {
         log.info("댓글 조회: recipeUuid={}, page={}, size={}, sort={}", recipeUuid, page, size, sort);
-        return commentsService.countByRecipes_Uuid(recipeUuid, page, size);
+        List<CommentsDto> list = commentsService.countByRecipes_Uuid(recipeUuid, page, size);
+        log.info("조회된 댓글 수: {}", list.size());
+        return list;
     }
 
     // 댓글 작성
     @PostMapping("/{recipeUuid}")
-    public void saveComment(@RequestBody CommentsDto commentsDto,
+    public CommentsDto saveComment(@RequestBody CommentsDto commentsDto,
                             @PathVariable String recipeUuid,
                             HttpSession session) {
+<<<<<<< Updated upstream
         //세션
         String userEmail = (String) session.getAttribute("userEmail");
         if (userEmail == null) {
@@ -38,9 +41,17 @@ public class CommentsController {
             session.setAttribute("userEmail", userEmail);
             throw new RuntimeException("로그인 후 이용 가능합니다.");
         }
+=======
+//        //세션
+//        String userEmail = (String) session.getAttribute("userEmail");
+//        if (userEmail == null) throw new RuntimeException("로그인 후 이용 가능합니다.");
+
+        String userEmail = "sj12@naver.com"; // 일단
+>>>>>>> Stashed changes
 
         log.info("댓글 작성: commentsDto={}, recipeUuid={}, userEmail={}", commentsDto, recipeUuid, userEmail);
         commentsService.saveComment(commentsDto, recipeUuid, userEmail);
+        return commentsDto;
     }
 
 
