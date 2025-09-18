@@ -1,0 +1,42 @@
+.error-box {
+    margin-top: 40px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.error-message {
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.error-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-home {
+    background: var(--brand);
+    color: var(--wtext);
+    border: 1px solid var(--brand);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-back {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}

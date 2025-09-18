@@ -221,5 +221,36 @@
 <script src="${ctx}/js/recipe-detail-common.js"></script>
 <script src="${ctx}/js/recipe-details.js"></script>
 
+
+<%-- TODO: 신고 모달 --%>
+<div id="reportModal" class="modal" hidden>
+    <div class="modal-content report-modal">
+        <h3 class="modal-title">🚩 레시피 신고</h3>
+        <form id="reportForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <input type="hidden" name="uuid" value="${recipe.uuid}"/>
+
+            <div class="form-group">
+                <label class="form-label">신고 유형</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="reportType" value="0" required> 욕설</label>
+                    <label><input type="radio" name="reportType" value="1"> 스팸</label>
+                    <label><input type="radio" name="reportType" value="2"> 저작권</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="reason">사유</label>
+                <textarea name="reason" id="reason" rows="4" maxlength="500" placeholder="신고 사유를 입력해주세요."
+                          required></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="submit" class="btn-submit">제출</button>
+                <button type="button" id="btnClose" class="btn-cancel">취소</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

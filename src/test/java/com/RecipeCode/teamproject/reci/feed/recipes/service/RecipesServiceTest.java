@@ -77,4 +77,27 @@ class RecipesServiceTest {
 
 
     }
+
+    @Test
+    void getRecipeDetails() {
+        // given
+        String existingUuid = "aacb56cf-5513-4d46-9ddc-c4810fb5862b";
+
+        // when
+        RecipesDto result = recipesService.getRecipeDetails(existingUuid);
+
+        // then
+        log.info("조회 결과: {}", result);
+    }
+    @Test
+    void getRecipeDetails_없는레시피조회() {
+        // given
+        String invalidUuid = "bbcb56cf-5553-4d46-9ddc-c4810fb4762b";
+
+        // when & then
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> recipesService.getRecipeDetails(invalidUuid));
+
+        log.info("예외 메시지: {}", ex.getMessage());
+    }
 }

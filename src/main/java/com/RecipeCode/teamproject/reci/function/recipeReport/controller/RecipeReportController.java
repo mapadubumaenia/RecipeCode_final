@@ -8,13 +8,14 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 @Log4j2
 @Controller
 @RequiredArgsConstructor
@@ -57,10 +58,26 @@ public class RecipeReportController {
 
     // 신고 저장 (사용자가 게시글 신고 버튼 눌렀을 때)
     @PostMapping("/report/add")
-    public String insert(@ModelAttribute RecipeReportDto recipeReportDto) {
-        log.info("신고 요청: {}", recipeReportDto);
+    @ResponseBody
+    public Map<String, Object> insert(@ModelAttribute RecipeReportDto recipeReportDto,
+                                      @AuthenticationPrincipal UserDetails user) {
+        Map<String, Object> result = new HashMap<>();
+
+        // 로그인 안된 경우
+        if (user == null) {
+            result.put("status", "fail");
+            result.put("message", "로그인이 필요합니다.");
+            return result;
+        }
+
+        // 로그인 된 경우 -> 이메일 세팅 후 저장
+        recipeReportDto.setUserEmail(user.getUsername());
         recipeReportService.save(recipeReportDto);
-        return "redirect:/recipes/" + recipeReportDto.getUuid();
+
+        result.put("status", "ok");
+        result.put("uuid", recipeReportDto.getUuid());
+        result.put("message", "신고가 접수되었습니다.");
+        return result;
     }
 
     // 상태 변경 (수정)
@@ -69,12 +86,12 @@ public class RecipeReportController {
                          @RequestParam Long newStatus,
                          @RequestParam(required = false) String uuid) {
 
-        // 1. 신고 상태 변경 (완료 처리)
+        // 1. 서비스에 상태 전달
         recipeReportService.updateStatus(reportId, newStatus);
 
         // 2. uuid가 넘어왔다는 건 "삭제" 버튼을 누른 경우
         if (uuid != null && newStatus == 2L) {
-            recipesService.softDeleteRecipe(uuid); // 게시글 삭제
+            recipesService.softDeleteRecipe(uuid); // 게시글 소프트 삭제
         }
 
         return "redirect:/report";
