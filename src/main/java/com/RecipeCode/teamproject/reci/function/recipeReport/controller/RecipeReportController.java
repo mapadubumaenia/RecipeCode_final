@@ -2,7 +2,6 @@ package com.RecipeCode.teamproject.reci.function.recipeReport.controller;
 
 import com.RecipeCode.teamproject.reci.feed.recipes.service.RecipesService;
 import com.RecipeCode.teamproject.reci.function.recipeReport.dto.RecipeReportDto;
-import com.RecipeCode.teamproject.reci.function.recipeReport.repository.RecipeReportRepository;
 import com.RecipeCode.teamproject.reci.function.recipeReport.service.RecipeReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

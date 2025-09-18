@@ -21,7 +21,10 @@
     <div class="flex-box">
         <h1 class="page-title">Recipe Code</h1>
             <a class="register" href="/auth/register">👤</a>
-            <div class="notif-wrap">
+        <div class="notif-wrap">
+            <sec:authorize access="isAuthenticated()">
+                <sec:authentication property="principal.nickname"/>님
+            </sec:authorize>
                 <button
                         id="btnNotif"
                         class="notif-btn"
@@ -235,10 +238,15 @@
     <aside class="sidebar">
         <!-- 하단 버튼:모바일 display:none -->
         <div class="card p-16 stack-btns">
-            <a class="btn pc-register text-center" href="/auth/register">register</a>
+            <!-- 1) 회원가입: GET /auth/register -->
+            <a class="btn pc-register text-center"
+               href="<c:url value='/auth/login'/>">Login</a>
+
             <a class="btn text-center" href="newfeed-ver-mypage-wireframe.html"
             >Profile</a>
-            <a class="btn primary text-center" href="create-update.html">Upload Recipe</a>
+            <!-- 3) 레시피 등록: GET /recipes/add -->
+            <a class="btn primary text-center"
+               href="<c:url value='/recipes/add'/>">Upload Recipe</a>
         </div>
         <!-- 팔로우 피드: -->
         <div class="followingfeed">
