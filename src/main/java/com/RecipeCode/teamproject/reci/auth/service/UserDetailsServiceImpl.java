@@ -26,7 +26,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final ErrorMsg errorMsg;
 
 
-
 //    함수 재정의 : 자동 기능 : alt + insert
     @Override
     public UserDetails loadUserByUsername(String username) {
@@ -39,9 +38,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority(member.getRole()));
 
             return new SecurityUserDto(
-                    member.getUserEmail(),
-                    member.getPassword(),
-                    authorities
+                    member,
+                    authorities,
+                    null
             );
         }
 
@@ -51,10 +50,28 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             Admin admin = adminOpt.get();
             authorities.add(new SimpleGrantedAuthority(admin.getRole()));
 
+            Member adminMember=Member.builder()
+                    .userEmail(admin.getAdminEmail())
+                    .userId(admin.getAdminId())
+                    .password(admin.getPassword())
+                    .nickname(admin.getNickname())
+                    .profileImage(admin.getProfileImage())
+                    .profileImageUrl(admin.getProfileImageUrl())
+                    .role(admin.getRole())
+                    .userBlog(admin.getAdminBlog())
+                    .userInsta(admin.getAdminInsta())
+                    .userIntroduce(admin.getAdminIntroduce())
+                    .userLocation(admin.getAdminLocation())
+                    .userWebsite(admin.getAdminWebsite())
+                    .userYoutube(admin.getAdminYoutube())
+                    .profileStatus(admin.getProfileStatus())
+                    .userInterestTag(admin.getAdminInterestTag())
+                    .build();
+
             return new SecurityUserDto(
-                    admin.getAdminEmail(),
-                    admin.getPassword(),
-                    authorities
+                    adminMember,
+                    authorities,
+                    null
             );
         }
         throw new RuntimeException(errorMsg.getMessage("errors.not.found"));

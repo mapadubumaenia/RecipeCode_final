@@ -1,12 +1,14 @@
+
+
 // 본문 "더보기" 토글
-(function () {
+(function(){
     const box = document.getElementById('postDesc');
     const btn = document.getElementById('btnToggleDesc');
     btn?.addEventListener('click', () => box.classList.toggle('expanded'));
 })();
 
 // 이미지/텍스트 슬라이더
-(function () {
+(function(){
     const imgTrack = document.getElementById("imgSlides");
     const txtTrack = document.getElementById("textSlides");
     const sliderRoot = document.querySelector(".step-slider");
@@ -17,17 +19,12 @@
         txtTrack.querySelectorAll(".slide").length
     );
     let index = 0;
-
-    function trackWidth() {
-        return sliderRoot.getBoundingClientRect().width;
-    }
-
-    function setTranslate(px) {
+    function trackWidth(){ return sliderRoot.getBoundingClientRect().width; }
+    function setTranslate(px){
         imgTrack.style.transform = `translateX(${px}px)`;
         txtTrack.style.transform = `translateX(${px}px)`;
     }
-
-    function snapTo(i) {
+    function snapTo(i){
         if (slideCount === 0) return;
         index = (i + slideCount) % slideCount;
         const x = -index * trackWidth();
@@ -35,7 +32,6 @@
         txtTrack.classList.remove("no-trans");
         setTranslate(x);
     }
-
     window.addEventListener("resize", () => snapTo(index));
     document.querySelector(".prev")?.addEventListener("click", () => snapTo(index - 1));
     document.querySelector(".next")?.addEventListener("click", () => snapTo(index + 1));
@@ -48,7 +44,7 @@
 
 // 좋아요/댓글 AJAX는 추후 여기서 fetch 붙이면 됨 (data-recipe-uuid 이용)
 
-(function () {
+(function(){
     const btnLike = document.getElementById("btnLike");
     const likeCnt = document.getElementById("likeCnt");
     const recipeBox = document.querySelector(".container[data-recipe-uuid]");
@@ -60,17 +56,17 @@
         try {
             const resp = await fetch(`${ctx}/recipes/${recipeUuid}/like`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"}
-                // 👉 [운영 시 다시 활성화]
-                // const csrfMeta = document.querySelector('meta[name="_csrf"]');
-                // const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-                // const headers = { "Content-Type": "application/json" };
-                // if (csrfMeta && csrfHeaderMeta) {
-                //     headers[csrfHeaderMeta.content] = csrfMeta.content;
-                // }
-                // const resp = await fetch(`${ctx}/recipes/${recipeUuid}/like`, {
-                //     method: "POST",
-                //     headers
+                headers: { "Content-Type": "application/json" }
+                    // 👉 [운영 시 다시 활성화]
+                    // const csrfMeta = document.querySelector('meta[name="_csrf"]');
+                    // const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+                    // const headers = { "Content-Type": "application/json" };
+                    // if (csrfMeta && csrfHeaderMeta) {
+                    //     headers[csrfHeaderMeta.content] = csrfMeta.content;
+                    // }
+                    // const resp = await fetch(`${ctx}/recipes/${recipeUuid}/like`, {
+                    //     method: "POST",
+                    //     headers
             });
             if (!resp.ok) throw new Error("서버 오류");
             const data = await resp.json();
@@ -229,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({commentsContent: content})
                 });
 
-                if (!res.ok) throw new Error("댓글 작성 실패");
+            if (!res.ok) throw new Error("댓글 작성 실패");
 
                 // 작성 후 초기화
                 cmtInput.value = "";
@@ -315,3 +311,43 @@ document.addEventListener("DOMContentLoaded", () => {
         loadComments();
     }
 );
+
+// 신고 모달 열기/닫기, 서버 전송
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("reportModal");
+    const btnReport = document.getElementById("btnReport");
+    const btnClose = document.getElementById("btnClose");
+    const form = document.getElementById("reportForm");
+
+    // 🚩 신고 버튼 → 모달 열기
+    btnReport?.addEventListener("click", () => modal.hidden = false);
+    // 취소 버튼 → 모달 닫기
+    btnClose?.addEventListener("click", () => modal.hidden = true);
+
+    // 폼 제출 → 서버에 전송
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+            const res = await fetch(`${ctx}/report/add`, {
+                method: "POST",
+                body: new URLSearchParams(formData)
+            });
+            if (!res.ok) throw new Error("신고 실패");
+
+            const data = await res.json(); // 컨트롤러 JSON 응답 파싱
+
+            if (data.status === "ok") {
+                alert(data.message); // "신고가 접수되었습니다."
+                modal.hidden = true;
+            } else {
+                alert(data.message); // "로그인이 필요합니다." 등
+                modal.hidden = true; // 필요시 닫지 않고 로그인 페이지로 유도 가능
+            }
+        } catch (err) {
+            console.error(err);
+            alert("신고 중 오류가 발생했습니다.");
+        }
+    });
+});

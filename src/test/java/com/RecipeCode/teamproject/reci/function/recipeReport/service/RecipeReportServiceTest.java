@@ -10,8 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
-import static org.junit.jupiter.api.Assertions.*;
 @Log4j2
 @SpringBootTest
 class RecipeReportServiceTest {
@@ -24,11 +22,10 @@ class RecipeReportServiceTest {
     @Test
     void save() {
         RecipeReportDto recipeReportDto = new RecipeReportDto();
-        recipeReportDto.setUuid("0bc68ceb-a747-41fc-9ef3-2f8c530fef8f");
+        recipeReportDto.setUuid("e7cd2fa3-e939-4eeb-ba92-f74ef4433dbd");
         recipeReportDto.setUserEmail("asdf1234@naver.com");
-        recipeReportDto.setAdminEmail("ad123@naver.com");
-        recipeReportDto.setReason("스팸입니다.");
-        recipeReportDto.setReportType(0L);
+        recipeReportDto.setReason("삭제용입니다222222.");
+        recipeReportDto.setReportType(2L);
         recipeReportDto.setReportStatus(1L);
         recipeReportService.save(recipeReportDto);
     }
@@ -63,7 +60,7 @@ class RecipeReportServiceTest {
 //    @Test
 //    void countByRecipesUuid() {
 //        // 1) given: DB에 이미 존재하는 레시피 uuid
-//        String uuid = "0bc68ceb-a747-41fc-9ef3-2f8c530fef8f"; 
+//        String uuid = "0bc68ceb-a747-41fc-9ef3-2f8c530fef8f";
 //
 //        // 2) when: 카운트 실행
 //        Long count = recipeReportService.countByRecipesUuid(uuid);

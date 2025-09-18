@@ -24,9 +24,6 @@
     <c:set var="ctx" value="${pageContext.request.contextPath}" />
     <link rel="stylesheet" href="${ctx}/css/common.css" />
     <link rel="stylesheet" href="${ctx}/css/recipe-details.css" />
-
-    <meta name="_csrf" content="${_csrf.token}"/>
-    <meta name="_csrf_header" content="${_csrf.headerName}"/>
 </head>
 <body>
 <div class="container" data-recipe-uuid="<c:out value='${recipe.uuid}'/>">
@@ -221,110 +218,39 @@
 <script>
     const ctx = "${pageContext.request.contextPath}";
 </script>
-
 <script src="${ctx}/js/recipe-detail-common.js"></script>
 <script src="${ctx}/js/recipe-details.js"></script>
 
-<<<<<<< Updated upstream
-=======
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const recipeUuid = document.querySelector(".container").getAttribute("data-recipe-uuid");
-        console.log("recipeUuid 확인:", recipeUuid);
-        const cmtList = document.getElementById("cmtList");
-        const btnCmtSubmit = document.getElementById("btnCmtSubmit");
-        const cmtInput = document.getElementById("cmt");
-        const btnCmtMore = document.getElementById("btnCmtMore");
 
-        const COMMENTS_PAGE_SIZE = 5;
-        let page = 0;
-        let sort = "desc";
+<%-- TODO: 신고 모달 --%>
+<div id="reportModal" class="modal" hidden>
+    <div class="modal-content report-modal">
+        <h3 class="modal-title">🚩 레시피 신고</h3>
+        <form id="reportForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <input type="hidden" name="uuid" value="${recipe.uuid}"/>
 
-        // CSRF 토큰 가져오기
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+            <div class="form-group">
+                <label class="form-label">신고 유형</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="reportType" value="0" required> 욕설</label>
+                    <label><input type="radio" name="reportType" value="1"> 스팸</label>
+                    <label><input type="radio" name="reportType" value="2"> 저작권</label>
+                </div>
+            </div>
 
-        // 댓글 불러오기
-        async function loadComments(reset = false) {
-            try {
-                if (reset) {
-                    cmtList.innerHTML = "";
-                    page = 0;
-                }
+            <div class="form-group">
+                <label class="form-label" for="reason">사유</label>
+                <textarea name="reason" id="reason" rows="4" maxlength="500" placeholder="신고 사유를 입력해주세요."
+                          required></textarea>
+            </div>
 
-                const res = await fetch(`${ctx}/api/comments/${recipeUuid}?page=${page}&size=${COMMENTS_PAGE_SIZE}&sort=${sort}`);
-                if (!res.ok) throw new Error("댓글 조회 실패");
-                const data = await res.json();
-
-                data.forEach(c => {
-                    const commentElem = createCommentElem(c);
-                    cmtList.appendChild(commentElem);
-                });
-
-                btnCmtMore.style.display = data.length === COMMENTS_PAGE_SIZE ? "block" : "none";
-                page++;
-            } catch (e) {
-                console.error(e);
-                alert("댓글 불러오기 중 오류가 발생했습니다: " + e.message);
-            }
-        }
-
-        function createCommentElem(c) {
-            const div = document.createElement("div");
-            div.className = "comment";
-            div.dataset.commentsId = c.commentsId;
-
-            const user = document.createElement("b");
-            user.textContent = c.userId;
-
-            const content = document.createElement("span");
-            content.textContent = c.commentsContent;
-
-            div.appendChild(user);
-            div.appendChild(content);
-
-            return div;
-        }
-
-        // 댓글 작성
-        btnCmtSubmit.addEventListener("click", async () => {
-            const content = cmtInput.value.trim();
-            if (!content) return alert("댓글 내용을 입력해주세요.");
-
-            try {
-                const res = await fetch(`${ctx}/api/comments/${recipeUuid}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        [csrfHeader]: csrfToken
-                    },
-                    body: JSON.stringify({ commentsContent: content })
-                });
-
-                if (!res.ok) {
-                    const errMsg = await res.text();
-                    throw new Error(errMsg || "댓글 작성 실패");
-                }
-
-                alert("댓글이 작성되었습니다!");
-                cmtInput.value = "";
-                loadComments(true);
-            } catch (e) {
-                console.error(e);
-                alert("댓글 작성 중 오류가 발생했습니다: " + e.message);
-            }
-        });
-
-        // 더보기 버튼
-        btnCmtMore.addEventListener("click", () => {
-            loadComments();
-        });
-
-        // 초기 댓글 로드
-        loadComments();
-    });
-</script>
-
->>>>>>> Stashed changes
+            <div class="modal-actions">
+                <button type="submit" class="btn-submit">제출</button>
+                <button type="button" id="btnClose" class="btn-cancel">취소</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

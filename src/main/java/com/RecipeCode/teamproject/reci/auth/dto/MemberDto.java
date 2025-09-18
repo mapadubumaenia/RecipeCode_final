@@ -21,6 +21,9 @@ public class MemberDto {
     private String userInterestTag;
     private String profileStatus;
     private String role;
+    private String provider;
+    private String providerId;
+
     private String profileImageUrl;
     private byte[] profileImage;
 

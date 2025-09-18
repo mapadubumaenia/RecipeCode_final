@@ -66,9 +66,16 @@
                 <c:forEach var="report" items="${reports}">
                     <tr>
                         <td>
-                            <a href="/recipes/${report.uuid}">
-                                <c:out value="${report.recipeTitle}"/>
-                            </a>
+                            <c:choose>
+                                <c:when test="${report.recipeTitle eq '[삭제된 레시피]'}">
+                                    <span class="deleted-title">[삭제된 레시피]</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="/recipes/${report.uuid}">
+                                        <c:out value="${report.recipeTitle}"/>
+                                    </a>
+                                </c:otherwise>
+                            </c:choose>
                         </td>
                         <td>
                             <c:choose>
@@ -83,26 +90,37 @@
                         <td>
                             <c:choose>
                                 <c:when test="${report.reportStatus == 1}">
-                                    <span class="status processing">처리중</span>
+                                    <c:choose>
+                                        <c:when test="${report.remainingHours > 0}">
+                                            처리중 (${report.remainingHours}시간 남음)
+                                        </c:when>
+                                        <c:otherwise>
+                                            처리중 (24시간 초과)
+                                        </c:otherwise>
+                                    </c:choose>
                                 </c:when>
                                 <c:when test="${report.reportStatus == 2}">
-                                    <span class="status done">완료</span>
+                                    처리완료
                                 </c:when>
                             </c:choose>
                         </td>
+
                         <td class="right">
                             <!-- 삭제 -->
                             <form action="/report/edit" method="post" style="display:inline;"
                                   onsubmit="return confirm('정말 해당 글을 삭제하시겠습니까?');">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                                 <input type="hidden" name="reportId" value="${report.reportId}">
                                 <input type="hidden" name="newStatus" value="2">
                                 <input type="hidden" name="uuid" value="${report.uuid}">
                                 <button type="submit" class="btn small red">삭제</button>
                             </form>
 
+
                             <!-- 유지 -->
                             <form action="/report/edit" method="post" style="display:inline;"
                                   onsubmit="return confirm('신고를 처리 완료하시겠습니까? (글은 유지됩니다)');">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                                 <input type="hidden" name="reportId" value="${report.reportId}">
                                 <input type="hidden" name="newStatus" value="2">
                                 <button type="submit" class="btn small green">유지</button>
