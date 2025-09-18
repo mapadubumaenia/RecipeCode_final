@@ -29,6 +29,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+                .csrf(csrf->csrf.disable())
                 // 개발용: 전부 열어두기
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/search","/recipes/**").permitAll() // JSP 뷰
