@@ -218,6 +218,7 @@
 <script>
     const ctx = "${pageContext.request.contextPath}";
 </script>
+
 <script src="${ctx}/js/recipe-detail-common.js"></script>
 <script src="${ctx}/js/recipe-details.js"></script>
 

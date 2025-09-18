@@ -34,6 +34,8 @@ public class CommentsController {
         //세션
         String userEmail = (String) session.getAttribute("userEmail");
         if (userEmail == null) {
+            userEmail = "sj12@naver.com";  //하드코딩
+            session.setAttribute("userEmail", userEmail);
             throw new RuntimeException("로그인 후 이용 가능합니다.");
         }
 
@@ -41,20 +43,31 @@ public class CommentsController {
         commentsService.saveComment(commentsDto, recipeUuid, userEmail);
     }
 
+
+
     // 대댓글 불러오기
     @GetMapping("/replies/{parentId}")
-    public void getReplies(@PathVariable Long parentId) {
+    public List<CommentsDto> getReplies(@PathVariable Long parentId) {
         log.info("대댓글 조회: parentId={}", parentId);
-        commentsService.getReplies(parentId);
+        return commentsService.getReplies(parentId);
     }
 
     // 대댓작성
     @PostMapping("/replies/{parentId}")
     public void saveReply(@PathVariable Long parentId,
-                          @RequestBody CommentsDto commentsDto) {
-        log.info("대댓글 작성: parentId={}", parentId);
-        commentsService.saveReply(commentsDto, parentId);
+                          @RequestBody CommentsDto commentsDto,
+                          HttpSession session) {
+        //세션
+        String userEmail = (String) session.getAttribute("userEmail");
+        if (userEmail == null) {
+            userEmail = "sj12@naver.com";  //하드코딩
+            session.setAttribute("userEmail", userEmail);
+
+        }
+        commentsService.saveReply(commentsDto, parentId, userEmail);
     }
+
+
 
     // 삭제
     @DeleteMapping("/{commentsId}")

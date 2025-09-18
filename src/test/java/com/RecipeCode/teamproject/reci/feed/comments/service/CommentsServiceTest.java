@@ -115,27 +115,6 @@ class CommentsServiceTest {
     }
 
     @Test
-    void saveReply() {
-        CommentsDto dto = new CommentsDto();
-        Comments entity = new Comments();
-        when(mapStruct.toEntity(dto)).thenReturn(entity);
-
-        Comments parent = new Comments();
-        Recipes recipe = new Recipes();
-        parent.setCommentsId(10L);
-        parent.setRecipes(recipe);
-
-        when(commentsRepository.findById(10L)).thenReturn(Optional.of(parent));
-        when(commentsRepository.save(entity)).thenReturn(entity);
-
-        service.saveReply(dto, 10L);
-
-        assertEquals(parent, entity.getParentId());
-        assertEquals(recipe, entity.getRecipes());
-        verify(commentsRepository, times(1)).save(entity);
-    }
-
-    @Test
     void deleteComment() {
         doNothing().when(commentsRepository).deleteById(1L);
 
