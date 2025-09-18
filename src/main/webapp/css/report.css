@@ -1,0 +1,118 @@
+/* report.css */
+
+/* 카드 */
+.card {
+    margin: 20px auto;
+    max-width: 1200px;
+    overflow: hidden;
+}
+
+/* 헤더 */
+.card .hd {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.card .hd h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* 탭 */
+.tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.tabs a {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--chip);
+    font-size: 0.9rem;
+}
+
+.tabs a.active {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--wtext);
+    font-weight: 600;
+}
+
+/* 본문 */
+.bd {
+    padding: 16px;
+}
+
+/* 테이블 */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+}
+
+.table th {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.table tr:hover td {
+    background: #f9fafc;
+}
+
+/* 버튼 */
+.btn.small {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.btn.red {
+    background: var(--danger);
+    color: var(--wtext);
+    border: none;
+}
+
+.btn.green {
+    background: var(--ok);
+    color: var(--wtext);
+    border: none;
+}
+
+/* 삭제된 레시피 표시 */
+.deleted-title {
+    color: var(--muted);
+    font-style: italic;
+}
+
+/* 페이징 */
+.pagination {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.pagination a {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    font-size: 0.9rem;
+}
+
+.pagination a.active {
+    background: var(--brand);
+    color: var(--wtext);
+    font-weight: 600;
+}

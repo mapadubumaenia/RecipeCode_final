@@ -22,14 +22,12 @@ public interface RecipeReportRepository extends JpaRepository<RecipeReport, Long
     // 특정 유저가 한 신고 내역 조회
     List<RecipeReport> findByMemberUserEmail(String userEmail);
 
-    // 특정 관리자가 처리한 내역 조회
-    List<RecipeReport> findByAdminAdminEmail(String adminEmail);
-
     // 특정 신고 유형만 조회 (0=욕설, 1=스팸, 2=저작권)
     Page<RecipeReport> findByReportType(Long reportType, Pageable pageable);
 
     // 특정 게시글의 총 신고 건수
     Long countByRecipesUuid(String uuid);
+
     // 동시조건용
     Page<RecipeReport> findByReportStatusAndReportType(Long status, Long reportType, Pageable pageable);
 
