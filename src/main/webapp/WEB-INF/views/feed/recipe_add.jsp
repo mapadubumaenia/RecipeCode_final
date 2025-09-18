@@ -120,12 +120,6 @@
                     </label>
                     <!-- 여기 앵커 -->
                     <div id="metaAnchorImage"></div>
-<%--                    <div class="meta-row">--%>
-<%--                        <input class="input" id="title" name="recipeTitle" maxlength="80"--%>
-<%--                               value="<c:out value='${recipe.recipeTitle}'/>" placeholder="레시피 제목"/>--%>
-<%--                        <input class="input" id="subtitle" name="recipeIntro"--%>
-<%--                               value="<c:out value='${recipe.recipeIntro}'/>" placeholder="간단 설명 (선택)"/>--%>
-<%--                    </div>--%>
                 </article>
 
                 <!-- 동영상 Pane (VIDEO 전용) -->
@@ -241,12 +235,17 @@
 
 
                 <!-- 하단 액션 -->
-                <article class="card p-16">
+                <article class="card p-16 flex-box">
                     <div class="actions">
                         <button class="btn" type="button" id="btnCancel">취소</button>
 <%--                        <button class="btn" id="saveDraft" type="button">임시 저장</button>--%>
-                        <button class="btn primary" id="publish" type="button"><c:choose><c:when test='${isEdit}'>수정 완료</c:when><c:otherwise>발행</c:otherwise></c:choose></button>
+                        <button class="btn primary" id="publish" type="button"><c:choose><c:when test='${isEdit}'>수정</c:when><c:otherwise>발행</c:otherwise></c:choose></button>
                     </div>
+                    <c:if test="${isEdit}">
+                    <div class="recipeDelete">
+                        <button class="btn danger" id="delete" type="button">삭제</button>
+                    </div>
+                    </c:if>
                 </article>
 
                 <!-- 조리 단계 (드래그 정렬) — 이미지 레시피 Pane -->

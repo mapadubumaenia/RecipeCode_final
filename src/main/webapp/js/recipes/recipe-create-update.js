@@ -47,6 +47,7 @@
     const imagePane       = $('#imagePane'); // ← 조리 단계 카드
 
     const btnPublish      = $('#publish');
+    const btnDelete       = $('#delete');
     const btnDraft        = $('#saveDraft');
 
     // === 비디오 ===
@@ -427,6 +428,34 @@
         disableOnce(e.currentTarget);
         postStatus.value = 'DRAFT';
         finalizeAndSubmit();
+    });
+
+    btnDelete?.addEventListener('click', async () => {
+        if (!confirm("정말 삭제하시겠습니까?")) return;
+
+        try {
+            // 레시피 uuid는 숨겨둔 필드나 dataset에서 가져오기
+            const uuid = form?.dataset.uuid || form?.querySelector('[name="uuid"]')?.value;
+            if (!uuid) {
+                alert("레시피 식별자가 없습니다.");
+                return;
+            }
+
+            const res = await fetch(`${contextPath}/api/recipes/${uuid}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                alert("삭제되었습니다.");
+                location.href = `${contextPath}/`;
+            } else {
+                const msg = await res.text();
+                alert("삭제 실패: " + msg);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("에러 발생: " + err.message);
+        }
     });
 
     // === 초기화 ===
