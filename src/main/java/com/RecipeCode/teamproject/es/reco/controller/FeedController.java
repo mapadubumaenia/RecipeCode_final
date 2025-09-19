@@ -1,4 +1,3 @@
-// src/main/java/com/RecipeCode/teamproject/es/reco/controller/FeedController.java
 package com.RecipeCode.teamproject.es.reco.controller;
 
 import com.RecipeCode.teamproject.es.reco.dto.FeedPageDto;
@@ -15,14 +14,13 @@ public class FeedController {
 
     @GetMapping("/personal")
     public FeedPageDto personal(
-            @RequestParam String userId,
+            @RequestParam String userEmail,
             @RequestParam(required = false) String after,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return feed.personalFeed(userId, after, size);
+        return feed.personalFeed(userEmail, after, size);
     }
 
-    // ★ hot 전용 엔드포인트
     @GetMapping("/hot")
     public FeedPageDto hot(
             @RequestParam(required = false) String after,

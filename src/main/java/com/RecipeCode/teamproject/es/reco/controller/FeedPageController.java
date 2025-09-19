@@ -1,4 +1,3 @@
-// src/main/java/com/RecipeCode/teamproject/es/reco/controller/FeedPageController.java
 package com.RecipeCode.teamproject.es.reco.controller;
 
 import com.RecipeCode.teamproject.es.reco.dto.FeedPageDto;
@@ -15,25 +14,24 @@ public class FeedPageController {
     private final FeedService feed;
 
     @GetMapping("/feed")
-    public String feed(@RequestParam(required = false) String userId,
+    public String feed(@RequestParam(required = false) String userEmail,
                        @RequestParam(required = false) String after,
                        @RequestParam(defaultValue = "20") int size,
                        Model model) {
 
-        String uid = (userId == null) ? "" : userId.trim();
-        boolean hasUser = !uid.isBlank();
+        String ue = (userEmail == null) ? "" : userEmail.trim().toLowerCase();
+        boolean hasUser = !ue.isBlank();
 
-        // ★ SSR 단계에서도 분기: 개인화 or hot
-        FeedPageDto res = hasUser ? feed.personalFeed(uid, after, size)
+        FeedPageDto res = hasUser ? feed.personalFeed(ue, after, size)
                 : feed.hot(after, size);
 
-        model.addAttribute("userId", uid);
+        model.addAttribute("userEmail", ue);
         model.addAttribute("size", size);
         model.addAttribute("hasUser", hasUser);
         model.addAttribute("items", res.getItems());
         model.addAttribute("next",  res.getNext());
 
-        return "feed"; // /WEB-INF/views/feed.jsp
+        return "feed";
     }
 
     @ResponseBody
