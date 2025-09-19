@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class SearchService {
@@ -47,9 +49,7 @@ public class SearchService {
         // 2) 필터
         List<Query> filters = new ArrayList<>();
         filters.add(Query.of(b -> b.term(t -> t.field("visibility").value("PUBLIC"))));
-        filters.add(Query.of(b -> b.bool(bb -> bb
-                .mustNot(mn -> mn.term(t -> t.field("deleted").value(true)))
-        )));
+        filters.add(Query.of(b -> b.bool(bb -> bb.mustNot(mn -> mn.term(t -> t.field("deleted").value(true))))));
         if (tags != null && !tags.isEmpty()) {
             List<FieldValue> vals = tags.stream().map(FieldValue::of).toList();
             filters.add(Query.of(b -> b.terms(t -> t.field("tags").terms(v -> v.value(vals)))));
@@ -91,11 +91,10 @@ public class SearchService {
         SearchHits<RecipeSearchDoc> hits = es.search(nq, RecipeSearchDoc.class);
 
         // 8) 결과 매핑
-        // 변경
         var items = hits.getSearchHits().stream().map(h -> {
             var d = h.getContent();
             var m = new LinkedHashMap<String, Object>(12);
-            m.put("id", h.getId()); // ✅ 핵심 수정
+            m.put("id", h.getId());
             m.put("title", d.getTitle() != null ? d.getTitle() : "");
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
             m.put("authorId",  d.getAuthorId()  != null ? d.getAuthorId()  : "");
@@ -103,7 +102,7 @@ public class SearchService {
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("score", h.getScore());
-            m.put("thumbUrl", d.getThumbUrl() != null ? d.getThumbUrl() : "");
+            m.put("thumbUrl", resolveThumb(d)); // 👈 핵심
             m.put("comments", d.getComments() != null ? d.getComments() : 0L);
             m.put("views", d.getViews() != null ? d.getViews() : 0L);
             return m;
@@ -172,13 +171,11 @@ public class SearchService {
                 .withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)))
                 .withSort(s -> s.field(f -> f.field("id").order(SortOrder.Desc)));
 
-
         var afterValues = CursorUtil.decode(after);
         if (afterValues != null) qb.withSearchAfter(afterValues);
 
         SearchHits<RecipeSearchDoc> hits = es.search(qb.build(), RecipeSearchDoc.class);
 
-        // 변경
         var items = hits.getSearchHits().stream().map(h -> {
             var d = h.getContent();
             var m = new LinkedHashMap<String, Object>(10);
@@ -189,7 +186,7 @@ public class SearchService {
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
-            m.put("thumbUrl", d.getThumbUrl() != null ? d.getThumbUrl() : "");
+            m.put("thumbUrl", resolveThumb(d)); // 👈 핵심
             return m;
         }).toList();
 
@@ -202,5 +199,44 @@ public class SearchService {
         }
 
         return Map.of("items", items, "next", next);
+    }
+
+    // ===============================
+    // 썸네일 보정 유틸 (핵심)
+    // ===============================
+
+    /** ES 문서 기반으로 '항상 이미지 URL'이 되도록 보정 */
+    private String resolveThumb(RecipeSearchDoc d) {
+        String t = d.getThumbUrl();
+        // 이미지로 보기에 안전하면 그대로 사용
+        if (StringUtils.hasText(t) && !looksLikeYouTubeUrl(t)) {
+            return t;
+        }
+        // 유튜브거나 비어있으면 videoUrl에서 ID 추출 → i.ytimg.com
+        String vid = extractYouTubeId(d.getVideoUrl());
+        if (vid != null) {
+            return "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
+        }
+        // 마지막 폴백
+        return (t != null) ? t : "";
+    }
+
+    private boolean looksLikeYouTubeUrl(String url) {
+        if (!StringUtils.hasText(url)) return false;
+        String u = url.toLowerCase();
+        return u.contains("youtube.com") || u.contains("youtu.be");
+    }
+
+    /** 다양한 유튜브 URL에서 videoId 추출 (watch, youtu.be, shorts, embed 등) */
+    private String extractYouTubeId(String url) {
+        if (!StringUtils.hasText(url)) return null;
+        Matcher m;
+        m = Pattern.compile("[?&]v=([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(1);
+        m = Pattern.compile("youtu\\.be/([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(1);
+        m = Pattern.compile("/(shorts|embed)/([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(2);
+        return null;
     }
 }
