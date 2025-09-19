@@ -2,6 +2,7 @@ package com.RecipeCode.teamproject.common;
 
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -34,5 +35,18 @@ public class CommonException {
         model.addAttribute("errors", errors); // 에러를 모델에 담기
 
         return "errors";                      // jsp명
+    }
+
+    // 좋아요 본인 제한 에러
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException e){
+        if(e.getMessage().contains("로그인")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED) // UNAUTHORIZED 401
+                    .body(e.getMessage());
+        }
+        return ResponseEntity
+                // BAD_REQUEST(에러) 400
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
     }
 }

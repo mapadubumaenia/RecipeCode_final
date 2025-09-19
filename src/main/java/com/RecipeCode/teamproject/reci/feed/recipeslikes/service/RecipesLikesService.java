@@ -40,6 +40,9 @@ public class RecipesLikesService {
             recipes.setLikeCount(recipes.getLikeCount() - 1);
             liked = false;
         } else {
+            if(userEmail.equalsIgnoreCase(recipes.getMember().getUserEmail())){
+                throw new IllegalArgumentException(errorMsg.getMessage("errors.my.likes"));
+            }
             // 새 좋아요 추가
             RecipesLikes like = new RecipesLikes();
             like.setMember(member);
