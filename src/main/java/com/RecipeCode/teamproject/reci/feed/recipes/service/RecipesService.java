@@ -44,8 +44,6 @@ public class RecipesService {
     private final MemberRepository memberRepository;
     private final RecipeMapStruct recipeMapStruct;
     private final ErrorMsg errorMsg;
-    @PersistenceContext
-    private EntityManager em; // 👉 JPA 영속성 컨텍스트 제어용
 
     // 내 팔로우 페이지 : 특정 ID 팔로우 피드보기 (최신순)
     public Page<RecipesDto> getFollowFeed(List<String> followIds, Pageable pageable) {

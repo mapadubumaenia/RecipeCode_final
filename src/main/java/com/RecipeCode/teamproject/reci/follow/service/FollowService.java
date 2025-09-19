@@ -1,5 +1,6 @@
 package com.RecipeCode.teamproject.reci.follow.service;
 
+import com.RecipeCode.teamproject.common.MapStruct;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,32 +12,33 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FollowService {
     private final MemberRepository memberRepository;
+    private final MapStruct mapStruct;
 
-    public List<MemberDto> searchUsers(String keyword) {
-        return memberRepository.findByUserIdContainingIgnoreCase(keyword)
-                .stream()
-                .map(m-> new MemberDto(
-                        m.getUserEmail(),
-                        m.getUserId(),
-                        m.getNickname(),
-                        m.getProfileImageUrl(),
-                        m.getUserLocation(),
-                        m.getUserBlog(),
-                        m.getUserInsta(),
-                        m.getUserWebsite(),
-                        m.getUserIntroduce(),
-                        m.getUserBlog(),
-                        m.getUserYoutube()
-                ))
-                .toList();
-    }
+//    public List<MemberDto> searchUsers(String keyword) {
+//        return memberRepository.findByUserIdContainingIgnoreCase(keyword)
+//                .stream()
+//                .map(m-> new MemberDto(
+//                        m.getUserEmail(),
+//                        m.getUserId(),
+//                        m.getNickname(),
+//                        m.getProfileImageUrl(),
+//                        m.getUserLocation(),
+//                        m.getUserBlog(),
+//                        m.getUserInsta(),
+//                        m.getUserWebsite(),
+//                        m.getUserIntroduce(),
+//                        m.getUserBlog(),
+//                        m.getUserYoutube()
+//                ))
+//                .toList();
+//    }
 
 //  Service
-//  public List<MemberDto> searchUsers(String keyword) {
-//    return memberRepository.findByUserIdContainingIgnoreCase(keyword)
-//                           .stream()
-//                           .map(memberMapper::toDto)
-//                           .toList();
-//}
+  public List<MemberDto> searchUsers(String keyword) {
+    return memberRepository.findByUserIdContainingIgnoreCase(keyword)
+                           .stream()
+                           .map(mapStruct::toDto)
+                           .toList();
+}
 
 }
