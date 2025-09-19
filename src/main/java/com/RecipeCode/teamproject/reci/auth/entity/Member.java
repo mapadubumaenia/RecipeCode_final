@@ -1,8 +1,12 @@
 package com.RecipeCode.teamproject.reci.auth.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
+import com.RecipeCode.teamproject.reci.auth.membertag.entity.MemberTag;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="USERS")
@@ -34,5 +38,9 @@ public class Member extends BaseTimeEntity {
     @Lob
     private byte[] profileImage;
     private String profileImageUrl;
+
+    // 회원 ↔ 관심태그 (1:N)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberTag> memberTags = new ArrayList<>();
 
 }
