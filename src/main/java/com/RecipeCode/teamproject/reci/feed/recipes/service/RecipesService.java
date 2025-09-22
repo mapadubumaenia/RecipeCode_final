@@ -45,8 +45,6 @@ public class RecipesService {
     private final RecipeMapStruct recipeMapStruct;
     private final ErrorMsg errorMsg;
 
-    @PersistenceContext
-    private EntityManager em; // 👉 JPA 영속성 컨텍스트 제어용
 
     // 내 팔로우 페이지 : 특정 ID 팔로우 피드보기 (최신순)
     public Page<RecipesDto> getFollowFeed(List<String> followIds, Pageable pageable) {
@@ -82,10 +80,12 @@ public class RecipesService {
             recipe.setRecipeType("VIDEO");
             recipe.setVideoUrl(recipesDto.getVideoUrl());
             recipe.setThumbnail(null);
+            String embedUrl = toYoutubeEmbed(recipesDto.getVideoUrl());
+            recipe.setThumbnailUrl(embedUrl);
 
             // 🔑 핵심 변경: embed를 thumbnailUrl에 넣지 않고, i.ytimg.com 이미지 URL을 넣는다
-            String thumb = youtubeThumb(recipesDto.getVideoUrl());
-            recipe.setThumbnailUrl(thumb != null ? thumb : "");
+//            String thumb = youtubeThumb(recipesDto.getVideoUrl());
+//            recipe.setThumbnailUrl(thumb != null ? thumb : "");
 
             // (선택) 상세에서 쓸 embed URL을 별도 필드로 관리한다면 여기서 세팅
             // recipe.setEmbedUrl(toYoutubeEmbed(recipesDto.getVideoUrl()));
@@ -158,10 +158,12 @@ public class RecipesService {
             recipe.setRecipeType("VIDEO");
             recipe.setVideoUrl(recipesDto.getVideoUrl());
             recipe.setThumbnail(null);
+            String embedUrl = toYoutubeEmbed(recipesDto.getVideoUrl());
+            recipe.setThumbnailUrl(embedUrl);
 
             // 🔑 핵심 변경: 썸네일은 항상 "이미지 URL"로 저장
-            String thumb = youtubeThumb(recipesDto.getVideoUrl());
-            recipe.setThumbnailUrl(thumb != null ? thumb : "");
+//            String thumb = youtubeThumb(recipesDto.getVideoUrl());
+//            recipe.setThumbnailUrl(thumb != null ? thumb : "");
 
             // (선택) 상세 전용 embed 필드에 저장한다면 여기도 같이
             // recipe.setEmbedUrl(toYoutubeEmbed(recipesDto.getVideoUrl()));
