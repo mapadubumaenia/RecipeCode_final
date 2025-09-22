@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html lang="ko">
 <head>
@@ -219,82 +220,102 @@
       size: 20
     };
 
-    // ✅ UUID(36자) 형식 가드
+    // URL → 입력값/상태 반영
+    function seedFromUrl(){
+      var params = new URLSearchParams(window.location.search);
+      var qParam = params.get('q') || '';
+      var sortParam = params.get('sort') || 'new'; // 기본값 new
+
+      $q.value = qParam;                // '#술'처럼 인코딩된 값이 자동 디코딩되어 들어옴
+      $sort.value = sortParam;          // 'new' | 'hot' | (필요하면 'rel' → 'new'로 매핑)
+      state.q = qParam.trim();
+      state.sort = $sort.value || 'new';
+      state.next = null;
+    }
+
+    // 입력값/정렬 → 주소창 동기화 (뒤로가기/새로고침시 동일 상태 유지)
+    function syncUrl(){
+      var params = new URLSearchParams();
+      if (state.q) params.set('q', state.q);
+      if (state.sort) params.set('sort', state.sort);
+      var qs = params.toString();
+      var url = ctx + '/search' + (qs ? ('?' + qs) : '');
+      history.replaceState(null, '', url);
+    }
+
+    // (이하 기존 유틸 함수는 그대로)
     function isUuid36(s){
       return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || '');
     }
-
     function fmtDate(v) {
       if (!v) return '';
       try {
         var d = new Date(v);
-        if (isNaN(d.getTime())) return (typeof v === 'string') ? v : '';
-        return d.getFullYear() + '-' +
-                String(d.getMonth()+1).padStart(2,'0') + '-' +
-                String(d.getDate()).padStart(2,'0');
-      } catch(e) { return ''; }
+        if (isNaN(d.getTime())) return '';
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+      } catch (e) { return ''; }
     }
 
     function escapeHtml(s) {
       if (s == null) return '';
       return String(s)
-              .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-              .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+              .replace(/&/g,'&amp;')
+              .replace(/</g,'&lt;')
+              .replace(/>/g,'&gt;')
+              .replace(/"/g,'&quot;')
+              .replace(/'/g,'&#39;');
     }
 
-    function renderItem(it) {
-      var thumb = (it.thumbUrl && it.thumbUrl.length > 0)
-              ? it.thumbUrl
-              : 'https://via.placeholder.com/1200x800?text=';
-      var title = escapeHtml(it.title || '');
-      var nickForAt = (it.authorNick || '');
-      var date  = fmtDate(it.createdAt);
-      var likes = (it.likes != null) ? it.likes : 0;
-      var cmts  = (it.comments != null) ? it.comments : 0;
-      var views = (it.views != null) ? it.views : 0;
+    function renderItem(it){
+      try {
+        var thumb = (it.thumbUrl && it.thumbUrl.length > 0)
+                ? it.thumbUrl
+                : 'https://via.placeholder.com/1200x800?text=';
 
-      // ✅ 상세 링크 가드: id가 uuid가 아니면 링크 비활성화
-      var idOk = isUuid36(it.id);
-      var detailHref = idOk ? (ctx + '/recipes/' + encodeURIComponent(it.id)) : '#';
+        var title = escapeHtml(it.title || '');
+        var nick  = escapeHtml(it.authorNick || '');
+        var date  = fmtDate(it.createdAt);
+        var likes = (it.likes != null) ? it.likes : 0;
+        var cmts  = (it.comments != null) ? it.comments : 0;
+        var views = (it.views != null) ? it.views : 0;
 
-      var el = document.createElement('article');
-      el.className = 'card p-16 post';
+        // 상세 링크 (UUID 가드)
+        var idOk = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(it.id || '');
+        var detailHref = idOk ? (ctx + '/recipes/' + encodeURIComponent(it.id)) : '#';
 
-      el.innerHTML =
-              '<div class="post-head">' +
-              '<div class="avatar-ss"><img src="" alt=""></div>' +
-              '<div class="post-info">' +
-              '<div class="post-id">@' + nickForAt + '</div>' +
-              '<div class="muted">' + (date || '') + '</div>' +
-              '</div>' +
-              '<button class="followbtn-sm" data-user-id="" data-following="false">Follow</button>' +
-              '</div>' +
+        var el = document.createElement('article');
+        el.className = 'card p-16 post';
+        el.innerHTML =
+                '<div class="post-head">' +
+                '<div class="avatar-ss"><img src="" alt=""></div>' +
+                '<div class="post-info">' +
+                '<div class="post-id">@' + nick + '</div>' +
+                '<div class="muted">' + (date || '') + '</div>' +
+                '</div>' +
+                '<button class="followbtn-sm" data-user-id="" data-following="false">Follow</button>' +
+                '</div>' +
+                (idOk ? ('<a class="post-link" href="' + detailHref + '">') : '<div class="post-link disabled" aria-disabled="true">') +
+                '<div class="thumb"><img src="' + thumb + '" alt=""></div>' +
+                '<p class="muted">' + title + '</p>' +
+                (idOk ? '</a>' : '</div>') +
+                '<div class="post-cta">' +
+                '<button class="btn-none">❤️ ' + likes + '</button>' +
+                '<button class="btn-none">💬 ' + cmts + '</button>' +
+                '<button class="btn-none" title="views">👁 ' + views + '</button>' +
+                '</div>';
 
-              // 🔗 클릭영역: id 유효하면 <a>, 아니면 <div>로 대체
-              (idOk
-                              ? ('<a class="post-link" href="' + detailHref + '" aria-label="상세 보기: ' + title + '">')
-                              : ('<div class="post-link disabled" aria-disabled="true" title="상세 ID 없음">')
-              ) +
-              '<div class="thumb"><img src="' + thumb + '" alt=""></div>' +
-              '<p class="muted">' + title + '</p>' +
-              (idOk ? '</a>' : '</div>') +
+        if (!idOk) {
+          el.querySelector('.post-link.disabled')?.addEventListener('click', function(e){ e.preventDefault(); });
+          console.warn('[search] invalid id:', it.id, 'title=', it.title);
+        }
 
-              '<div class="post-cta">' +
-              '<button class="btn-none">❤️ ' + likes + '</button>' +
-              '<button class="btn-none">💬 ' + cmts + '</button>' +
-              '<button class="btn-none" title="views">👁 ' + views + '</button>' +
-              '</div>';
-
-      // id가 유효하지 않으면 클릭 막기 + 콘솔에 원인 남김
-      if (!idOk) {
-        el.querySelector('.post-link.disabled')?.addEventListener('click', function(e){
-          e.preventDefault();
-        });
-        // 디버깅에 도움: 어떤 id가 잘못 내려왔는지 확인
-        console.warn('[search] invalid id:', it.id, 'title=', it.title);
+        $list.appendChild(el);
+      } catch (e) {
+        console.error('[renderItem] failed with item:', it, e);
       }
-
-      $list.appendChild(el);
     }
 
     async function fetchOnce(initial) {
@@ -314,14 +335,8 @@
         var data = await res.json();
 
         if (initial) $list.innerHTML = '';
-
-        // (옵션) 초간단 디버깅: 첫 5개 id 출력
-        // console.log('ids:', (data.items || []).slice(0,5).map(it => it.id));
-
         (data.items || []).forEach(renderItem);
         state.next = data.next || null;
-      } catch (e) {
-        // noop
       } finally {
         state.loading = false;
       }
@@ -331,32 +346,27 @@
       state.q = ($q.value || '').trim();
       state.sort = $sort.value || 'new';
       state.next = null;
+      syncUrl();           // ★ 주소창 업데이트
       fetchOnce(true);
     }
 
     // 이벤트
-    $btn.addEventListener('click', function() { startSearch(); });
-    $q.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') startSearch();
-    });
-    $sort.addEventListener('change', function() { startSearch(); });
+    $btn.addEventListener('click', startSearch);
+    $q.addEventListener('keydown', function(e){ if (e.key === 'Enter') startSearch(); });
+    $sort.addEventListener('change', startSearch);
 
-    // 무한 스크롤
-    var io = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting && state.next) {
-          fetchOnce(false);
-        }
+    // 무한 스크롤 (그대로)
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting && state.next) fetchOnce(false);
       });
     });
     io.observe($sentinel);
 
-    // 초기 로드: 최신(new) 전체
+    // ★ 초기 진입: URL 파라미터로 먼저 시딩 → 그 다음 최초 검색 실행
+    seedFromUrl();
     startSearch();
   })();
-
-
-
 </script>
 </body>
 </html>
