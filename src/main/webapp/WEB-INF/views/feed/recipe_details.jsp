@@ -169,7 +169,7 @@
                 </div>
 
                 <div class="actions">
-                    <button class="btn-none red" id="btnLike">👍 좋아요 <span id="likeCnt"><c:out value="${recipe.likeCount}" /></span></button>
+                        <button class="btn-none red" id="btnLike">👍 좋아요 <span id="likeCnt"><c:out value="${recipe.likeCount}" /></span></button>
                     <button class="btn-none" id="btnShare">🔗 공유</button>
                     <button class="btn-none" id="btnReport">🚩 신고</button>
                 </div>
@@ -218,8 +218,8 @@
 <script>
     const ctx = "${pageContext.request.contextPath}";
 </script>
-<script src="${ctx}/js/recipe-detail-common.js"></script>
-<script src="${ctx}/js/recipe-details.js"></script>
+<script src="${ctx}/js/recipes/recipe-detail-common.js"></script>
+<script src="${ctx}/js/recipes/recipe-details.js"></script>
 
 
 <%-- TODO: 신고 모달 --%>
@@ -252,5 +252,7 @@
         </form>
     </div>
 </div>
+
+
 </body>
 </html>

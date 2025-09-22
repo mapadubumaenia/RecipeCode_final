@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-public class RecipesProfileController {
+public class RecipesRestController {
 
     private final RecipesService recipesService;
 
-    @DeleteMapping("/{uuid}")
+    @DeleteMapping("/recipes/{uuid}")
     public ResponseEntity<Void> delete(@PathVariable String uuid,
                                        @AuthenticationPrincipal SecurityUserDto user) {
         recipesService.softDeleteRecipe(uuid);

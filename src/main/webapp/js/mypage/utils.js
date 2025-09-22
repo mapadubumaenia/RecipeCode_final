@@ -1,3 +1,12 @@
+// TODO: (운영 시 활성화) CSRF 토큰을 JS에서 쓰고 싶을 때
+// const CSRF = (() => {
+//     const t = document.querySelector('meta[name="_csrf"]');
+//     const h = document.querySelector('meta[name="_csrf_header"]');
+//     if (!t || !h) return { header: null, token: null };
+//     return { header: h.content, token: t.content };
+// })();
+
+
 // 시간 변환
 function timeAgo(dateStr) {
     if (!dateStr) return "";
@@ -35,10 +44,12 @@ function createFeedArticle(recipe, currentUserEmail) {
       ${
         recipe.recipeType === "IMAGE"
             ? `<img src="${recipe.thumbnailUrl || 'https://picsum.photos/seed/default/800/500'}" alt="recipe">`
-            : `<iframe src="${recipe.thumbnailUrl}" style="width:100%;height:100%;border:0" allowfullscreen></iframe>`
+            : `<iframe src="${recipe.thumbnailUrl}" allowfullscreen></iframe>`
     }
     </div>
+    <a href="/recipes/${recipe.uuid}">
     <p class="muted">${recipe.recipeIntro || ''}</p>
+    </a>
     <div class="post-cta flex-box">
       <div class="leftBox">
         <span class="like">❤️${recipe.likeCount || 0}</span>
@@ -56,7 +67,8 @@ function createFollowArticle(user) {
     article.className = "card p-12 post";
 
     // 서버에서 내려줄 값: user.isLike (true/false)
-    const isLike = user.isLike ?? false;
+    const isLike = user.isLike === true; // 안전 캐스팅
+    const uuid = user.recipe?.uuid || user.uuid || "";
 
     article.innerHTML = `
     <div class="post-head">
@@ -69,8 +81,8 @@ function createFollowArticle(user) {
       </div>
         <div class="rightBox">
             <button class="like-toggle btn-none">
-                    data-user-id="${user.recipe.uuid}" 
-                    data-like="${islike}">
+                    data-uuid="${uuid}"
+                    data-like="${isLike}">
                 ${islike ? "💔 UnLike" : "❤️ Like"}
             </button>    
         </div>
@@ -87,13 +99,17 @@ document.addEventListener("click", (e) => {
         const uuid = btn.dataset.uuid;
         const isLike = btn.dataset.like === "true";
 
-        fetch(`/api/recipes/${uuid}/like`, {
+        const url = (typeof ctx === "string" ? ctx : "") + "/api/recipes/" + encodeURIComponent(uuid) + "/like";
+
+        fetch(url, {
             method: isLike ? "DELETE" : "POST",
-            headers: { "Content-Type": "application/json" }
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json",
+            // ...getCsrfHeaders()}
+            }
         })
             .then(res => {
                 if (!res.ok) throw new Error("Like 토글 실패");
-
                 // UI 갱신
                 btn.dataset.like = (!isLike).toString();
                 btn.textContent = !isLike ? "💔 Unlike" : "❤️ Like";

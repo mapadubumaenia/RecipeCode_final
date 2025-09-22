@@ -51,7 +51,7 @@ public class RecipesViewController {
     }
 
 
-    /** 레시피 등록*/
+    /* 레시피 등록 */
     @PostMapping(path = "/recipes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createRecipe(
             @ModelAttribute RecipesDto recipesDto,      // ingredients[i].*, contents[i].*, tags[i]

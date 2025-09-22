@@ -7,6 +7,7 @@ import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,12 +20,12 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class UserDetailsServiceImpl implements UserDetailsService {
 //    DB Member 레포지토리 DI
     private final AdminRepository adminRepository;
     private final MemberRepository memberRepository;
     private final ErrorMsg errorMsg;
-
 
 
 //    함수 재정의 : 자동 기능 : alt + insert
@@ -37,11 +38,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (memberOt.isPresent()) {
             Member member = memberOt.get();
             authorities.add(new SimpleGrantedAuthority(member.getRole()));
-
             return new SecurityUserDto(
-                    member.getUserEmail(),
-                    member.getPassword(),
-                    authorities
+                    member,
+                    authorities,
+                    null
             );
         }
 
@@ -51,10 +51,28 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             Admin admin = adminOpt.get();
             authorities.add(new SimpleGrantedAuthority(admin.getRole()));
 
+            Member adminMember=Member.builder()
+                    .userEmail(admin.getAdminEmail())
+                    .userId(admin.getAdminId())
+                    .password(admin.getPassword())
+                    .nickname(admin.getNickname())
+                    .profileImage(admin.getProfileImage())
+                    .profileImageUrl(admin.getProfileImageUrl())
+                    .role(admin.getRole())
+                    .userBlog(admin.getAdminBlog())
+                    .userInsta(admin.getAdminInsta())
+                    .userIntroduce(admin.getAdminIntroduce())
+                    .userLocation(admin.getAdminLocation())
+                    .userWebsite(admin.getAdminWebsite())
+                    .userYoutube(admin.getAdminYoutube())
+                    .profileStatus(admin.getProfileStatus())
+                    .userInterestTag(admin.getAdminInterestTag())
+                    .build();
+
             return new SecurityUserDto(
-                    admin.getAdminEmail(),
-                    admin.getPassword(),
-                    authorities
+                    adminMember,
+                    authorities,
+                    null
             );
         }
         throw new RuntimeException(errorMsg.getMessage("errors.not.found"));

@@ -120,12 +120,6 @@
                     </label>
                     <!-- 여기 앵커 -->
                     <div id="metaAnchorImage"></div>
-<%--                    <div class="meta-row">--%>
-<%--                        <input class="input" id="title" name="recipeTitle" maxlength="80"--%>
-<%--                               value="<c:out value='${recipe.recipeTitle}'/>" placeholder="레시피 제목"/>--%>
-<%--                        <input class="input" id="subtitle" name="recipeIntro"--%>
-<%--                               value="<c:out value='${recipe.recipeIntro}'/>" placeholder="간단 설명 (선택)"/>--%>
-<%--                    </div>--%>
                 </article>
 
                 <!-- 동영상 Pane (VIDEO 전용) -->
@@ -241,12 +235,17 @@
 
 
                 <!-- 하단 액션 -->
-                <article class="card p-16">
+                <article class="card p-16 flex-box">
                     <div class="actions">
                         <button class="btn" type="button" id="btnCancel">취소</button>
 <%--                        <button class="btn" id="saveDraft" type="button">임시 저장</button>--%>
-                        <button class="btn primary" id="publish" type="button"><c:choose><c:when test='${isEdit}'>수정 완료</c:when><c:otherwise>발행</c:otherwise></c:choose></button>
+                        <button class="btn primary" id="publish" type="button"><c:choose><c:when test='${isEdit}'>수정</c:when><c:otherwise>발행</c:otherwise></c:choose></button>
                     </div>
+                    <c:if test="${isEdit}">
+                    <div class="recipeDelete">
+                        <button class="btn danger" id="delete" type="button">삭제</button>
+                    </div>
+                    </c:if>
                 </article>
 
                 <!-- 조리 단계 (드래그 정렬) — 이미지 레시피 Pane -->
@@ -276,7 +275,7 @@
                                     <div class="step-body">
                                         <label class="upload">
                                             <input type="file" name="stepImages" accept="image/*" />
-                                            <span class="ph <c:if test='${not empty c.recipeImageUrl}'>hidden</c:if>'">이미지 업로드</span>
+                                            <span class="ph <c:if test='${not empty c.recipeImageUrl}'>hidden</c:if>">이미지 업로드</span>
                                             <img class="<c:if test='${empty c.recipeImageUrl}'>hidden</c:if>" alt=""
                                                  <c:if test='${not empty c.recipeImageUrl}'>src='${c.recipeImageUrl}'</c:if> />
                                         </label>
@@ -358,10 +357,20 @@
 </div>
 
 
+<!-- 1) jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" defer></script>
+
+<!-- 2) jQuery Validation 플러그인 -->
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.21.0/dist/jquery.validate.min.js" defer></script>
+
+<!-- 3) 내 validation 설정 (여기서 window.RecipesValidation 전역에 올림) -->
+<script src="${contextPath}/js/recipes/recipes-validation-config.js" defer></script>
+
+<!-- 4) 페이지 로직 (맨 마지막) -->
+<script src="${contextPath}/js/recipes/recipe-create-update.js" defer></script>
+
 <!-- JSP에서 contextPath 전역 변수 내려주기 (필요 시) -->
 <script>window.contextPath = '${contextPath}';</script>
-<!-- 기능 스크립트: 뷰 렌더링(폼 전송) 방식 -->
-<script src="${contextPath}/js/recipe-create-update.js"></script>
 
 </body>
 </html>

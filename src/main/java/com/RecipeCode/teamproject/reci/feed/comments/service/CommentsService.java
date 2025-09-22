@@ -27,13 +27,13 @@ public class CommentsService {
 
     // 댓글 불러오기
     public List<CommentsDto> countByRecipes_Uuid(String recipeUuid, int page, int size) {
-        Pageable pageable = PageRequest.of(page,size,Sort.by("insertTime").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("insertTime").descending());
 
         Recipes recipe = recipesRepository.findById(recipeUuid)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
         return commentsRepository.findByRecipesUuidAndParentIdIsNull(recipeUuid, pageable)
-                .stream().map(comments->{
+                .stream().map(comments -> {
                     CommentsDto dto = mapStruct.toDto(comments);
                     dto.setReplyCount(commentsRepository.countByParentId_CommentsId(comments.getCommentsId()));
                     return dto;
@@ -61,6 +61,8 @@ public class CommentsService {
         commentsRepository.save(comment);
     }
 
+
+
     // 대댓글 불러오기
     public List<CommentsDto> getReplies(Long parentId) {
         return commentsRepository.findByParentIdCommentsId(parentId)
@@ -70,7 +72,7 @@ public class CommentsService {
     }
 
     // 대댓글 작성
-    public void saveReply(CommentsDto commentsDto, Long parentId) {
+    public void saveReply(CommentsDto commentsDto, Long parentId, String userEmail) {
         Comments reply = mapStruct.toEntity(commentsDto);
 
         Comments parent = commentsRepository.findById(parentId)
@@ -78,8 +80,14 @@ public class CommentsService {
         reply.setParentId(parent);
         reply.setRecipes(parent.getRecipes()); // 같은 레시피 연결
 
+        Member member = memberRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+        reply.setMember(member);
+
         commentsRepository.save(reply);
     }
+
+
 
     // 댓글/대댓글 삭제
     @Transactional

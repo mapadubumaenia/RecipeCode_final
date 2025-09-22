@@ -68,11 +68,11 @@ public class Recipes extends BaseTimeEntity {
     private LocalDateTime deleteDate;
 
 
-/*
- *   단방향 매핑
- *   재료는 단방향: Ingredient → Recipes (ManyToOne)
- *   조리단계도 단방향: RecipeContent → Recipes (ManyToOne)
- *
- * */
+    /*
+     *   단방향 매핑
+     *   재료는 단방향: Ingredient → Recipes (ManyToOne)
+     *   조리단계도 단방향: RecipeContent → Recipes (ManyToOne)
+     *
+     * */
 
 }

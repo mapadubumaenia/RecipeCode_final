@@ -5,16 +5,20 @@ import com.RecipeCode.teamproject.common.MapStruct;
 import com.RecipeCode.teamproject.reci.admin.repository.AdminRepository;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.auth.notisetting.entity.NotiSetting;
+import com.RecipeCode.teamproject.reci.auth.notisetting.repository.NotiSettingRepository;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MemberService {
-    private final AdminRepository adminRepository;
     private final MemberRepository memberRepository;
+    private final NotiSettingRepository notiSettingRepository;
     private final MapStruct mapStruct;
     private final PasswordEncoder passwordEncoder;
     private final ErrorMsg errorMsg;
@@ -35,6 +39,28 @@ public class MemberService {
             member.setProvider("local");
             member.setRole("R_USER");
             memberRepository.save(member);
+            memberRepository.flush();
+
+            NotiSetting follow = NotiSetting.builder()
+                    .member(member)
+                    .typeCode("FOLLOW")
+                    .allow(true)
+                    .build();
+
+            NotiSetting comment = NotiSetting.builder()
+                    .member(member)
+                    .typeCode("COMMENT")
+                    .allow(true)
+                    .build();
+
+            notiSettingRepository.save(follow);
+            notiSettingRepository.save(comment);
         }
+    }
+
+//    상세조회(Profile 페이지용)
+    public Member getByUserEmail(String email) {
+        return memberRepository.findByUserEmail(email)
+                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.register")));
     }
 }

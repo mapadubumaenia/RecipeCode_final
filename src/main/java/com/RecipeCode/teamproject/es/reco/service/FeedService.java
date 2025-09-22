@@ -1,4 +1,3 @@
-// src/main/java/com/RecipeCode/teamproject/es/reco/service/FeedService.java
 package com.RecipeCode.teamproject.es.reco.service;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -24,28 +23,31 @@ import java.util.stream.Collectors;
 public class FeedService {
 
     private final ElasticsearchOperations es;
-    private final SearchService searchService; // ES hot용만 사용
+    private final SearchService searchService;
 
-    // ★ hot 전용
+    /** HOT 피드 */
     public FeedPageDto hot(String after, int size) {
         size = Math.min(Math.max(size, 1), 50);
         Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
         return mapHotToDto(hot);
     }
 
-    public FeedPageDto personalFeed(String userId, String after, int size) {
+    /** 개인화 피드 */
+    public FeedPageDto personalFeed(String userEmail, String after, int size) {
         size = Math.min(Math.max(size, 1), 50);
 
-        // userId 비면 ES get 금지 → hot
-        if (userId == null || userId.isBlank()) {
+        if (userEmail == null || userEmail.isBlank()) {
             Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
             return mapHotToDto(hot);
         }
 
-        // user-recs에서 개인화 문서 조회 (예외시 hot 폴백)
+        // 이메일 키 소문자 정규화
+        String key = userEmail.trim().toLowerCase();
+
+        // 개인 추천 문서 조회 (없으면 HOT 폴백)
         UserRecsDoc rec;
         try {
-            rec = es.get(userId, UserRecsDoc.class);
+            rec = es.get(key, UserRecsDoc.class);
         } catch (Exception e) {
             Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
             return mapHotToDto(hot);
@@ -64,9 +66,11 @@ public class FeedService {
         List<String> ids = page.stream().map(UserRecsDoc.Item::getRecipeId).toList();
         if (ids.isEmpty()) return new FeedPageDto(all.size(), List.of(), null);
 
+        // recipe-v2에서 해당 아이템만 조회(공개/미삭제만)
         Query q = Query.of(b -> b.bool(bb -> bb
                 .must(m -> m.ids(i -> i.values(ids)))
                 .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
+                .filter(f -> f.bool(b2 -> b2.mustNot(mn -> mn.term(t -> t.field("deleted").value(true)))))
         ));
 
         NativeQuery nq = NativeQuery.builder()
@@ -79,18 +83,21 @@ public class FeedService {
                 .map(SearchHit::getContent)
                 .collect(Collectors.toMap(RecipeSearchDoc::getId, r -> r, (a, b) -> a));
 
+        // 추천 순서 유지 + 썸네일 포함 매핑
         List<RecipeCardDto> items = new ArrayList<>();
         for (UserRecsDoc.Item it : page) {
             RecipeSearchDoc d = byId.get(it.getRecipeId());
-            if (d == null) continue; // 삭제/비공개 스킵
+            if (d == null) continue; // 삭제/비공개/미존재 스킵
+
             items.add(new RecipeCardDto(
                     d.getId(),
                     d.getTitle(),
                     d.getAuthorNick() == null ? "" : d.getAuthorNick(),
                     d.getLikes(),
-                    d.getCreatedAt() == null ? "" : d.getCreatedAt().toString(), // 타입 안전
+                    d.getCreatedAt() == null ? "" : d.getCreatedAt().toString(),
                     d.getTags() == null ? List.of() : d.getTags(),
-                    it.getScore()
+                    it.getScore(),
+                    d.getThumbUrl() == null ? "" : d.getThumbUrl()   // 🔥 썸네일 세팅
             ));
         }
 
@@ -99,8 +106,7 @@ public class FeedService {
         return new FeedPageDto(all.size(), items, next);
     }
 
-    // --- utils ---
-
+    // ---- HOT 매핑 util ----
     @SuppressWarnings("unchecked")
     private FeedPageDto mapHotToDto(Map<String, Object> hot) {
         List<Map<String, Object>> list =
@@ -119,7 +125,7 @@ public class FeedService {
 
             String createdAt = "";
             Object ts = m.get("createdAt");
-            if (ts != null) createdAt = ts.toString(); // Instant/Date/String 모두 toString
+            if (ts != null) createdAt = ts.toString();
 
             List<String> tags = new ArrayList<>();
             Object tg = m.get("tags");
@@ -127,7 +133,12 @@ public class FeedService {
                 for (Object o : (List<?>) tg) tags.add(Objects.toString(o, ""));
             }
 
-            items.add(new RecipeCardDto(id, title, authorNick, likes, createdAt, tags, 0.0));
+            // 🔥 통합검색측 Map에 thumbUrl 있으면 전달
+            String thumbUrl = Objects.toString(m.getOrDefault("thumbUrl", ""), "");
+
+            items.add(new RecipeCardDto(
+                    id, title, authorNick, likes, createdAt, tags, 0.0, thumbUrl
+            ));
         }
 
         int total = (hot.get("total") instanceof Number)
@@ -139,6 +150,7 @@ public class FeedService {
         return new FeedPageDto(total, items, next);
     }
 
+    // ---- utils ----
     private static long parseLongOrZero(String s) {
         try { return Long.parseLong(s); } catch (Exception e) { return 0L; }
     }

@@ -17,6 +17,12 @@
     <!-- 공통 CSS: contextPath 기준 -->
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/profile-mypage.css'/>">
+
+    <%-- TODO: CSRF 토큰 (나중에 적용 시 주석 해제) --%>
+    <%--
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
+    --%>
 </head>
 <body>
 <main class="container profile-page">
@@ -32,6 +38,8 @@
             <!-- ▶ 알림 + 로그아웃 -->
             <div class="header-actions">
                 <form action="${pageContext.request.contextPath}/logout" method="post">
+                    <%-- TODO: CSRF hidden input (나중에 적용 시 주석 해제) --%>
+                    <%-- <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/> --%>
                     <button type="submit" class="btn-logout">logout</button>
                 </form>
                 <div class="notif-wrap">
@@ -70,15 +78,15 @@
         </div>
         <div class="profile-info">
             <div class="profile-top">
-                <h2 class="profile-name">${user.nickname}</h2>
+                <h2 class="profile-name">${user.userId}</h2>
                 <a href="${pageContext.request.contextPath}/mypage/edit" class="edit-profile">✎ Edit</a>
             </div>
             <div class="profile-actions btn-none">
                 <a class="followbtn-md" href="${pageContext.request.contextPath}/mypage/followers">
-                    Followers ${user.followerCount}
+                    Followers <%-- ${user.followingCount} --%>
                 </a>
                 <a class="followbtn-md" href="${pageContext.request.contextPath}/mypage/following">
-                    Following ${user.followingCount}
+                    Following <%-- ${user.followingCount} --%>
                 </a>
             </div>
         </div>
@@ -117,8 +125,8 @@
             <h2 class="section-title m-0">New</h2>
             <!-- 팔로우 탭 -->
             <nav class="tabs">
-                <button class="tab is-active" data-tab="following">Following ${user.followingCount}</button>
-                <button class="tab" data-tab="followers">Follower ${user.followerCount}</button>
+                <button class="tab is-active" data-tab="following">Following <%-- ${user.followingCount} --%></button>
+                <button class="tab" data-tab="followers">Follower <%-- ${user.followerCount} --%></button>
             </nav>
 
             <!-- pc 버전에서만 보임 : 내 팔로잉/팔로우가 새로 올린 피드만 -->
@@ -129,12 +137,13 @@
 </main>
 
 <!-- FAQ 플로팅 버튼 -->
-<button id="faq-btn" class="faq-btn">FAQ</button>
-
+<a id="faq-btn" class="faq-btn" href="<c:url value="faq" />">FAQ</a>
+<script>
+    const ctx = "${pageContext.request.contextPath}";
+</script>
 <%--<script src="${pageContext.request.contextPath}/js/notifs.js"></script>--%>
 <%--<script src="${pageContext.request.contextPath}/js/position-fixed.js"></script>--%>
-<%--<script>const currentUserEmail = "${user.userEmail}";</script>--%>
-<script>const currentUserEmail = "asdf1234@naver.com";</script>
+<script>const currentUserEmail = "${currentUserEmail}";</script>
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-searchResult.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-feed.js"></script>
