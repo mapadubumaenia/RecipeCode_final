@@ -12,13 +12,19 @@ public class FeedController {
 
     private final FeedService feed;
 
+
+
+
     @GetMapping("/personal")
     public FeedPageDto personal(
             @RequestParam String userEmail,
             @RequestParam(required = false) String after,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return feed.personalFeed(userEmail, after, size);
+        // ✅ 이메일 소문자 고정 + size 가드(1~50)
+        String ue = (userEmail == null) ? "" : userEmail.trim().toLowerCase();
+        int sz = Math.min(Math.max(size, 1), 50);
+        return feed.personalFeed(ue, after, sz);
     }
 
     @GetMapping("/hot")
@@ -26,6 +32,7 @@ public class FeedController {
             @RequestParam(required = false) String after,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return feed.hot(after, size);
+        int sz = Math.min(Math.max(size, 1), 50);
+        return feed.hot(after, sz);
     }
 }
