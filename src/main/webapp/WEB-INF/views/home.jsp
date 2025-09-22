@@ -1,4 +1,3 @@
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
@@ -9,6 +8,11 @@
     <title>쉐프리드 — 레시피 피드</title>
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/newfeed-ver-main-wireframe.css'/>">
+    <style>
+        /* 링크가 카드 영역을 블록으로 덮도록 */
+        .post-link { display:block; text-decoration:none; color:inherit; }
+        .post-link.disabled { cursor:default; }
+    </style>
 </head>
 <body>
 <header class="container">
@@ -201,6 +205,14 @@
             </script>
         </sec:authorize>
 
+        <!-- ✅ 공통 유틸: 컨텍스트/UUID/상세URL -->
+        <script>
+            var CTX = '${pageContext.request.contextPath}';
+            function isUuid36(s){
+                return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || '');
+            }
+            function detailUrl(id){ return CTX + '/recipes/' + encodeURIComponent(id); }
+        </script>
 
         <script>
             (function(){
@@ -251,6 +263,12 @@
                     return 'https://picsum.photos/seed/' + encodeURIComponent(seed || 'rc') + '/1200/800';
                 }
 
+                /* ✅ 여기서부터 변경: 링크 포함 카드(상세 이동 지원) */
+                function safeId(it){
+                    // 서비스가 RecipeCardDto.id로 UUID를 내려줌. 혹시 대비해 uuid/_id도 폴백.
+                    return (it.id || it.uuid || it._id || '').toString();
+                }
+
                 function cardHtml(it){
                     var tagsHtml = '';
                     if (it.tags && it.tags.length) {
@@ -264,29 +282,36 @@
                     var likes = (typeof it.likes === 'number') ? it.likes : (it.likes || 0);
                     var thumb = pickThumb(it);
 
+                    var rid = safeId(it);
+                    var hasUuid = isUuid36(rid);
+                    var href = hasUuid ? detailUrl(rid) : '#';
+
                     var html = ''
-                        + '<article class="card p-16 post" data-id="' + esc(it.id || '') + '">'
+                        + '<article class="card p-16 post" data-id="' + esc(rid) + '">'
                         +   '<div class="post-head">'
                         +     '<div class="avatar-ss"><img src="" alt=""></div>'
                         +     '<div class="post-info">'
-                        +       '<div class="post-id">@' + esc(it.author || '') + '</div>'
+                        +       '<div class="post-id">@' + esc(it.author || it.authorNick || '') + '</div>'
                         +       '<div class="muted">' + esc(it.createdAt || '') + '</div>'
                         +     '</div>'
-                        +     '<button class="followbtn-sm" data-user-id="' + esc(it.author || '') + '" data-following="false"></button>'
+                        +     '<button class="followbtn-sm" data-user-id="' + esc(it.author || it.authorNick || '') + '" data-following="false"></button>'
                         +   '</div>'
-                        +   '<div class="thumb">'
-                        +     '<img src="' + esc(thumb) + '" alt="' + esc(it.title || '') + '">'
-                        +   '</div>'
-                        +   '<p class="muted">' + esc(it.title || '') + score + '</p>'
-                        +   '<p class="muted">' + tagsHtml + '</p>'
+                        +   (hasUuid ? ('<a class="post-link" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">')
+                        +     '<div class="thumb">'
+                        +       '<img src="' + esc(thumb) + '" alt="' + esc(it.title || '') + '">'
+                        +     '</div>'
+                        +     '<p class="muted">' + esc(it.title || '') + score + '</p>'
+                        +     (tagsHtml ? ('<p class="muted">' + tagsHtml + '</p>') : '')
+                        +   (hasUuid ? '</a>' : '</div>')
                         +   '<div class="post-cta">'
-                        +     '<button class="btn-none">❤️ ' + likes + '</button>'
-                        +     '<button class="btn-none post-cmt" data-post-id="' + esc(it.id || '') + '">💬</button>'
-                        +     '<button class="btn-none">↗ Share</button>'
+                        +     '<button class="btn-none js-like">❤️ ' + likes + '</button>'
+                        +     '<button class="btn-none post-cmt js-cmt" data-post-id="' + esc(rid) + '">💬</button>'
+                        +     '<button class="btn-none js-share">↗ Share</button>'
                         +   '</div>'
                         + '</article>';
                     return html;
                 }
+                /* ✅ 변경 끝 */
 
                 async function loadMore(){
                     if (busy) return;
@@ -332,6 +357,24 @@
                 // 초기 로드 + 버튼 이벤트
                 loadMore();
                 if ($btn) $btn.addEventListener('click', loadMore);
+
+                /* ✅ 카드 빈공간 클릭 시 상세 이동 (버튼은 이동 막기) */
+                document.addEventListener('click', function(e){
+                    // 이동 막아야 하는 버튼들
+                    if (e.target.closest('.js-like, .js-cmt, .js-share, .followbtn-sm')) {
+                        e.stopPropagation();
+                        return;
+                    }
+                    // a.post-link 자체는 기본 동작으로 이동
+                    if (e.target.closest('a.post-link')) return;
+
+                    var card = e.target.closest('article.post[data-id]');
+                    if (!card) return;
+                    var rid = card.getAttribute('data-id');
+                    if (isUuid36(rid)) {
+                        window.location.href = detailUrl(rid);
+                    }
+                });
             })();
         </script>
         <!-- === /For You 추천 피드 === -->
