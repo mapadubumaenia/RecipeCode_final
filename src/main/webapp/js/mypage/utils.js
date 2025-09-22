@@ -44,10 +44,12 @@ function createFeedArticle(recipe, currentUserEmail) {
       ${
         recipe.recipeType === "IMAGE"
             ? `<img src="${recipe.thumbnailUrl || 'https://picsum.photos/seed/default/800/500'}" alt="recipe">`
-            : `<iframe src="${recipe.thumbnailUrl}" style="width:100%;height:100%;border:0" allowfullscreen></iframe>`
+            : `<iframe src="${recipe.thumbnailUrl}" allowfullscreen></iframe>`
     }
     </div>
+    <a href="/recipes/${recipe.uuid}">
     <p class="muted">${recipe.recipeIntro || ''}</p>
+    </a>
     <div class="post-cta flex-box">
       <div class="leftBox">
         <span class="like">❤️${recipe.likeCount || 0}</span>

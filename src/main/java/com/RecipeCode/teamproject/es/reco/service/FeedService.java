@@ -25,12 +25,14 @@ public class FeedService {
     private final ElasticsearchOperations es;
     private final SearchService searchService;
 
+    /** HOT 피드 */
     public FeedPageDto hot(String after, int size) {
         size = Math.min(Math.max(size, 1), 50);
         Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
         return mapHotToDto(hot);
     }
 
+    /** 개인화 피드 */
     public FeedPageDto personalFeed(String userEmail, String after, int size) {
         size = Math.min(Math.max(size, 1), 50);
 
@@ -39,7 +41,10 @@ public class FeedService {
             return mapHotToDto(hot);
         }
 
+        // 이메일 키 소문자 정규화
         String key = userEmail.trim().toLowerCase();
+
+        // 개인 추천 문서 조회 (없으면 HOT 폴백)
         UserRecsDoc rec;
         try {
             rec = es.get(key, UserRecsDoc.class);
@@ -61,6 +66,7 @@ public class FeedService {
         List<String> ids = page.stream().map(UserRecsDoc.Item::getRecipeId).toList();
         if (ids.isEmpty()) return new FeedPageDto(all.size(), List.of(), null);
 
+        // recipe-v2에서 해당 아이템만 조회(공개/미삭제만)
         Query q = Query.of(b -> b.bool(bb -> bb
                 .must(m -> m.ids(i -> i.values(ids)))
                 .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
@@ -77,10 +83,12 @@ public class FeedService {
                 .map(SearchHit::getContent)
                 .collect(Collectors.toMap(RecipeSearchDoc::getId, r -> r, (a, b) -> a));
 
+        // 추천 순서 유지 + 썸네일 포함 매핑
         List<RecipeCardDto> items = new ArrayList<>();
         for (UserRecsDoc.Item it : page) {
             RecipeSearchDoc d = byId.get(it.getRecipeId());
-            if (d == null) continue;
+            if (d == null) continue; // 삭제/비공개/미존재 스킵
+
             items.add(new RecipeCardDto(
                     d.getId(),
                     d.getTitle(),
@@ -88,7 +96,8 @@ public class FeedService {
                     d.getLikes(),
                     d.getCreatedAt() == null ? "" : d.getCreatedAt().toString(),
                     d.getTags() == null ? List.of() : d.getTags(),
-                    it.getScore()
+                    it.getScore(),
+                    d.getThumbUrl() == null ? "" : d.getThumbUrl()   // 🔥 썸네일 세팅
             ));
         }
 
@@ -97,6 +106,7 @@ public class FeedService {
         return new FeedPageDto(all.size(), items, next);
     }
 
+    // ---- HOT 매핑 util ----
     @SuppressWarnings("unchecked")
     private FeedPageDto mapHotToDto(Map<String, Object> hot) {
         List<Map<String, Object>> list =
@@ -107,19 +117,28 @@ public class FeedService {
             String id = Objects.toString(m.get("id"), "");
             String title = Objects.toString(m.get("title"), "");
             String authorNick = Objects.toString(m.get("authorNick"), "");
+
             long likes;
             Object lk = m.get("likes");
             if (lk instanceof Number) likes = ((Number) lk).longValue();
             else likes = parseLongOrZero(Objects.toString(lk, "0"));
+
             String createdAt = "";
             Object ts = m.get("createdAt");
             if (ts != null) createdAt = ts.toString();
+
             List<String> tags = new ArrayList<>();
             Object tg = m.get("tags");
             if (tg instanceof List<?>) {
                 for (Object o : (List<?>) tg) tags.add(Objects.toString(o, ""));
             }
-            items.add(new RecipeCardDto(id, title, authorNick, likes, createdAt, tags, 0.0));
+
+            // 🔥 통합검색측 Map에 thumbUrl 있으면 전달
+            String thumbUrl = Objects.toString(m.getOrDefault("thumbUrl", ""), "");
+
+            items.add(new RecipeCardDto(
+                    id, title, authorNick, likes, createdAt, tags, 0.0, thumbUrl
+            ));
         }
 
         int total = (hot.get("total") instanceof Number)
@@ -131,9 +150,11 @@ public class FeedService {
         return new FeedPageDto(total, items, next);
     }
 
+    // ---- utils ----
     private static long parseLongOrZero(String s) {
         try { return Long.parseLong(s); } catch (Exception e) { return 0L; }
     }
+
     private static int decode(String after) {
         if (after == null || after.isBlank()) return 0;
         try {
@@ -143,6 +164,7 @@ public class FeedService {
             return Integer.parseInt(s.trim());
         } catch (Exception e) { return 0; }
     }
+
     private static String encode(int off) {
         String s = "idx:" + off;
         return Base64.getUrlEncoder().withoutPadding()
