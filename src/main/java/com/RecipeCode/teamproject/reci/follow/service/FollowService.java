@@ -14,24 +14,6 @@ public class FollowService {
     private final MemberRepository memberRepository;
     private final MapStruct mapStruct;
 
-//    public List<MemberDto> searchUsers(String keyword) {
-//        return memberRepository.findByUserIdContainingIgnoreCase(keyword)
-//                .stream()
-//                .map(m-> new MemberDto(
-//                        m.getUserEmail(),
-//                        m.getUserId(),
-//                        m.getNickname(),
-//                        m.getProfileImageUrl(),
-//                        m.getUserLocation(),
-//                        m.getUserBlog(),
-//                        m.getUserInsta(),
-//                        m.getUserWebsite(),
-//                        m.getUserIntroduce(),
-//                        m.getUserBlog(),
-//                        m.getUserYoutube()
-//                ))
-//                .toList();
-//    }
 
 //  Service
   public List<MemberDto> searchUsers(String keyword) {

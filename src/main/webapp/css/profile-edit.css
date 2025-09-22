@@ -1,0 +1,36 @@
+/* 폼/라벨 */
+.ttl{margin:0 0 8px;font-weight:800}
+.label{display:block;font-size:.9rem;color:var(--text);margin-bottom:6px}
+.hint{margin:.25rem 0 0;color:var(--muted);font-size:.86rem}
+.input,.textarea,.select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+.textarea{min-height:88px;resize:vertical}
+
+/* 아바타 업로더 */
+.avatar-row{display:grid;gap:10px}
+.avatar-uploader{position:relative;aspect-ratio:1/1;border-radius:999px;overflow:hidden;min-width:240px;background:linear-gradient(135deg,#eee,#ddd);display:grid;place-items:center;border:1px dashed #d5d5dc;justify-self:center}
+.avatar-uploader input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.avatar-uploader img{width:100%;height:100%;object-fit:cover}
+.avatar-row .id-block{display:grid;gap:8px}
+
+/* 태그(간단 스타일) */
+.tag{font-weight:500;margin-right:4px;border:1px dotted #ddd;border-radius:15px;padding:4px}
+.tag .x{cursor:pointer;user-select:none}
+.tag .x:hover{opacity:.8;transform:scale(1.05)}
+
+/* 스위치/액션 */
+.switch{display:flex;align-items:center;gap:8px}
+.switch input{appearance:none;width:42px;height:24px;background:#ddd;border-radius:999px;position:relative;outline:none;cursor:pointer}
+.switch input:checked{background:#111827}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.switch input:checked::after{transform:translateX(18px)}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.actions .spacer{flex:1}
+
+/* 반응형 */
+@media (min-width:680px){
+  .form{display:flex;align-items:flex-start;gap:12px}
+  .form>main{flex:1;display:grid;gap:12px}
+  .form>.help{width:320px;position:sticky;top:12px;align-self:flex-start}
+  .avatar-row{grid-template-columns:1fr 1fr}
+  .avatar-uploader{min-width:180px}
+}

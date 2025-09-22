@@ -45,15 +45,15 @@ public class RecipesService {
     private final RecipeMapStruct recipeMapStruct;
     private final ErrorMsg errorMsg;
 
+    @PersistenceContext
+    private EntityManager em; // 👉 JPA 영속성 컨텍스트 제어용
+
     // 내 팔로우 페이지 : 특정 ID 팔로우 피드보기 (최신순)
     public Page<RecipesDto> getFollowFeed(List<String> followIds, Pageable pageable) {
-//        공개 레시피
         String status = "PUBLIC";
-
         Page<Recipes> recipesPage = recipesRepository
                 .findByMember_UserIdInAndPostStatusOrderByInsertTimeDesc(
                         followIds, status, pageable);
-
         return recipesPage.map(recipesDto -> recipeMapStruct.toRecipeDto(recipesDto));
     }
 
@@ -78,26 +78,31 @@ public class RecipesService {
         recipe.setMember(member);
 
         if ("VIDEO".equalsIgnoreCase(recipesDto.getRecipeType())) {
+            // ▶ VIDEO 업로드: 썸네일은 항상 "이미지 URL"로 저장 (검색 카드에서 <img>로 사용)
             recipe.setRecipeType("VIDEO");
-            String embedUrl = toYoutubeEmbed(recipesDto.getVideoUrl());
             recipe.setVideoUrl(recipesDto.getVideoUrl());
-            // 동영상은 내부 썸네일/다운로드 URL 불필요
             recipe.setThumbnail(null);
-            recipe.setThumbnailUrl(embedUrl); // 피드 썸네일 쓰려면(선택)
+
+            // 🔑 핵심 변경: embed를 thumbnailUrl에 넣지 않고, i.ytimg.com 이미지 URL을 넣는다
+            String thumb = youtubeThumb(recipesDto.getVideoUrl());
+            recipe.setThumbnailUrl(thumb != null ? thumb : "");
+
+            // (선택) 상세에서 쓸 embed URL을 별도 필드로 관리한다면 여기서 세팅
+            // recipe.setEmbedUrl(toYoutubeEmbed(recipesDto.getVideoUrl()));
+
         } else {
+            // ▶ IMAGE 업로드
             recipe.setRecipeType("IMAGE");
             recipe.setVideoUrl(null);
             recipe.setThumbnail(thumbnail);
-            recipe.setThumbnailUrl(generateDownloadUrl(uuid));
+            recipe.setThumbnailUrl(generateDownloadUrl(uuid)); // 이미지 다운로드 URL
         }
 
-        // 3) 본문/카운터 기본값 보정 (선택)
-        //  └ 엔티티가 기본형 long 이면 생략 가능
+        // 3) 본문/카운터 기본값 보정
         if (recipe.getViewCount() == null) recipe.setViewCount(0L);
         if (recipe.getLikeCount() == null) recipe.setLikeCount(0L);
         if (recipe.getCommentCount() == null) recipe.setCommentCount(0L);
         if (recipe.getReportCount() == null) recipe.setReportCount(0L);
-
 
         // 2) 레시피 저장
         Recipes savedRecipe = recipesRepository.saveAndFlush(recipe);
@@ -108,7 +113,6 @@ public class RecipesService {
 
         // 3) 연관 엔티티 저장
         ingredientService.saveAll(ingredientDtos, recipe);
-//        recipeContentService.saveRecipeContent(contentDtos, images, recipe);
         recipeTagService.saveTagsForRecipe(tagDtos, recipe);
 
         return savedRecipe.getUuid();
@@ -140,7 +144,7 @@ public class RecipesService {
         Recipes recipe = recipesRepository.findById(uuid)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
-//        작성자 검증 : 테스트 후 살릴 것
+        // 작성자 검증 : 테스트 후 살릴 것
         if (userEmail != null &&
                 !userEmail.equalsIgnoreCase(recipe.getMember().getUserEmail())) {
             throw new RuntimeException(errorMsg.getMessage("errors.unauthorized"));
@@ -149,13 +153,19 @@ public class RecipesService {
         // 1) 레시피 기본 정보 업데이트
         recipeMapStruct.updateRecipe(recipesDto, recipe);
 
-//        IMAGE / VIDEO 전환 처리
+        // IMAGE / VIDEO 전환 처리
         if ("VIDEO".equalsIgnoreCase(recipesDto.getRecipeType())) {
-            String youtubeThumb = toYoutubeEmbed(recipesDto.getVideoUrl());
             recipe.setRecipeType("VIDEO");
             recipe.setVideoUrl(recipesDto.getVideoUrl());
             recipe.setThumbnail(null);
-            recipe.setThumbnailUrl(youtubeThumb); // 이미지 썸네일로 사용
+
+            // 🔑 핵심 변경: 썸네일은 항상 "이미지 URL"로 저장
+            String thumb = youtubeThumb(recipesDto.getVideoUrl());
+            recipe.setThumbnailUrl(thumb != null ? thumb : "");
+
+            // (선택) 상세 전용 embed 필드에 저장한다면 여기도 같이
+            // recipe.setEmbedUrl(toYoutubeEmbed(recipesDto.getVideoUrl()));
+
         } else {
             recipe.setRecipeType("IMAGE");
             recipe.setVideoUrl(null);
@@ -173,7 +183,6 @@ public class RecipesService {
 
         // 🔥 기존 태그 삭제 후 새로 추가
         recipeTagService.syncTagsForRecipe(recipe, tagDtos);
-
     }
 
     /* 상세 조회 */
@@ -194,10 +203,7 @@ public class RecipesService {
         dto.setIngredients(recipeMapStruct.toIngredientDtoList(ingredients));
         dto.setContents(recipeMapStruct.toRecipeContentDtoList(contents));
         return dto;
-
-
     }
-
 
     public void updateRecipe(String uuid,
                              RecipesDto recipesDto,
@@ -209,22 +215,11 @@ public class RecipesService {
                 tagDtos, null, null);
     }
 
-    //    상세조회
+    // 상세조회
     public Recipes findById(String uuid) {
         return recipesRepository.findById(uuid)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
     }
-
-    /* 삭제 */
-//    @Transactional
-//    public void deleteRecipe(String uuid) {
-//        // 부모에 재료/단계 컬렉션 안 들고 있으니 FK 제약 피하려면 수동 삭제 필요
-//        recipeTagRepository.deleteByRecipesUuid(uuid);
-//        ingredientRepository.deleteByRecipesUuid(uuid);
-//        recipeContentRepository.deleteByRecipesUuid(uuid);
-//        recipesRepository.deleteById(uuid);
-//
-//    }
 
     /* 소프트 삭제 */
     @Transactional
@@ -236,7 +231,6 @@ public class RecipesService {
         // TODO : 물리 삭제 아님(entity @Where, @SQLDelete 사용)
         //   Hibernate가 soft delete로 변환 실행
         recipesRepository.delete(recipes);
-
     }
 
     public byte[] findThumbnailByUuid(String uuid) {
@@ -248,11 +242,15 @@ public class RecipesService {
     /* 조회수 */
     public void increaseViewCount(String uuid) {
         Recipes recipe = recipesRepository.findByUuid(uuid)
-                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
         recipe.setViewCount(recipe.getViewCount() + 1);
     }
 
+    // ---------------------------
+    // 유튜브 관련 유틸
+    // ---------------------------
 
+    /** 상세페이지 iframe용: 원본 URL을 embed URL로 변환 */
     public String toYoutubeEmbed(String url) {
         try {
             java.net.URL u = new java.net.URL(url);
@@ -261,7 +259,7 @@ public class RecipesService {
             String q = u.getQuery(); // v=, t= 같은 파라미터
 
             // youtu.be/VIDEOID
-            if (host.contains("youtu.be")) {
+            if (host != null && host.contains("youtu.be")) {
                 String id = path.replaceFirst("^/", "");
                 String start = parseStartSeconds(q);
                 return start == null
@@ -269,7 +267,7 @@ public class RecipesService {
                         : "https://www.youtube.com/embed/" + id + "?start=" + start;
             }
             // youtube.com/watch?v=VIDEOID
-            if (host.contains("youtube.com")) {
+            if (host != null && host.contains("youtube.com")) {
                 java.util.Map<String, String> params = splitQuery(q);
                 String id = params.get("v");
                 if (id != null && !id.isBlank()) {
@@ -279,18 +277,41 @@ public class RecipesService {
                             : "https://www.youtube.com/embed/" + id + "?start=" + start;
                 }
                 // shorts/VIDEOID
-                if (path.startsWith("/shorts/")) {
+                if (path != null && path.startsWith("/shorts/")) {
                     String ids = path.substring("/shorts/".length());
                     return "https://www.youtube.com/embed/" + ids;
                 }
                 // 재생목록
-                if (path.startsWith("/playlist")) {
+                if (path != null && path.startsWith("/playlist")) {
                     String list = splitQuery(q).get("list");
                     if (list != null) return "https://www.youtube.com/embed/videoseries?list=" + list;
                 }
             }
         } catch (Exception ignore) {
         }
+        return null;
+    }
+
+    /** 검색 카드용 썸네일: 유튜브 영상이면 i.ytimg.com 이미지 URL 반환 */
+    private String youtubeThumb(String url) {
+        if (url == null || url.isBlank()) return null;
+        String id = extractYouTubeId(url);
+        return (id == null) ? null : "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg";
+    }
+
+    /** 다양한 유튜브 URL에서 videoId 추출 (watch, youtu.be, shorts, embed 등) */
+    private String extractYouTubeId(String url) {
+        if (url == null || url.isBlank()) return null;
+        java.util.regex.Matcher m;
+        // watch?v=
+        m = java.util.regex.Pattern.compile("[?&]v=([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(1);
+        // youtu.be/<id>
+        m = java.util.regex.Pattern.compile("youtu\\.be/([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(1);
+        // /shorts/<id> 또는 /embed/<id>
+        m = java.util.regex.Pattern.compile("/(shorts|embed)/([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(2);
         return null;
     }
 
@@ -321,7 +342,6 @@ public class RecipesService {
         if (ms.find()) secs += Integer.parseInt(ms.group(1));
         return secs > 0 ? String.valueOf(secs) : null;
     }
-
 
     public void deleteRecipe(String uuid) {
     }

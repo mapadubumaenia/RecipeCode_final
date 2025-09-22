@@ -7,12 +7,16 @@ import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
 import com.RecipeCode.teamproject.reci.feed.comments.dto.CommentsDto;
 import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
+import com.RecipeCode.teamproject.reci.function.follow.dto.FollowDto;
+import com.RecipeCode.teamproject.reci.function.follow.entity.Follow;
 import com.RecipeCode.teamproject.reci.function.recipeReport.dto.RecipeReportDto;
 import com.RecipeCode.teamproject.reci.function.recipeReport.entity.RecipeReport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE  // null 제외 기능(update 시 사용)
@@ -54,4 +58,12 @@ public interface MapStruct {
     @Mapping(source = "userEmail", target = "member.userEmail")
     @Mapping(source = "uuid", target = "recipes.uuid")
     RecipeReport toEntity(RecipeReportDto recipeReportDto);
+
+    // Follow <-> FollowDto
+    @Mapping(source = "follower", target = "member")   // 팔로워 목록 조회 시
+    FollowDto toFollowerDto(Follow follow);
+
+    @Mapping(source = "following", target = "member")  // 팔로잉 목록 조회 시
+    FollowDto toFollowingDto(Follow follow);
+
 }
