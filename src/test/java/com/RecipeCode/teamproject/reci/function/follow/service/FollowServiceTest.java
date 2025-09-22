@@ -2,6 +2,7 @@ package com.RecipeCode.teamproject.reci.function.follow.service;
 
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
+import com.RecipeCode.teamproject.reci.function.follow.dto.FollowDto;
 import com.RecipeCode.teamproject.reci.function.follow.entity.Follow;
 import com.RecipeCode.teamproject.reci.function.follow.repository.FollowRepository;
 import lombok.extern.log4j.Log4j2;
@@ -119,6 +120,37 @@ class FollowServiceTest {
         // then
         List<Follow> follows = followRepository.findByFollower(follower, Pageable.unpaged()).getContent();
         log.info("팔로우 개수 (언팔로우 후) : {}", follows.size()); // 기대값 = 0
+    }
+
+    @Test
+    void getFollowingList() {
+        // 팔로우 관계 생성
+        followService.follow("zxcv@gmail.com", "sj12@naver.com");
+
+        // when (팔로잉 목록 조회)
+        Slice<FollowDto> followingList =
+                followService.getUserFollowingList("zxcv@gmail.com", Pageable.unpaged());
+        // then
+        log.info("팔로잉 목록 개수  : {}", followingList.getContent().size());
+        log.info("팔로잉 대상 닉네임  : {}", followingList.getContent().get(0).getMember().getNickname());
+
+    }
+
+    @Test
+    void getFollowerList() {
+        // given (팔로우 관계 생성)
+        followService.follow("zxcv@gmail.com", "sj12@naver.com");
+
+
+        // when (팔로워 목록 조회: sj12 기준)
+        Slice<FollowDto> followerList =
+                followService.getUserFollowerList("sj12@naver.com", Pageable.unpaged());
+
+        // then (로그로 확인)
+        log.info("팔로워 목록 개수  : {}", followerList.getContent().size());
+        if (!followerList.isEmpty()) {
+            log.info("팔로워 닉네임  : {}", followerList.getContent().get(0).getMember().getNickname());
+        }
     }
 }
 
