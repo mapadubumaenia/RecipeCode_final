@@ -28,6 +28,13 @@ public class SearchService {
     private final ElasticsearchOperations es;
     private final SearchLogService logs;
 
+    // ✅ 해시태그 추출 패턴 (한글/영문/숫자/언더스코어/하이픈)
+    private static final Pattern HASHTAG = Pattern.compile("#([\\p{L}\\p{N}_-]+)");
+
+    // ✅ tags 정확일치에 사용할 후보 필드들(매핑 차이 안전 대비)
+    private static final String TAGS_FIELD_KEYWORD = "tags.keyword";
+    private static final String TAGS_FIELD = "tags";
+
     public SearchService(ElasticsearchOperations es, SearchLogService logs) {
         this.es = es;
         this.logs = logs;
@@ -51,8 +58,15 @@ public class SearchService {
         filters.add(Query.of(b -> b.term(t -> t.field("visibility").value("PUBLIC"))));
         filters.add(Query.of(b -> b.bool(bb -> bb.mustNot(mn -> mn.term(t -> t.field("deleted").value(true))))));
         if (tags != null && !tags.isEmpty()) {
-            List<FieldValue> vals = tags.stream().map(FieldValue::of).toList();
-            filters.add(Query.of(b -> b.terms(t -> t.field("tags").terms(v -> v.value(vals)))));
+            // 🔁 필터로 넘어온 tagsCsv도 #가 있을 수 있으니 제거 후 정확일치(OR) — 필요시 AND로 변경 가능
+            List<String> cleaned = tags.stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> s.startsWith("#") ? s.substring(1) : s)
+                    .toList();
+
+            // OR(terms) — keyword 필드 우선, 실패 대비로 tags(그대로)도 함께 should로 묶자
+            filters.add(orTermsOnTagFields(cleaned));
         }
         Query boolQuery = Query.of(b -> b.bool(bb -> bb.must(main).filter(filters)));
 
@@ -61,8 +75,8 @@ public class SearchService {
                 .withQuery(boolQuery)
                 .withPageable(PageRequest.of(0, size));
 
-        // 4) 집계
-        qb.withAggregation("tags", Aggregation.of(a -> a.terms(t -> t.field("tags").size(20))));
+        // 4) 집계 (keyword 우선, 없으면 tags로도 동작)
+        qb.withAggregation("tags", Aggregation.of(a -> a.terms(t -> t.field(TAGS_FIELD_KEYWORD).size(20))));
         qb.withAggregation("by_day", Aggregation.of(a -> a.dateHistogram(h -> h
                 .field("createdAt")
                 .fixedInterval(fi -> fi.time("1d")))));
@@ -135,15 +149,29 @@ public class SearchService {
         if (!StringUtils.hasText(qv)) {
             return Query.of(b -> b.matchAll(m -> m));
         }
-        if (qv.startsWith("#") && qv.length() > 1) {
-            String tag = qv.substring(1).trim();
-            return Query.of(b -> b.term(t -> t.field("tags").value(tag)));
+
+        // ✅ 사용자가 입력한 #태그들을 추출 → 인덱스는 해시 없이 저장되므로 해시 제거(핵심)
+        List<String> hashtags = extractHashtags(qv); // ["간단","매운"] 등
+        if (!hashtags.isEmpty()) {
+            // 각 태그에 대해 (tags.keyword:간단 OR tags:간단)를 MUST AND
+            return Query.of(b -> b.bool(bb -> {
+                for (String tagCore : hashtags) {
+                    final String val = tagCore; // 해시 제거된 핵심 값
+                    bb.must(m -> m.bool(sb -> sb
+                            .should(s1 -> s1.term(t1 -> t1.field(TAGS_FIELD_KEYWORD).value(val)))
+                            .should(s2 -> s2.term(t2 -> t2.field(TAGS_FIELD).value(val)))
+                    ));
+                }
+                return bb;
+            }));
         }
+
         if (qv.startsWith("@") && qv.length() > 1) {
             String nick = qv.substring(1).trim();
-            // ✅ @검색을 authorNick으로 정확 일치
             return Query.of(b -> b.term(t -> t.field("authorNick").value(nick)));
         }
+
+        // 일반 검색 (기존 유지)
         return Query.of(b -> b.bool(bb -> bb
                 .should(s -> s.multiMatch(mm -> mm
                         .query(qv)
@@ -154,6 +182,28 @@ public class SearchService {
                         .fields("title^3", "body", "authorNick")
                         .type(TextQueryType.BoolPrefix)))
                 .minimumShouldMatch("1")));
+    }
+
+    // ✅ 여러 해시태그 추출 유틸 (해시 제거해서 반환)
+    private static List<String> extractHashtags(String q) {
+        if (!StringUtils.hasText(q)) return List.of();
+        Matcher m = HASHTAG.matcher(q);
+        List<String> out = new ArrayList<>();
+        while (m.find()) {
+            String core = m.group(1).trim();
+            if (!core.isEmpty()) out.add(core);
+        }
+        return out;
+    }
+
+    // ✅ 필터(tagsCsv) OR terms를 keyword/tags 양쪽에 안전하게 거는 헬퍼
+    private static Query orTermsOnTagFields(List<String> plainTags) {
+        // keyword 필드 terms OR 원 필드 terms를 should로 묶음
+        List<FieldValue> vals = plainTags.stream().map(FieldValue::of).toList();
+        return Query.of(b -> b.bool(bb -> bb
+                .should(s -> s.terms(t -> t.field(TAGS_FIELD_KEYWORD).terms(v -> v.value(vals))))
+                .should(s -> s.terms(t -> t.field(TAGS_FIELD).terms(v -> v.value(vals))))
+        ));
     }
 
     /** 쇼츠(트렌딩) */
