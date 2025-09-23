@@ -58,14 +58,14 @@ public class SearchService {
         filters.add(Query.of(b -> b.term(t -> t.field("visibility").value("PUBLIC"))));
         filters.add(Query.of(b -> b.bool(bb -> bb.mustNot(mn -> mn.term(t -> t.field("deleted").value(true))))));
         if (tags != null && !tags.isEmpty()) {
-            // 🔁 필터로 넘어온 tagsCsv도 #가 있을 수 있으니 제거 후 정확일치(OR) — 필요시 AND로 변경 가능
+            // 필터로 넘어온 tagsCsv도 #가 있을 수 있으니 제거 후 정확일치(OR)
             List<String> cleaned = tags.stream()
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .map(s -> s.startsWith("#") ? s.substring(1) : s)
                     .toList();
 
-            // OR(terms) — keyword 필드 우선, 실패 대비로 tags(그대로)도 함께 should로 묶자
+            // OR(terms) — keyword 필드 우선, 실패 대비로 tags(그대로)도 함께 should로 묶기
             filters.add(orTermsOnTagFields(cleaned));
         }
         Query boolQuery = Query.of(b -> b.bool(bb -> bb.must(main).filter(filters)));
@@ -107,7 +107,7 @@ public class SearchService {
         // 8) 결과 매핑
         var items = hits.getSearchHits().stream().map(h -> {
             var d = h.getContent();
-            var m = new LinkedHashMap<String, Object>(12);
+            var m = new LinkedHashMap<String, Object>(16);
             m.put("id", h.getId());
             m.put("title", d.getTitle() != null ? d.getTitle() : "");
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
@@ -116,9 +116,16 @@ public class SearchService {
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("score", h.getScore());
-            m.put("thumbUrl", resolveThumb(d)); // 👈 핵심
+            m.put("thumbUrl", resolveThumb(d)); // 레거시/폴백 유지
             m.put("comments", d.getComments() != null ? d.getComments() : 0L);
             m.put("views", d.getViews() != null ? d.getViews() : 0L);
+
+            // ⭐ 신규: 동영상/이미지 구분 메타
+            Media media = buildMedia(d);
+            m.put("mediaKind", media.kind());
+            m.put("mediaSrc", media.src());
+            m.put("poster", media.poster());
+
             return m;
         }).toList();
 
@@ -150,7 +157,7 @@ public class SearchService {
             return Query.of(b -> b.matchAll(m -> m));
         }
 
-        // ✅ 사용자가 입력한 #태그들을 추출 → 인덱스는 해시 없이 저장되므로 해시 제거(핵심)
+        // ✅ 입력한 #태그들을 추출 → 인덱스는 해시 없이 저장되므로 해시 제거
         List<String> hashtags = extractHashtags(qv); // ["간단","매운"] 등
         if (!hashtags.isEmpty()) {
             // 각 태그에 대해 (tags.keyword:간단 OR tags:간단)를 MUST AND
@@ -213,9 +220,8 @@ public class SearchService {
         var qb = NativeQuery.builder()
                 .withQuery(Query.of(b -> b.bool(bb -> bb
                         .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
-                        .filter(f -> f.bool(b2 -> b2.mustNot(mn -> mn.term(t -> t.field("deleted").value(true))))) // ✅ 추가
+                        .filter(f -> f.bool(b2 -> b2.mustNot(mn -> mn.term(t -> t.field("deleted").value(true)))))
                 )))
-
                 .withPageable(PageRequest.of(0, size))
                 .withSort(s -> s.field(f -> f.field("likes").order(SortOrder.Desc)))
                 .withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)))
@@ -228,7 +234,7 @@ public class SearchService {
 
         var items = hits.getSearchHits().stream().map(h -> {
             var d = h.getContent();
-            var m = new LinkedHashMap<String, Object>(10);
+            var m = new LinkedHashMap<String, Object>(16);
             m.put("id", h.getId());
             m.put("title", d.getTitle() != null ? d.getTitle() : "");
             m.put("authorId", d.getAuthorId() != null ? d.getAuthorId() : "");
@@ -236,7 +242,14 @@ public class SearchService {
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
-            m.put("thumbUrl", resolveThumb(d)); // 👈 핵심
+            m.put("thumbUrl", resolveThumb(d)); // 레거시/폴백 유지
+
+            // ⭐ 신규: 동영상/이미지 구분 메타
+            Media media = buildMedia(d);
+            m.put("mediaKind", media.kind());
+            m.put("mediaSrc", media.src());
+            m.put("poster", media.poster());
+
             return m;
         }).toList();
 
@@ -252,10 +265,10 @@ public class SearchService {
     }
 
     // ===============================
-    // 썸네일 보정 유틸 (핵심)
+    // 썸네일/미디어 보정 유틸 (핵심)
     // ===============================
 
-    /** ES 문서 기반으로 '항상 이미지 URL'이 되도록 보정 */
+    /** ES 문서 기반으로 '항상 이미지 URL'이 되도록 보정 (레거시 유지) */
     private String resolveThumb(RecipeSearchDoc d) {
         String t = d.getThumbUrl();
         // 이미지로 보기에 안전하면 그대로 사용
@@ -288,5 +301,45 @@ public class SearchService {
         m = Pattern.compile("/(shorts|embed)/([A-Za-z0-9_-]{11})").matcher(url);
         if (m.find()) return m.group(2);
         return null;
+    }
+
+    // ⭐ 신규: 동영상/유튜브/이미지 판단 → 프런트에서 바로 렌더 가능한 메타
+    private record Media(String kind, String src, String poster) {}
+
+    private Media buildMedia(RecipeSearchDoc d) {
+        String thumb = d.getThumbUrl();
+        String video = d.getVideoUrl();
+
+        // 1) 동영상이 있으면 우선 처리
+        if (StringUtils.hasText(video)) {
+            // YouTube
+            String vid = extractYouTubeId(video);
+            if (vid != null) {
+                String embed = "https://www.youtube.com/embed/" + vid
+                        + "?autoplay=0&mute=0&playsinline=1&modestbranding=1&rel=0";
+                String poster = "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
+                return new Media("youtube", embed, poster);
+            }
+            // 파일형(간단 판정: 확장자)
+            String v = video.toLowerCase();
+            if (v.endsWith(".mp4") || v.endsWith(".webm") || v.endsWith(".mov") || v.endsWith(".m4v")) {
+                // 썸네일 있으면 poster로 사용
+                String poster = (StringUtils.hasText(thumb) && !looksLikeYouTubeUrl(thumb)) ? thumb : null;
+                return new Media("video", video, poster);
+            }
+        }
+
+        // 2) 동영상이 없으면 이미지
+        if (StringUtils.hasText(thumb) && !looksLikeYouTubeUrl(thumb)) {
+            return new Media("image", thumb, null);
+        }
+
+        // 3) 마지막: 유튜브 섬네일 폴백
+        String vid = extractYouTubeId(video);
+        if (vid != null) {
+            String poster = "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
+            return new Media("image", poster, null);
+        }
+        return new Media("image", "", null);
     }
 }
