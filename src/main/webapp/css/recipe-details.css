@@ -64,7 +64,7 @@
 .edit-controls{display:flex;gap:8px;margin-top:8px}
 .edit-controls .btn--ghost{background:transparent;border:1px solid var(--line)}
 .toggleBox{display:flex;justify-content:center;width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);font-weight:700;background:transparent;margin-bottom:12px}
-.cmtcard{display: flex; flex-direction: row;}
+.cmtCard{display: flex; flex-direction: row;}
 .cmtInfo{display: flex; flex-direction: row; align-items: center; gap: 4px; color:#ddd;}
 .name{flex:1; color:var(--text)}
 .name .createdAt {font-weight: normal; }

@@ -2,10 +2,12 @@ package com.RecipeCode.teamproject.reci.feed.comments.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.feed.commentslikes.entity.CommentsLikes;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,11 @@ public class Comments extends BaseTimeEntity {
     private String commentsContent;
 
     private Long likeCount;
-    private Long reportCount;
+
+    @Column(nullable = false)
+    private Long reportCount = 0L;
+
+    private LocalDateTime updateTime;
 
 //  대댓글용(자기참조객체)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -56,5 +62,22 @@ public class Comments extends BaseTimeEntity {
 //          cascade = CascadeType.ALL : 부모 댓글 저장/삭제 시, 연관된 자식 댓글도 같이 적용
 //          orphanRemoval = true : 자식 엔티티가 부모랑 관계 끊어지면 자동으로 삭제
 //                                 예) DB에서 parent_id = null
+    @OneToMany(mappedBy = "comments", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentsLikes> likes = new ArrayList<>();
 
+    public void increaseLikeCount() {
+        if (likeCount == null) {
+            this.likeCount=1L;
+        }else  {
+            this.likeCount+=1;
+        }
+    }
+
+    public void decreaseLikeCount() {
+        if (likeCount == null || this.likeCount <= 0) {
+            this.likeCount=0L;
+        }else   {
+            this.likeCount-=1;
+        }
+    }
 }
