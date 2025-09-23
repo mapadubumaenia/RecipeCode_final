@@ -3,6 +3,7 @@ package com.RecipeCode.teamproject.common;
 
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.auth.membertag.entity.MemberTag;
 import com.RecipeCode.teamproject.reci.faq.dto.FaqDto;
 import com.RecipeCode.teamproject.reci.faq.entity.Faq;
 import com.RecipeCode.teamproject.reci.feed.comments.dto.CommentsDto;
@@ -15,6 +16,8 @@ import com.RecipeCode.teamproject.reci.function.follow.entity.Follow;
 
 import com.RecipeCode.teamproject.reci.function.recipeReport.dto.RecipeReportDto;
 import com.RecipeCode.teamproject.reci.function.recipeReport.entity.RecipeReport;
+import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
+import com.RecipeCode.teamproject.reci.tag.entity.Tag;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -50,8 +53,43 @@ public interface MapStruct {
 
 
 // Member <-> MemberDto
+    @Mapping(target = "profileImage", ignore = true) // DTO가 MultipartFile이면 toDto시 매핑 제외
+    @Mapping(source = "memberTags", target = "interestTags")
     MemberDto toDto(Member member);
+
+    @Mapping(source = "interestTags", target = "memberTags")
+    @Mapping(target = "profileImage",
+            expression = "java( mapMultipartToBytes(memberDto.getProfileImage()) )")
     Member toEntity(MemberDto memberDto);
+    //  변환 헬퍼
+    default byte[] mapMultipartToBytes(org.springframework.web.multipart.MultipartFile file) {
+        try {
+            return (file == null || file.isEmpty()) ? null : file.getBytes();
+        } catch (Exception e) {
+            throw new RuntimeException("파일 변환 실패", e);
+        }
+    }
+
+    //  추가 매핑
+
+    // MemberTag -> TagDto
+    default TagDto map(MemberTag memberTag) {
+        if (memberTag == null || memberTag.getTag() == null) return null;
+        Tag tag = memberTag.getTag();
+        return new TagDto(tag.getTagId(), tag.getTag());
+    }
+
+    // TagDto -> MemberTag
+    default MemberTag map(TagDto dto) {
+        if (dto == null) return null;
+        Tag tag = new Tag();
+        tag.setTagId(dto.getTagId());
+        tag.setTag(dto.getTag());
+
+        MemberTag memberTag = new MemberTag();
+        memberTag.setTag(tag);
+        return memberTag;
+    }
 
     //  TODO: RecipeReportDto
     @Mapping(source = "member.userEmail", target = "userEmail")
