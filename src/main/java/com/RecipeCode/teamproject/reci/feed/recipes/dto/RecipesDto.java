@@ -3,6 +3,7 @@ package com.RecipeCode.teamproject.reci.feed.recipes.dto;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
 import com.RecipeCode.teamproject.reci.feed.recipecontent.dto.RecipeContentDto;
 import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -38,6 +39,9 @@ public class RecipesDto {
     private Long reportCount;
     private Long commentCount;
 
+    @JsonProperty("isLike")
+    private boolean liked;
+
     private LocalDateTime insertTime;
     private LocalDateTime updateTime;
 
@@ -53,7 +57,8 @@ public class RecipesDto {
                       List<TagDto> tags,
                       LocalDateTime insertTime,
                       String recipeType,
-                      String videoUrl) {
+                      String videoUrl,
+                      boolean liked) {
         this.uuid = uuid;
         this.recipeTitle = recipeTitle;
         this.userEmail = userEmail;
@@ -65,6 +70,7 @@ public class RecipesDto {
         this.tags = tags;
         this.recipeType = recipeType;
         this.videoUrl = videoUrl;
+        this.liked = liked;
     }
 
 //    상세페이지 조회용 생성자(필드 대부분 다 채움)
@@ -86,7 +92,8 @@ public RecipesDto(String uuid,
                   String recipeType,
                   String videoUrl,
                   LocalDateTime insertTime,
-                  LocalDateTime updateTime) {
+                  LocalDateTime updateTime,
+                  boolean liked) {
     this.uuid = uuid;
     this.userEmail = userEmail;
     this.userId = userId;
@@ -106,6 +113,7 @@ public RecipesDto(String uuid,
     this.tags = tags;
     this.recipeType = recipeType;
     this.videoUrl = videoUrl;
+    this.liked = liked;
 }
 
 //  등록 수정용 생성자

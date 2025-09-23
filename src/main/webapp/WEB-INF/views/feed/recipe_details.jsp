@@ -169,7 +169,7 @@
                 </div>
 
                 <div class="actions">
-                        <button class="btn-none red" id="btnLike">👍 좋아요 <span id="likeCnt"><c:out value="${recipe.likeCount}" /></span></button>
+                        <button class="btn-none ${recipe.liked ? 'active' : ''}" id="btnLike" data-liked = "${recipe.liked}">👍 좋아요 <span id="likeCnt"><c:out value="${recipe.likeCount}" /></span></button>
                     <button class="btn-none" id="btnShare">🔗 공유</button>
                     <button class="btn-none" id="btnReport">🚩 신고</button>
                 </div>

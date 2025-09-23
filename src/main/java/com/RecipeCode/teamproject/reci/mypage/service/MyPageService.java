@@ -10,7 +10,11 @@ import com.RecipeCode.teamproject.reci.feed.recipeslikes.repository.RecipesLikes
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,13 @@ public class MyPageService {
     public Slice<RecipesDto> getMyLikedRecipes(String userEmail,
                                                Pageable pageable) {
         Slice<Recipes> slice = recipesLikesRepository.findByLikedRecipes(userEmail, pageable);
-        return slice.map(l->recipeMapStruct.toRecipeDto(l));
+        List<RecipesDto> dtos = slice.getContent()
+                .stream().map(recipes->recipeMapStruct.toRecipeDto(recipes))
+                .collect(Collectors.toList());
+        for (RecipesDto dto : dtos) {
+            dto.setLiked(true);
+        }
+
+        return new SliceImpl<>(dtos, pageable, slice.hasNext());
     }
 }

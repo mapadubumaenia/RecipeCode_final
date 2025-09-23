@@ -57,7 +57,8 @@ public class RecipesLikesService {
         recipesLikesDto.setUserEmail(userEmail);
         recipesLikesDto.setUuid(recipeUuid);
         recipesLikesDto.setLiked(liked);
-        recipesLikesDto.setLikesCount(recipesLikesDto.getLikesCount());
+        long count = recipesLikesRepository.countVisibleLikes(recipeUuid);
+        recipesLikesDto.setLikesCount(count);
 
         return recipesLikesDto;
     }

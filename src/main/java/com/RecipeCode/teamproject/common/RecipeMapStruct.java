@@ -105,6 +105,7 @@ public interface RecipeMapStruct {
     @Mapping(source = "member.userEmail", target = "userEmail")
     @Mapping(source = "member.userId", target = "userId")
     @Mapping(source = "recipeTag", target = "tags")  // RecipeTag → TagDto 변환 필요
+    @Mapping(target = "liked", ignore = true)
     RecipesDto toRecipeDto(Recipes recipes);
 
     List<RecipesDto> toRecipeDtoList(List<Recipes> recipes);
@@ -129,6 +130,7 @@ public interface RecipeMapStruct {
     @Mapping(target = "likeCount", ignore = true)
     @Mapping(target = "reportCount", ignore = true)
     @Mapping(target = "commentCount", ignore = true)
+//    @Mapping(target = "liked", ignore = true)
     void updateRecipe(RecipesDto dto, @MappingTarget Recipes entity);
 
     /* ==========================
