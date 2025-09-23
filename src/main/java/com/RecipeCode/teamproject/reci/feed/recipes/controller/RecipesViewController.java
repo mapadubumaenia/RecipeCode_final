@@ -162,14 +162,16 @@ public class RecipesViewController {
                 headers, HttpStatus.OK);
     }
 
-    /** ✅ 상세 페이지 (리다이렉트 목적지) */
+    /** TODO: 상세 페이지 */
     @GetMapping("/recipes/{uuid}")
-    public String detail(@PathVariable String uuid, Model model) {
+    public String detail(@PathVariable String uuid,  @AuthenticationPrincipal SecurityUserDto user, Model model) {
         // 조회수 +1
          recipesService.increaseViewCount(uuid);
 
+         String viewerEmail = (user != null) ? user.getUsername() : null;
+
         // 서비스에서 DTO로 가져와 뷰에 그대로 바인딩
-        RecipesDto dto = recipesService.getRecipeDetails(uuid); // 서비스에 맞게 메서드명 조정
+        RecipesDto dto = recipesService.getRecipeDetails(uuid, viewerEmail); // 서비스에 맞게 메서드명 조정
 
         // 업로드 시간 문자열
         String insertTime = "";

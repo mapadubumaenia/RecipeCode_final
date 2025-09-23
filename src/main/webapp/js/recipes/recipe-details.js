@@ -54,6 +54,9 @@
     const recipeBox = document.querySelector(".container[data-recipe-uuid]");
     if (!btnLike || !likeCnt || !recipeBox) return;
 
+    const initiallyLiked = btnLike.dataset.liked === "true";
+    btnLike.classList.toggle("active", initiallyLiked);
+
     const recipeUuid = recipeBox.dataset.recipeUuid;
 
     btnLike.addEventListener("click", async () => {
@@ -73,16 +76,30 @@
                 //     method: "POST",
                 //     headers
             });
-            if (!resp.ok) throw new Error("서버 오류");
+            if (!resp.ok){
+                const msg = await resp.text();
+                if(resp.status === 401){
+                    if(confirm(msg + "\n로그인 페이지로 이동할까요?")){
+                        window.location.href = `${ctx}/auth/login`;
+                    }
+                } else if(resp.status === 400){
+                    alert(msg); // "본인 레시피에는 좋아요를 누를 수 없습니다!"
+                } else {
+                    alert("알 수 없는 오류 발생. 관리자에게 문의하세요!")
+                }
+                return;
+            }
             const data = await resp.json();
-
             // 서버에서 내려준 dto 값 반영
             likeCnt.textContent = data.likesCount;
-            if (data.liked) {
-                btnLike.classList.add("active"); // CSS로 하트 색 변환
-            } else {
-                btnLike.classList.remove("active");
-            }
+            const now = (data.isLike ?? data.liked ?? false) === true;
+            btnLike.classList.toggle("active", now);
+            btnLike.dataset.liked = String(now);
+            // if (data.liked) {
+            //     btnLike.classList.add("active"); // CSS로 하트 색 변환
+            // } else {
+            //     btnLike.classList.remove("active");
+            // }
         } catch (err) {
             console.error(err);
             alert("좋아요 처리 중 오류 발생 😢");

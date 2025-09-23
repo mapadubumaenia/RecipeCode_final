@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -40,5 +41,11 @@ public interface RecipesLikesRepository extends JpaRepository<RecipesLikes, Long
             "order by r.insertTime desc")
     Slice<Recipes> findByLikedRecipes(@Param("userEmail")String userEmail,
                                       Pageable pageable);
+
+    @Query(value = "select l.recipes.uuid from RecipesLikes l\n" +
+                   "where l.member.userEmail = :email\n" +
+                   "and l.recipes.uuid in :uuids")
+    List<String> findLikedRecipesUuids(@Param("email") String email,
+                                       @Param("uuids") Collection<String> uuids);
 
 }

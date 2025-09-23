@@ -1,4 +1,3 @@
-// src/main/java/com/RecipeCode/teamproject/es/reco/controller/FeedController.java
 package com.RecipeCode.teamproject.es.reco.controller;
 
 import com.RecipeCode.teamproject.es.reco.dto.FeedPageDto;
@@ -13,21 +12,27 @@ public class FeedController {
 
     private final FeedService feed;
 
+
+
+
     @GetMapping("/personal")
     public FeedPageDto personal(
-            @RequestParam String userId,
+            @RequestParam String userEmail,
             @RequestParam(required = false) String after,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return feed.personalFeed(userId, after, size);
+        // ✅ 이메일 소문자 고정 + size 가드(1~50)
+        String ue = (userEmail == null) ? "" : userEmail.trim().toLowerCase();
+        int sz = Math.min(Math.max(size, 1), 50);
+        return feed.personalFeed(ue, after, sz);
     }
 
-    // ★ hot 전용 엔드포인트
     @GetMapping("/hot")
     public FeedPageDto hot(
             @RequestParam(required = false) String after,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return feed.hot(after, size);
+        int sz = Math.min(Math.max(size, 1), 50);
+        return feed.hot(after, sz);
     }
 }

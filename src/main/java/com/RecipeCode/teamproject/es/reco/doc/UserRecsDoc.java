@@ -7,7 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-
 import java.util.List;
 
 @Data
@@ -15,9 +14,12 @@ import java.util.List;
 @Document(indexName = "user-recs")
 public class UserRecsDoc {
     @Id
-    private String userId;
-    @Field(type = FieldType.Nested)// ES 문서 ID = userId
-    private List<Item> items;          // [{recipeId, score}, ...]
+    private String userEmail;
+
+    @Field(type = FieldType.Nested)
+    private List<Item> items;
+
+    @Field(type = FieldType.Keyword)
     private String updatedAt;
 
     @Data @NoArgsConstructor @AllArgsConstructor

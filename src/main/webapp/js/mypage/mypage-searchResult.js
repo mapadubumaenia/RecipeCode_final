@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.querySelectorAll(".search-user").forEach(el => {
                     el.addEventListener("click", () => {
                         const uid = el.dataset.userId;
+                        // TODO: 여기여기 url 수정
                         window.location.href = "/mypage/" + uid;
                     });
                 });

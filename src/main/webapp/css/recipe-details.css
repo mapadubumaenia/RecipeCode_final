@@ -39,7 +39,7 @@
 .grid{grid-template-columns:1fr 1fr;margin-top:6px}
 .channel{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%}
 .channelInfo{display:flex;gap:6px}
-.btn.red{background:var(--accent);border-color:transparent}
+#btnLike.active { color: darkred; font-weight: bold; }
 .actions{display:flex;gap:10px;flex-wrap:wrap}
 
 

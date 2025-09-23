@@ -1,5 +1,6 @@
 package com.RecipeCode.teamproject.reci.feed.recipeslikes.controller;
 
+import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.feed.recipeslikes.dto.RecipesLikesDto;
 import com.RecipeCode.teamproject.reci.feed.recipeslikes.service.RecipesLikesService;
@@ -12,10 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,15 +23,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecipesLikesController {
 
     private final RecipesLikesService recipesLikesService;
+    private final ErrorMsg errorMsg;
 
     // 좋아요 토글
 
-    @PostMapping("/{uuid}/like")
+    @RequestMapping(path = "/{uuid}/like",
+                    method = {RequestMethod.POST, RequestMethod.DELETE})
     public ResponseEntity<RecipesLikesDto> toggleLike(
             @PathVariable String uuid,
             @AuthenticationPrincipal SecurityUserDto user){
         if (user == null) {
-            throw new RuntimeException("No user logged in");
+            throw new IllegalArgumentException(errorMsg.getMessage("errors.unauthorized"));
         }
         RecipesLikesDto dto = recipesLikesService.toggleLike(uuid, user.getUsername());
         return ResponseEntity.ok(dto);

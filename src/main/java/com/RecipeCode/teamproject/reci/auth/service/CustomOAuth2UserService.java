@@ -2,6 +2,8 @@ package com.RecipeCode.teamproject.reci.auth.service;
 
 import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.auth.notisetting.entity.NotiSetting;
+import com.RecipeCode.teamproject.reci.auth.notisetting.repository.NotiSettingRepository;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +29,7 @@ import java.util.Map;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final MemberRepository memberRepository;
+    private final NotiSettingRepository notiSettingRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -86,6 +89,24 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     .providerId(providerId)
                     .build();
             memberRepository.save(member);
+            memberRepository.flush();
+
+            NotiSetting follow = NotiSetting.builder()
+                    .member(member)
+                    .typeCode("FOLLOW")
+                    .allow(true)
+                    .build();
+
+            NotiSetting comment = NotiSetting.builder()
+                    .member(member)
+                    .typeCode("COMMENT")
+                    .allow(true)
+                    .build();
+
+            notiSettingRepository.save(follow);
+            notiSettingRepository.save(comment);
+
+
         } else {
             // 기존 회원일시 프로필 정보 업데이트
             member.setProvider(provider);

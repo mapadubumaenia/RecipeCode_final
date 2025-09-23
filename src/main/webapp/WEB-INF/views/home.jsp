@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: user
-  Date: 25. 9. 12.
-  Time: 오전 11:59
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
@@ -15,49 +8,53 @@
     <title>쉐프리드 — 레시피 피드</title>
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/newfeed-ver-main-wireframe.css'/>">
+    <style>
+        /* 링크가 카드 영역을 블록으로 덮도록 */
+        .post-link { display:block; text-decoration:none; color:inherit; }
+        .post-link.disabled { cursor:default; }
+    </style>
 </head>
 <body>
 <header class="container">
     <div class="flex-box">
         <h1 class="page-title">Recipe Code</h1>
-            <a class="register" href="/auth/register">👤</a>
+        <a class="register" href="/auth/register">👤</a>
         <div class="notif-wrap">
             <sec:authorize access="isAuthenticated()">
                 <sec:authentication property="principal.nickname"/>님
             </sec:authorize>
-                <button
-                        id="btnNotif"
-                        class="notif-btn"
-                        aria-haspopup="dialog"
-                        aria-expanded="false"
-                        aria-controls="notifPanel"
-                        title="알림"
-                >
-                    🔔
-                    <span class="notif-dot" aria-hidden="true"></span>
-                </button>
+            <button
+                    id="btnNotif"
+                    class="notif-btn"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                    aria-controls="notifPanel"
+                    title="알림"
+            >
+                🔔
+                <span class="notif-dot" aria-hidden="true"></span>
+            </button>
 
-                <!-- 드롭다운 패널 -->
-                <div
-                        id="notifPanel"
-                        class="notif-panel"
-                        role="dialog"
-                        aria-label="알림 목록"
-                >
-                    <div class="notif-head">
-                        <strong>알림</strong>
-                        <div class="actions">
-                            <button class="btn small ghost" id="markAll">
-                                모두 읽음
-                            </button>
-                        </div>
+            <!-- 드롭다운 패널 -->
+            <div
+                    id="notifPanel"
+                    class="notif-panel"
+                    role="dialog"
+                    aria-label="알림 목록"
+            >
+                <div class="notif-head">
+                    <strong>알림</strong>
+                    <div class="actions">
+                        <button class="btn small ghost" id="markAll">
+                            모두 읽음
+                        </button>
                     </div>
+                </div>
 
-                    <div class="notif-list" id="notifList"><!-- JS 렌더 --></div>
+                <div class="notif-list" id="notifList"><!-- JS 렌더 --></div>
 
-                    <div class="notif-foot">
-                        <button class="btn small ghost" id="closeNotif">닫기</button>
-                    </div>
+                <div class="notif-foot">
+                    <button class="btn small ghost" id="closeNotif">닫기</button>
                 </div>
             </div>
         </div>
@@ -75,7 +72,6 @@
     </form>
 </div>
 
-
 <main class="container layout">
     <!-- 메인 컬럼 -->
     <section class="main">
@@ -92,7 +88,6 @@
             <!-- 카드 1 -->
             <article class="card p-12 trend-card">
                 <div class="thumb badge">
-                    <!-- 썸네일 이미지 예시: 실제 이미지 쓰려면 src 교체 -->
                     <img
                             src="https://picsum.photos/seed/pasta/800/500"
                             alt="Spaghetti Aglio e Olio"
@@ -187,66 +182,214 @@
         <!-- Personalized Feed -->
         <h2 id="foryou" class="section-title">For you</h2>
 
-        <article class="card p-16 post">
-            <div class="post-head">
-                <div class="avatar-ss"><img src="" alt=""></div>
-                <div class="post-info">
-                    <div class="post-id">@CulinaryExpert</div>
-                    <div class="muted">2h • Rome, IT</div>
-                </div>
-                <button class="followbtn-sm" data-user-id="u_123" data-following="false"></button>
-            </div>
-            <div class="thumb">
-                <img
-                        src="https://picsum.photos/seed/ravioli/1200/800"
-                        alt="Homemade Ravioli photo"
-                />
-            </div>
-            <p class="muted">Homemade Ravioli</p>
-            <div class="post-cta">
-                <button class="btn-none">❤️ 128</button>
-                <button class="btn-none post-cmt" data-post-id="ravioli_555">💬 23</button>
-                <button class="btn-none">↗ Share</button>
-            </div>
-        </article>
+        <!-- === For You 추천 피드 (동적 로딩) === -->
+        <section id="forYouFeed" class="post-list"></section>
+        <div style="display:flex; justify-content:center; margin:12px 0;">
+            <button id="forYouMoreBtn" class="btn" style="min-width:140px;">더 보기</button>
+        </div>
 
-        <article class="card p-16 post">
-            <div class="post-head">
-                <div class="avatar-ss"><img src="" alt=""></div>
-                <div class="post-info">
-                    <div class="post-id">@HealthyVibes</div>
-                    <div class="muted">1d • Seoul, KR</div>
-                </div>
-                <button class="followbtn-sm" data-user-id="u_123" data-following="false">Fllowing</button>
-            </div>
-            <div class="thumb">
-                <img
-                        src="https://picsum.photos/seed/smoothie/1200/800"
-                        alt="Smoothie Bowl photo"
-                />
-            </div>
-            <p class="muted">Starting my day with a healthy smoothie bowl 🥣</p>
-            <div class="post-cta">
-                <button class="btn-none">❤️ 128</button>
-                <button class="btn-none">💬 23</button>
-                <button class="btn-none">↗ Share</button>
-            </div>
-        </article>
+        <!-- 로그인 사용자의 이메일을 JS에 주입 (미로그인 시 공백) -->
+        <script>
+            (function setUserEmail(){
+                window.__USER_EMAIL__ = '';
+            })();
+        </script>
+        <sec:authorize access="isAuthenticated()">
+            <script>
+                (function(){
+                    var a = '<sec:authentication property="principal.userEmail"/>' || '';
+                    var b = '<sec:authentication property="principal.username"/>' || '';
+                    var v = (a && a.trim().length) ? a : (b && b.trim().length ? b : '');
+                    if (v) window.__USER_EMAIL__ = v.trim().toLowerCase();
+                })();
+            </script>
+        </sec:authorize>
+
+        <!-- ✅ 공통 유틸: 컨텍스트/UUID/상세URL -->
+        <script>
+            var CTX = '${pageContext.request.contextPath}';
+            function isUuid36(s){
+                return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || '');
+            }
+            function detailUrl(id){ return CTX + '/recipes/' + encodeURIComponent(id); }
+        </script>
+
+        <script>
+            (function(){
+                var $list = document.getElementById('forYouFeed');
+                var $btn  = document.getElementById('forYouMoreBtn');
+
+                var USER_EMAIL = (window.__USER_EMAIL__ || '').trim().toLowerCase();
+                var pageSize = 20;
+                var nextCursor = null;
+                var busy = false;
+
+                function buildUrl() {
+                    var url;
+                    if (USER_EMAIL && USER_EMAIL.length > 0) {
+                        url = '/api/feed/personal?userEmail=' + encodeURIComponent(USER_EMAIL);
+                    } else {
+                        url = '/api/feed/hot?';
+                    }
+
+                    // 쿼리 파라미터 정리
+                    if (url.indexOf('?') === -1) {
+                        url += '?';
+                    } else if (url.charAt(url.length - 1) !== '&' && url.charAt(url.length - 1) !== '?') {
+                        url += '&';
+                    }
+
+                    if (nextCursor) {
+                        url += 'after=' + encodeURIComponent(nextCursor) + '&';
+                    }
+                    url += 'size=' + encodeURIComponent(pageSize);
+                    return url;
+                }
+
+                function esc(v){
+                    var s = (v == null ? '' : String(v));
+                    return s.replace(/&/g,'&amp;')
+                        .replace(/</g,'&lt;')
+                        .replace(/>/g,'&gt;')
+                        .replace(/"/g,'&quot;')
+                        .replace(/'/g,'&#39;');
+                }
+
+                function pickThumb(it){
+                    if (it.thumbUrl && typeof it.thumbUrl === 'string' && it.thumbUrl.trim().length > 0){
+                        return it.thumbUrl;
+                    }
+                    var seed = (it.id || 'recipe').toString().slice(0,12).replace(/[^a-zA-Z0-9]/g,'');
+                    return 'https://picsum.photos/seed/' + encodeURIComponent(seed || 'rc') + '/1200/800';
+                }
+
+                /* ✅ 여기서부터 변경: 링크 포함 카드(상세 이동 지원) */
+                function safeId(it){
+                    // 서비스가 RecipeCardDto.id로 UUID를 내려줌. 혹시 대비해 uuid/_id도 폴백.
+                    return (it.id || it.uuid || it._id || '').toString();
+                }
+
+                function cardHtml(it){
+                    var tagsHtml = '';
+                    if (it.tags && it.tags.length) {
+                        var parts = [];
+                        for (var i=0;i<it.tags.length;i++){
+                            parts.push('<span class="tag">#' + esc(it.tags[i]) + '</span>');
+                        }
+                        tagsHtml = parts.join(' ');
+                    }
+                    var score = (typeof it.recScore === 'number' && it.recScore > 0) ? (' · score ' + it.recScore) : '';
+                    var likes = (typeof it.likes === 'number') ? it.likes : (it.likes || 0);
+                    var thumb = pickThumb(it);
+
+                    var rid = safeId(it);
+                    var hasUuid = isUuid36(rid);
+                    var href = hasUuid ? detailUrl(rid) : '#';
+
+                    var html = ''
+                        + '<article class="card p-16 post" data-id="' + esc(rid) + '">'
+                        +   '<div class="post-head">'
+                        +     '<div class="avatar-ss"><img src="" alt=""></div>'
+                        +     '<div class="post-info">'
+                        +       '<div class="post-id">@' + esc(it.author || it.authorNick || '') + '</div>'
+                        +       '<div class="muted">' + esc(it.createdAt || '') + '</div>'
+                        +     '</div>'
+                        +     '<button class="followbtn-sm" data-user-id="' + esc(it.author || it.authorNick || '') + '" data-following="false"></button>'
+                        +   '</div>'
+                        +   (hasUuid ? ('<a class="post-link" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">')
+                        +     '<div class="thumb">'
+                        +       '<img src="' + esc(thumb) + '" alt="' + esc(it.title || '') + '">'
+                        +     '</div>'
+                        +     '<p class="muted">' + esc(it.title || '') + score + '</p>'
+                        +     (tagsHtml ? ('<p class="muted">' + tagsHtml + '</p>') : '')
+                        +   (hasUuid ? '</a>' : '</div>')
+                        +   '<div class="post-cta">'
+                        +     '<button class="btn-none js-like">❤️ ' + likes + '</button>'
+                        +     '<button class="btn-none post-cmt js-cmt" data-post-id="' + esc(rid) + '">💬</button>'
+                        +     '<button class="btn-none js-share">↗ Share</button>'
+                        +   '</div>'
+                        + '</article>';
+                    return html;
+                }
+                /* ✅ 변경 끝 */
+
+                async function loadMore(){
+                    if (busy) return;
+                    busy = true;
+                    if ($btn) {
+                        $btn.disabled = true;
+                        $btn.textContent = '불러오는 중…';
+                    }
+
+                    try{
+                        var url = buildUrl();
+                        var res = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        var data = await res.json();
+
+                        if (data && data.items && data.items.length) {
+                            var html = '';
+                            for (var i=0;i<data.items.length;i++){
+                                html += cardHtml(data.items[i]);
+                            }
+                            var temp = document.createElement('div');
+                            temp.innerHTML = html;
+                            while (temp.firstChild) $list.appendChild(temp.firstChild);
+                        }
+                        nextCursor = (data && data.next) ? data.next : null;
+                    }catch(e){
+                        console.error(e);
+                        alert('추천 피드를 불러오지 못했어요.');
+                    }finally{
+                        if ($btn) {
+                            if (nextCursor) {
+                                $btn.textContent = '더 보기';
+                                $btn.disabled = false;
+                            } else {
+                                $btn.textContent = '마지막입니다';
+                                $btn.disabled = true;
+                            }
+                        }
+                        busy = false;
+                    }
+                }
+
+                // 초기 로드 + 버튼 이벤트
+                loadMore();
+                if ($btn) $btn.addEventListener('click', loadMore);
+
+                /* ✅ 카드 빈공간 클릭 시 상세 이동 (버튼은 이동 막기) */
+                document.addEventListener('click', function(e){
+                    // 이동 막아야 하는 버튼들
+                    if (e.target.closest('.js-like, .js-cmt, .js-share, .followbtn-sm')) {
+                        e.stopPropagation();
+                        return;
+                    }
+                    // a.post-link 자체는 기본 동작으로 이동
+                    if (e.target.closest('a.post-link')) return;
+
+                    var card = e.target.closest('article.post[data-id]');
+                    if (!card) return;
+                    var rid = card.getAttribute('data-id');
+                    if (isUuid36(rid)) {
+                        window.location.href = detailUrl(rid);
+                    }
+                });
+            })();
+        </script>
+        <!-- === /For You 추천 피드 === -->
+
     </section>
 
     <!-- 사이드바(태블릿/PC에서 오른쪽) -->
     <aside class="sidebar">
         <!-- 하단 버튼:모바일 display:none -->
         <div class="card p-16 stack-btns">
-            <!-- 1) 회원가입: GET /auth/register -->
             <a class="btn pc-register text-center"
                href="<c:url value='/auth/login'/>">Login</a>
 
-            <a class="btn text-center" href="newfeed-ver-mypage-wireframe.html"
-            >Profile</a>
-            <!-- 3) 레시피 등록: GET /recipes/add -->
-            <a class="btn primary text-center"
-               href="<c:url value='/recipes/add'/>">Upload Recipe</a>
+            <a class="btn text-center" href="newfeed-ver-mypage-wireframe.html">Profile</a>
+            <a class="btn primary text-center" href="<c:url value='/recipes/add'/>">Upload Recipe</a>
         </div>
         <!-- 팔로우 피드: -->
         <div class="followingfeed">
@@ -289,9 +432,7 @@
         <button class="search-btn" aria-label="검색">🔍</button>
     </div>
     <nav class="tabs">
-        <a class="tab is-active" href="newfeed-ver-mypage-wireframe.html"
-        >Profile</a
-        >
+        <a class="tab is-active" href="newfeed-ver-mypage-wireframe.html">Profile</a>
         <a class="tab" href="create-update.html">Upload</a>
     </nav>
 </footer>
