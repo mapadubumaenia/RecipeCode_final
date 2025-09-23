@@ -9,6 +9,29 @@
   <title>Search</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css">
+  <style>
+    /* ▶ 추가: 미디어 공통 스타일 */
+    .media {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+    }
+    .media.aspect {
+      aspect-ratio: 16 / 9;
+    }
+    .media > iframe,
+    .media > video,
+    .media > img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    /* 제목만 링크인 것을 시각적으로 구분 */
+    a.post-link.title { text-decoration: none; }
+    a.post-link.title:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
 <header class="container">
@@ -58,8 +81,6 @@
   </div>
 </header>
 
-
-
 <!-- 서치바 -->
 <nav class="container search-bar">
   <!-- 정렬 (표시는 그대로, 값만 new/hot) -->
@@ -82,89 +103,32 @@
 <main class="container layout">
   <!-- 메인 컬럼 -->
   <section class="main">
-    <!-- 쇼츠 (기존 그대로) -->
+    <!-- 쇼츠 (예시 카드, 실제 데이터 렌더는 JS가 담당) -->
     <h2 class="section-title">Trending Shorts</h2>
     <div id="trending" class="trend-grid">
-      <!-- 카드 1 -->
-      <article class="card p-12 trend-card">
-        <div class="thumb badge">
-          <img src="https://picsum.photos/seed/pasta/800/500" alt="Spaghetti Aglio e Olio" />
-        </div>
-        <div><div class="trend-title">Spaghetti Aglio e Olio</div></div>
-        <div class="actions">
-          <div>
-            <button class="btn-none">❤️ Like</button>
-            <button class="btn-none post-cmt" data-post-id="pasta_101">💬 12</button>
-          </div>
-          <button class="followbtn-sm" data-user-id="u_123" data-following="false">Follow</button>
-        </div>
-      </article>
-
-      <!-- 카드 2 -->
-      <article class="card p-12 trend-card">
-        <div class="thumb">
-          <img src="https://picsum.photos/seed/pancake/800/500" alt="Fluffy Pancakes" />
-        </div>
-        <div><div class="trend-title">Fluffy Pancakes</div></div>
-        <div class="actions">
-          <button class="act-btn">❤️ Like</button>
-          <button class="act-btn">💬 12</button>
-          <button class="act-btn">Fllowing</button>
-        </div>
-      </article>
-
-      <!-- 카드 3 -->
-      <article class="card p-12 trend-card">
-        <div class="thumb">
-          <img src="https://picsum.photos/seed/salad/800/500" alt="Caprese Salad" />
-        </div>
-        <div><div class="trend-title">Caprese Salad</div></div>
-        <div class="actions">
-          <button class="act-btn">❤️ Like</button>
-          <button class="act-btn">💬 12</button>
-          <button class="act-btn">Fllowing</button>
-        </div>
-      </article>
-
-      <!-- 카드 4 -->
-      <article class="card p-12 trend-card">
-        <div class="thumb">
-          <img src="https://picsum.photos/seed/risotto/800/500" alt="Mushroom Risotto" />
-        </div>
-        <div><div class="trend-title">Mushroom Risotto</div></div>
-        <div class="actions">
-          <button class="act-btn">❤️ Like</button>
-          <button class="act-btn">💬 12</button>
-          <button class="act-btn">Fllowing</button>
-        </div>
-      </article>
+      <!-- 서버 데이터로 대체됨 -->
     </div>
 
     <!-- 서치결과 -->
     <h2 id="foryou" class="section-title">Results</h2>
 
-    <!-- ▶ 결과가 렌더될 컨테이너 (디자인 유지) -->
+    <!-- 결과 컨테이너 -->
     <div id="results"></div>
-    <!-- 무한 스크롤 센티널(보이지 않음) -->
+    <!-- 무한 스크롤 센티널 -->
     <div id="resultsSentinel" style="height:1px"></div>
   </section>
 
   <!-- 사이드바(태블릿/PC에서 오른쪽) -->
   <aside class="sidebar">
     <div class="card p-16 stack-btns">
-      <!-- 1) 회원가입: GET /auth/register -->
       <a class="btn pc-register text-center"
          href="<c:url value='/auth/login'/>">login</a>
-
-      <!-- 2) 마이페이지: 아직 미구현이므로 비활성 처리 -->
       <button class="btn text-center" type="button" disabled aria-disabled="true" title="준비중">Profile</button>
-
-      <!-- 3) 레시피 등록: GET /recipes/add -->
       <a class="btn primary text-center"
          href="<c:url value='/recipes/add'/>">Upload Recipe</a>
     </div>
 
-    <!-- For you: 맞춤피드 -->
+    <!-- For you: 맞춤피드 샘플 -->
     <div class="followingfeed">
       <h2 class="section-title">For you</h2>
       <section id="following" class="card p-16 feature" style="margin-top: 12px">
@@ -176,7 +140,7 @@
           </div>
           <button class="followbtn-sm is-active" data-user-id="u_987" data-following="true"></button>
         </div>
-        <div class="thumb">
+        <div class="media aspect">
           <img src="https://picsum.photos/seed/smoothie/1200/800" alt="Smoothie Bowl photo" />
         </div>
         <p class="muted">Hand-picked favorites from our creators.</p>
@@ -202,7 +166,7 @@
 <script src="${pageContext.request.contextPath}/feed-follow-btn.js"></script>
 <script src="${pageContext.request.contextPath}/footer.js"></script>
 
-<!-- ✅ 통합검색 연동 JS (디자인 변경 없음, 무한 스크롤) -->
+<!-- ✅ 통합검색 연동 JS (무한 스크롤 + 동영상/유튜브 즉시 재생 지원) -->
 <script>
   (function() {
     var ctx = '${pageContext.request.contextPath}';
@@ -211,6 +175,7 @@
     var $btn = document.getElementById('btnSearch');
     var $list = document.getElementById('results');
     var $sentinel = document.getElementById('resultsSentinel');
+    var $trending = document.getElementById('trending');
 
     var state = {
       q: '',
@@ -224,16 +189,16 @@
     function seedFromUrl(){
       var params = new URLSearchParams(window.location.search);
       var qParam = params.get('q') || '';
-      var sortParam = params.get('sort') || 'new'; // 기본값 new
+      var sortParam = params.get('sort') || 'new';
 
-      $q.value = qParam;                // '#술'처럼 인코딩된 값이 자동 디코딩되어 들어옴
-      $sort.value = sortParam;          // 'new' | 'hot' | (필요하면 'rel' → 'new'로 매핑)
+      $q.value = qParam;
+      $sort.value = sortParam;
       state.q = qParam.trim();
       state.sort = $sort.value || 'new';
       state.next = null;
     }
 
-    // 입력값/정렬 → 주소창 동기화 (뒤로가기/새로고침시 동일 상태 유지)
+    // 주소창 동기화
     function syncUrl(){
       var params = new URLSearchParams();
       if (state.q) params.set('q', state.q);
@@ -243,10 +208,6 @@
       history.replaceState(null, '', url);
     }
 
-    // (이하 기존 유틸 함수는 그대로)
-    function isUuid36(s){
-      return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || '');
-    }
     function fmtDate(v) {
       if (!v) return '';
       try {
@@ -269,12 +230,9 @@
               .replace(/'/g,'&#39;');
     }
 
+    // ▶ 아이템 렌더 (영상/유튜브/이미지 구분해 그리기)
     function renderItem(it){
       try {
-        var thumb = (it.thumbUrl && it.thumbUrl.length > 0)
-                ? it.thumbUrl
-                : 'https://via.placeholder.com/1200x800?text=';
-
         var title = escapeHtml(it.title || '');
         var nick  = escapeHtml(it.authorNick || '');
         var date  = fmtDate(it.createdAt);
@@ -282,9 +240,35 @@
         var cmts  = (it.comments != null) ? it.comments : 0;
         var views = (it.views != null) ? it.views : 0;
 
-        // 상세 링크 (UUID 가드)
         var idOk = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(it.id || '');
         var detailHref = idOk ? (ctx + '/recipes/' + encodeURIComponent(it.id)) : '#';
+
+        var kind = it.mediaKind || 'image';
+        var mediaHtml = '';
+        if (kind === 'youtube') {
+          var src = it.mediaSrc || '';
+          mediaHtml =
+                  '<div class="media aspect">' +
+                  '<iframe src="' + src + '" title="' + title + '"' +
+                  ' loading="lazy" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>' +
+                  '</iframe>' +
+                  '</div>';
+        } else if (kind === 'video') {
+          var vsrc = it.mediaSrc || '';
+          var poster = it.poster ? (' poster="' + it.poster + '"') : '';
+          mediaHtml =
+                  '<div class="media aspect">' +
+                  '<video controls preload="metadata"' + poster + ' src="' + vsrc + '"></video>' +
+                  '</div>';
+        } else {
+          var img = (it.mediaSrc && it.mediaSrc.length > 0)
+                  ? it.mediaSrc
+                  : ((it.thumbUrl && it.thumbUrl.length > 0) ? it.thumbUrl : 'https://via.placeholder.com/1200x800?text=');
+          mediaHtml =
+                  '<div class="media aspect">' +
+                  '<img src="' + img + '" alt="">' +
+                  '</div>';
+        }
 
         var el = document.createElement('article');
         el.className = 'card p-16 post';
@@ -297,9 +281,9 @@
                 '</div>' +
                 '<button class="followbtn-sm" data-user-id="" data-following="false">Follow</button>' +
                 '</div>' +
-                (idOk ? ('<a class="post-link" href="' + detailHref + '">') : '<div class="post-link disabled" aria-disabled="true">') +
-                '<div class="thumb"><img src="' + thumb + '" alt=""></div>' +
-                '<p class="muted">' + title + '</p>' +
+                mediaHtml +
+                (idOk ? ('<a class="post-link title" href="' + detailHref + '">') : '<div class="post-link disabled" aria-disabled="true">') +
+                '<p class="muted" style="margin-top:8px">' + title + '</p>' +
                 (idOk ? '</a>' : '</div>') +
                 '<div class="post-cta">' +
                 '<button class="btn-none">❤️ ' + likes + '</button>' +
@@ -315,6 +299,64 @@
         $list.appendChild(el);
       } catch (e) {
         console.error('[renderItem] failed with item:', it, e);
+      }
+    }
+
+    // 트렌딩 섹션 렌더 (동일 로직 재사용)
+    function renderTrendingItem(it){
+      var wrap = document.createElement('article');
+      wrap.className = 'card p-12 trend-card';
+
+      var kind = it.mediaKind || 'image';
+      var title = escapeHtml(it.title || '');
+
+      var mediaHtml = '';
+      if (kind === 'youtube') {
+        var src = it.mediaSrc || '';
+        mediaHtml =
+                '<div class="media aspect">' +
+                '<iframe src="' + src + '" title="' + title + '"' +
+                ' loading="lazy" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>' +
+                '</iframe>' +
+                '</div>';
+      } else if (kind === 'video') {
+        var vsrc = it.mediaSrc || '';
+        var poster = it.poster ? (' poster="' + it.poster + '"') : '';
+        mediaHtml =
+                '<div class="media aspect">' +
+                '<video controls preload="metadata"' + poster + ' src="' + vsrc + '"></video>' +
+                '</div>';
+      } else {
+        var img = (it.mediaSrc && it.mediaSrc.length > 0)
+                ? it.mediaSrc
+                : ((it.thumbUrl && it.thumbUrl.length > 0) ? it.thumbUrl : 'https://via.placeholder.com/1200x800?text=');
+        mediaHtml =
+                '<div class="media aspect">' +
+                '<img src="' + img + '" alt="">' +
+                '</div>';
+      }
+
+      wrap.innerHTML =
+              mediaHtml +
+              '<div><div class="trend-title">' + title + '</div></div>' +
+              '<div class="actions">' +
+              '<button class="act-btn">❤️ ' + (it.likes || 0) + '</button>' +
+              '<button class="act-btn">💬 ' + (it.comments || 0) + '</button>' +
+              '</div>';
+
+      $trending.appendChild(wrap);
+    }
+
+    async function fetchTrending() {
+      try {
+        var url = ctx + '/api/trending?size=8';
+        var res = await fetch(url, { headers: { 'Accept': 'application/json' }});
+        if (!res.ok) return;
+        var data = await res.json();
+        $trending.innerHTML = '';
+        (data.items || []).forEach(renderTrendingItem);
+      } catch (e) {
+        console.warn('trending load failed', e);
       }
     }
 
@@ -346,7 +388,7 @@
       state.q = ($q.value || '').trim();
       state.sort = $sort.value || 'new';
       state.next = null;
-      syncUrl();           // ★ 주소창 업데이트
+      syncUrl();
       fetchOnce(true);
     }
 
@@ -355,7 +397,7 @@
     $q.addEventListener('keydown', function(e){ if (e.key === 'Enter') startSearch(); });
     $sort.addEventListener('change', startSearch);
 
-    // 무한 스크롤 (그대로)
+    // 무한 스크롤
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         if (entry.isIntersecting && state.next) fetchOnce(false);
@@ -363,9 +405,10 @@
     });
     io.observe($sentinel);
 
-    // ★ 초기 진입: URL 파라미터로 먼저 시딩 → 그 다음 최초 검색 실행
+    // 초기 시딩 및 로드
     seedFromUrl();
-    startSearch();
+    fetchTrending();  // 트렌딩 먼저
+    startSearch();    // 검색 실행
   })();
 </script>
 </body>

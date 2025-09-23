@@ -169,7 +169,7 @@
                 </div>
 
                 <div class="actions">
-                        <button class="btn-none red" id="btnLike">👍 좋아요 <span id="likeCnt"><c:out value="${recipe.likeCount}" /></span></button>
+                        <button class="btn-none ${recipe.liked ? 'active' : ''}" id="btnLike" data-liked = "${recipe.liked}">👍 좋아요 <span id="likeCnt"><c:out value="${recipe.likeCount}" /></span></button>
                     <button class="btn-none" id="btnShare">🔗 공유</button>
                     <button class="btn-none" id="btnReport">🚩 신고</button>
                 </div>
@@ -221,6 +221,33 @@
 <script src="${ctx}/js/recipes/recipe-detail-common.js"></script>
 <script src="${ctx}/js/recipes/recipe-details.js"></script>
 
+<div id="myReportModal" class="modal" hidden>
+    <div class="modal-content">
+        <h3> 댓글 신고</h3>
+        <form id="myReportForm">
+            <input type="hidden" name="commentsId" id="commentsId" value="">
+            <div>
+                <label>신고 유형</label>
+                <label>
+                    <select name="reportType" required>
+                        <option value="0">욕설</option>
+                        <option value="1">스팸</option>
+                        <option value="2">저작권</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <label>신고 사유</label>
+                <label>
+                    <textarea name="reason" rows="4" maxlength="500" placeholder="신고 사유를 입력해주세요." required></textarea>
+                </label>
+            </div>
+            <button type="submit">제출</button>
+            <button type="button" id="myReportClose">취소</button>
+        </form>
+    </div>
+</div>
+
 
 <%-- TODO: 신고 모달 --%>
 <div id="reportModal" class="modal" hidden>
@@ -252,7 +279,6 @@
         </form>
     </div>
 </div>
-
 
 </body>
 </html>

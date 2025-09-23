@@ -1,5 +1,6 @@
 package com.RecipeCode.teamproject.reci.feed.comments.dto;
 
+import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -23,5 +24,7 @@ public class CommentsDto {
     private LocalDateTime updateTime;
 
     private int replyCount;
+
+
 
 }

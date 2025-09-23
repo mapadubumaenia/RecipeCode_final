@@ -25,6 +25,11 @@ public class CommentsService {
     private final MapStruct mapStruct;
     private final ErrorMsg errorMsg;
 
+    // 댓글 수 세기
+    public long countCommentsByRecipe(String recipeUuid) {
+        return commentsRepository.countByRecipes_Uuid(recipeUuid);
+    }
+
     // 댓글 불러오기
     public List<CommentsDto> countByRecipes_Uuid(String recipeUuid, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("insertTime").descending());
@@ -62,7 +67,6 @@ public class CommentsService {
     }
 
 
-
     // 대댓글 불러오기
     public List<CommentsDto> getReplies(Long parentId) {
         return commentsRepository.findByParentIdCommentsId(parentId)
@@ -87,7 +91,25 @@ public class CommentsService {
         commentsRepository.save(reply);
     }
 
+    // 댓글 수정
+    @Transactional
+    public CommentsDto updateComment(Long commentsId, CommentsDto commentsDto, String userEmail) {
+        // 조회
+        Comments comment = commentsRepository.findById(commentsId)
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+        // 작성자 확인
+        if (!comment.getMember().getUserEmail().equals(userEmail)) {
+            throw new RuntimeException("본인 댓글만 수정할 수 있습니다.");
+        }
+        // 수정
+        comment.setCommentsContent(commentsDto.getCommentsContent());
+        comment.setUpdateTime(java.time.LocalDateTime.now());
 
+        CommentsDto updatedDto = mapStruct.toDto(comment);
+        updatedDto.setReplyCount(commentsRepository.countByParentId_CommentsId(commentsId));
+
+        return updatedDto;
+    }
 
     // 댓글/대댓글 삭제
     @Transactional

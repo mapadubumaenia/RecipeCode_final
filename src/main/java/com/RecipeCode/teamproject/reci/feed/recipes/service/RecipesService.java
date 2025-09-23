@@ -15,12 +15,14 @@ import com.RecipeCode.teamproject.reci.feed.recipecontent.service.RecipeContentS
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 import com.RecipeCode.teamproject.reci.feed.recipes.repository.RecipesRepository;
+import com.RecipeCode.teamproject.reci.feed.recipeslikes.repository.RecipesLikesRepository;
 import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -40,6 +42,7 @@ public class RecipesService {
     private final RecipeTagService recipeTagService;
     private final IngredientRepository ingredientRepository;
     private final RecipeContentRepository recipeContentRepository;
+    private final RecipesLikesRepository  recipesLikesRepository;
     private final RecipeTagRepository recipeTagRepository;
     private final MemberRepository memberRepository;
     private final RecipeMapStruct recipeMapStruct;
@@ -188,8 +191,8 @@ public class RecipesService {
     }
 
     /* 상세 조회 */
-    @Transactional(readOnly = true)
-    public RecipesDto getRecipeDetails(String uuid) {
+    @Transactional
+    public RecipesDto getRecipeDetails(String uuid, @Nullable String userEmail) {
         Recipes recipe = recipesRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException(
                         errorMsg.getMessage("errors.not.found")
@@ -202,9 +205,26 @@ public class RecipesService {
                 .findByRecipesUuidOrderByStepOrderAsc(uuid);
 
         RecipesDto dto = recipeMapStruct.toRecipeDto(recipe);
+
+        boolean liked = false;
+        if (userEmail != null) {
+            Member viewer = memberRepository.findByUserEmail(userEmail)
+                    .orElse(null);
+            if (viewer != null) {
+                liked = recipesLikesRepository.existsByMemberAndRecipes(viewer, recipe);
+            }
+        }
+
         dto.setIngredients(recipeMapStruct.toIngredientDtoList(ingredients));
         dto.setContents(recipeMapStruct.toRecipeContentDtoList(contents));
+        dto.setLiked(liked);
         return dto;
+    }
+
+    // 비로그인/공용 진입용 편의 메서드
+    @Transactional
+    public RecipesDto getRecipeDetails(String uuid) {
+        return getRecipeDetails(uuid, null);
     }
 
     public void updateRecipe(String uuid,
