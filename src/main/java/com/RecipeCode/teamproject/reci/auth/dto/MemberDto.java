@@ -1,6 +1,11 @@
 package com.RecipeCode.teamproject.reci.auth.dto;
 
+import com.RecipeCode.teamproject.reci.auth.membertag.entity.MemberTag;
+import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,14 +23,18 @@ public class MemberDto {
     private String userInsta;
     private String userYoutube;
     private String userBlog;
-    private String userInterestTag;
     private String profileStatus;
     private String role;
     private String provider;
     private String providerId;
+    private List<TagDto> interestTags;
 
     private String profileImageUrl;
-    private byte[] profileImage;
+    private MultipartFile profileImage;
+
+    // MemberDto
+    private Boolean noti_FOLLOW;
+    private Boolean noti_COMMENT;
 
 
     // mypage userId 조회용 생성자
@@ -37,7 +46,7 @@ public class MemberDto {
             String userLocation,
             String userIntroduce,
             String userBlog,
-            String userInterestTag,
+            List<TagDto> memberTags,
             String userYoutube,
             String userInsta,
             String userWebsite){
@@ -48,10 +57,10 @@ public class MemberDto {
         this.userLocation = userLocation;
         this.userIntroduce = userIntroduce;
         this.userBlog = userBlog;
-        this.userInterestTag = userInterestTag;
         this.userYoutube = userYoutube;
         this.userInsta = userInsta;
         this.userWebsite = userWebsite;
+        this.interestTags = memberTags;
     }
 
 }

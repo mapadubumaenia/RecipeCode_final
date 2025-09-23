@@ -1,7 +1,10 @@
 package com.RecipeCode.teamproject.reci.auth.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
+import com.RecipeCode.teamproject.reci.auth.membertag.dto.MemberTagDto;
 import com.RecipeCode.teamproject.reci.auth.membertag.entity.MemberTag;
+import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
+import com.RecipeCode.teamproject.reci.tag.entity.Tag;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,7 +32,6 @@ public class Member extends BaseTimeEntity {
     private String userInsta;
     private String userYoutube;
     private String userBlog;
-    private String userInterestTag;
     private String profileStatus;
     private String role;
     private String provider;      // local, google, kakao
@@ -41,6 +43,7 @@ public class Member extends BaseTimeEntity {
 
     // 회원 ↔ 관심태그 (1:N)
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<MemberTag> memberTags = new ArrayList<>();
 
 }

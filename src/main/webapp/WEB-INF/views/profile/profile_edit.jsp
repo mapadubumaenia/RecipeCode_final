@@ -17,15 +17,15 @@
     <link rel="stylesheet" href="<c:url value='/css/profile-edit.css'/>">
 </head>
 <body>
+<form action="<c:url value='/mypage/updateProfile'/>" method="post" enctype="multipart/form-data">
 <main class="container">
-
     <!-- 헤더: 기존 마이페이지/팔로우 리스트와 동일한 구조 -->
     <header class="profile-header">
         <div class="flex-row">
             <h1 class="page-title">Edit Profile</h1>
-            <a class="float-text" href="newfeed-ver-main-wireframe.html">home</a>
+            <a class="float-text" href="<c:url value='/'/>">home</a>
         </div>
-        <a class="btn-logout" href="newfeed-ver-mypage-wireframe.html">Back</a>
+        <a class="btn-logout" href="<c:url value='/mypage'/>">Back</a>
     </header>
 
     <section class="form">
@@ -37,20 +37,26 @@
 
                 <div class="avatar-row">
                     <label class="avatar-uploader">
-                        <input id="avatar" type="file" accept="image/*" />
-                        <span class="ph">프로필 이미지를 업로드</span>
-                        <!-- 미리보기 이미지는 JS 붙이면 보여짐 -->
-                        <img id="avatarPreview" alt="" class="hidden" />
+                        <input id="avatar" type="file" name="profileImage" accept="image/*" />
+                        <c:choose>
+                            <c:when test="${not empty member.profileImageUrl}">
+                                <img id="avatarPreview" src="${member.profileImageUrl}" class="avatar-lg"/>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="ph">프로필 이미지를 업로드</span>
+                                <img id="avatarPreview" alt="" class="hidden"/>
+                            </c:otherwise>
+                        </c:choose>
                     </label>
 
                     <div class="id-block">
                         <div class="row">
                             <label class="label">아이디</label>
-                            <input class="input" value="<c:out value='${pageContext.request.userPrincipal.principal.member.userId}' default=''/>" readonly />
+                            <input class="input" name="userId" value="<c:out value='${member.userId}' default=''/>" readonly />
                         </div>
                         <div class="row">
                             <label class="label">이메일</label>
-                            <input class="input" value="<c:out value='${pageContext.request.userPrincipal.principal.member.userEmail}' default=''/>" readonly />
+                            <input class="input" name="userEmail" value="<c:out value='${member.userEmail}' default=''/>" readonly />
                         </div>
                     </div>
                 </div>
@@ -58,17 +64,17 @@
                 <div class="grid cols-2">
                     <div class="row">
                         <label class="label">표시 이름</label>
-                        <input class="input" value="<c:out value='${pageContext.request.userPrincipal.principal.member.nickname}' default=''/>" placeholder="ex) 소금후추" />
+                        <input class="input" name="nickname" value="<c:out value='${member.nickname}' default=''/>" placeholder="ex) 소금후추" />
                     </div>
                     <div class="row">
                         <label class="label">지역(옵션)</label>
-                        <input class="input" value="<c:out value='${pageContext.request.userPrincipal.principal.member.userLocation}' default=''/>" placeholder="Seoul, KR" />
+                        <input class="input" name="userLocation" value="<c:out value='${member.userLocation}' default=''/>" placeholder="Seoul, KR" />
                     </div>
                 </div>
 
                 <div class="row">
                     <label class="label">한마디(소개)</label>
-                    <textarea class="textarea" placeholder="한 줄 소개를 적어주세요."><c:out value='${pageContext.request.userPrincipal.principal.member.userIntroduce}' default=''/></textarea>
+                    <textarea class="textarea" name="userIntroduce" placeholder="한 줄 소개를 적어주세요."><c:out value='${member.userIntroduce}' default=''/></textarea>
                 </div>
             </article>
 
@@ -79,32 +85,48 @@
                 <div class="grid cols-2">
                     <div class="row">
                         <label class="label">웹사이트</label>
-                        <input class="input" value="<c:out value='${pageContext.request.userPrincipal.principal.member.userWebsite}' default=''/>" placeholder="https://example.com" />
+                        <input class="input" name="userWebsite" value="<c:out value='${member.userWebsite}' default=''/>" placeholder="https://example.com" />
                     </div>
                     <div class="row">
                         <label class="label">인스타그램</label>
-                        <input class="input" value="<c:out value='${pageContext.request.userPrincipal.principal.member.userInsta}' default=''/>" placeholder="@your_instagram" />
+                        <input class="input" name="userInsta" value="<c:out value='${member.userInsta}' default=''/>" placeholder="@your_instagram" />
                     </div>
                 </div>
 
                 <div class="grid cols-2 mb-8">
                     <div class="row">
                         <label class="label">유튜브</label>
-                        <input class="input" value="<c:out value='${pageContext.request.userPrincipal.principal.member.userYoutube}' default=''/>" placeholder="채널/핸들" />
+                        <input class="input" name="userYoutube" value="<c:out value='${member.userYoutube}' default=''/>" placeholder="채널/핸들" />
                     </div>
                     <div class="row">
                         <label class="label">블로그</label>
-                        <input class="input" value="<c:out value='${pageContext.request.userPrincipal.principal.member.userBlog}' default=''/>" placeholder="티스토리/벨로그 등" />
+                        <input class="input" name="userBlog" value="<c:out value='${member.userBlog}' default=''/>" placeholder="티스토리/벨로그 등" />
                     </div>
                 </div>
 
                 <div class="row">
                     <label class="label mb-8">관심 태그</label>
                     <div class="tags mb-8" id="tagList"></div>
-                    <input class="input mb-8" id="tagInput" placeholder="레시피 태그를 입력해주세요 — 예) 파스타" />
+                    <input class="input mb-8"  id="interestTagInput" placeholder="관심 태그를 입력해주세요 — 예) 파스타" />
                     <button class="btn ghost" type="button" id="addTagBtn">+ 추가</button>
                 </div>
+                <!-- 보여줄 태그 리스트 -->
+                <div class="tags" id="interestTagList">
+                    <c:forEach var="t" items="${member.memberTags}" varStatus="ts">
+                        <span class="tag" data-id="${t.tag.tagId}" data-tag="${t.tag.tag}">
+                        <span>#${t.tag.tag}</span><span class="x" title="삭제">×</span>
+                        </span>
+                    </c:forEach>
+                </div>
 
+                <!-- 서버 전송용 hidden inputs -->
+                <div id="interestTagHidden">
+                    <c:forEach var="t" items="${member.memberTags}" varStatus="ts">
+                        <c:if test="${!t.tag.deleted}">
+                            <input type="hidden" name="interestTags[${ts.index}].tag" value="${t.tag.tag}"/>
+                        </c:if>
+                    </c:forEach>
+                </div>
             </article>
 
             <!-- 환경설정 -->
@@ -116,15 +138,12 @@
                         <label class="label">기본 공개 범위</label>
                         <select class="select" name="profileStatus">
                             <option value="PUBLIC"
-                                    <c:if test="${pageContext.request.userPrincipal.principal.member.profileStatus eq 'PUBLIC'}">selected</c:if>>Public</option>
+                                    <c:if test="${member.profileStatus eq 'PUBLIC'}">selected</c:if>>Public</option>
                             <option value="FOLLOW"
-                                    <c:if test="${pageContext.request.userPrincipal.principal.member.profileStatus eq 'FOLLOW'}">selected</c:if>>Followers</option>
-                            <option value="PRIVATE"
-                                    <c:if test="${pageContext.request.userPrincipal.principal.member.profileStatus eq 'PRIVATE'}">selected</c:if>>Private</option>
+                                    <c:if test="${member.profileStatus eq 'FOLLOW'}">selected</c:if>>Followers</option>
                         </select>
                     </div>
                 </div>
-
                 <div class="grid cols-2">
                     <c:forEach var="setting" items="${notiSettings}">
                         <label class="switch">
@@ -145,12 +164,13 @@
             <!-- 액션 -->
             <article class="card p-16">
                 <div class="actions">
-                    <button class="btn primary">저장</button>
-                    <button class="btn ghost">취소</button>
+                    <button id="savebtn" type="submit" class="btn primary">저장</button>
+                    <button id="cancelbtn" type="button" onclick="edit_cancel()" class="btn ghost">취소</button>
                     <span class="spacer"></span>
-                    <button class="btn danger">회원탈퇴</button>
+                    <button id="deletebtn" type="button" onclick="delete_account()" class="btn danger">회원탈퇴</button>
                 </div>
             </article>
+
         </main>
 
         <!-- 우측: 가이드(데스크톱에서 고정) -->
@@ -162,61 +182,7 @@
         </aside>
     </section>
 </main>
-
-<script>
-    /* ===== 공통 유틸 ===== */
-    // $() -> document.querySelector(s) 로 정의 해놓은 것
-    const $ = (s, el= document) => el.querySelector(s);
-    const $$ = (s, el = document) => [...el.querySelectorAll(s)];
-
-    /* ===== 프로필 이미지 미리보기 ===== */
-    $("#avatar")?.addEventListener("change", (e) =>{
-        const file = e.target.files?.[0];
-        const img = $("#avatarPreview");
-        if(!file) {
-            img?.classList.add("hidden");
-            return;
-        }
-        const url = URL.createObjectURL(file);
-        img.src = url;
-        img.classList.remove("hidden");
-        $(".avatar-uploader .ph").classList.add("hidden");
-    });
-
-    /* ===== 태그 ===== */
-    const tagInput = $("#tagInput");
-    const tagList = $("#tagList");
-
-    function addTag(text) {
-        const label = text.trim().replace(/^#+/, "");
-        if (!label) return;
-        // 중복 방지
-        const norm = label.toLowerCase(); // 소문자 기준
-        if ([...tagList.children].some((el) => el.dataset.tag === label))
-            return;
-
-        const el = document.createElement("span");
-        el.className = "tag";
-        el.dataset.tag = norm;
-        el.innerHTML = `<span>#${label}</span><span class="x" title="삭제">×</span>`;
-        tagList.appendChild(el);
-        tagInput.value = "";
-    }
-    tagInput?.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            addTag(tagInput.value);
-        }
-    });
-    $("#addTagBtn")?.addEventListener("click", () => addTag(tagInput.value));
-    tagList?.addEventListener("click", (e) => {
-        e.preventDefault();
-        addTag(tagInput.value);
-        const x = e.target.closest(".x");
-        if (!x) return;
-        x.parentElement.remove();
-    });
-
-</script>
+</form>
+<script src="<c:url value='/js/mypage/mypage-edit.js'/>"></script>
 </body>
 </html>
