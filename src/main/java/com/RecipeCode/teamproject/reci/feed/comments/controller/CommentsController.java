@@ -5,9 +5,11 @@ import com.RecipeCode.teamproject.reci.feed.comments.service.CommentsService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController      // JSON 반환 전용, @ResponseBody 불필요
 @RequiredArgsConstructor
@@ -16,6 +18,15 @@ import java.util.List;
 public class CommentsController {
 
     private final CommentsService commentsService;
+
+    // 댓글 수
+    @GetMapping("/count/{recipeUuid}")
+    public ResponseEntity<?> getCommentsCount(@PathVariable String recipeUuid){
+        long count = commentsService.countCommentsByRecipe(recipeUuid);
+        return ResponseEntity.ok().body(Map.of("commentsCount",count));
+    }
+
+
 
     // 댓글 불러오기
     @GetMapping("/{recipeUuid}")
@@ -67,6 +78,20 @@ public class CommentsController {
         }
 
         commentsService.saveReply(commentsDto, parentId, userEmail);
+    }
+
+    // 댓글 수정
+    @PatchMapping("/{commentsId}")
+    public CommentsDto updateComment(@PathVariable Long commentsId,
+                                     @RequestBody CommentsDto commentsDto,
+                                     HttpSession session) {
+        String userEmail = (String) session.getAttribute("userEmail");
+        if (userEmail == null) {
+            userEmail = "sj12@naver.com";  // 하드코딩 (테스트용)
+            session.setAttribute("userEmail", userEmail);
+        }
+        log.info("댓글 수정 요청: commentsDto={}, 내용={}, userEmail={}", commentsId, commentsDto.getCommentsContent(), userEmail);
+        return commentsService.updateComment(commentsId,commentsDto, userEmail);
     }
 
     // 댓글 삭제
