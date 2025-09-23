@@ -2,6 +2,7 @@ package com.RecipeCode.teamproject.reci.function.follow.controller;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.MapStruct;
+import com.RecipeCode.teamproject.common.SecurityUtil;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
@@ -27,7 +28,7 @@ public class ProfileFeedViewController {
     private final ProfileFeedService profileFeedService;
     private final FollowService followService;
     private final ErrorMsg errorMsg;
-
+    private final SecurityUtil securityUtil;
 
     // 특정 유저 프로필 페이지
     @GetMapping("/profile/{userEmail}")
@@ -40,6 +41,10 @@ public class ProfileFeedViewController {
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
         MemberDto userDto = mapStruct.toDto(user);
         model.addAttribute("user", userDto);
+
+        // 1-1) 로그인한 유저 정보 조회
+        String loginUserEmail = securityUtil.getLoginUser().getUsername();
+        model.addAttribute("loginUserEmail", loginUserEmail);
 
         // 2) 작성한 레시피 목록 (무한 스크롤 Slice)
         Slice<RecipesDto> posts = profileFeedService.getUserRecipes(userEmail, pageable);

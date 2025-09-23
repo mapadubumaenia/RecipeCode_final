@@ -17,10 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 data.content.forEach(recipe => {
-                    const article = createFeedArticle(recipe, userEmail);
+                    const article = createFeedArticle(recipe, currentUserEmail);
                     feedContainer.appendChild(article);
                 });
-
                 isLast = data.last;
                 page++;
                 isLoading = false;
@@ -51,4 +50,50 @@ document.addEventListener("click", (e) => {
             .then(() => alert("링크가 복사되었습니다!"))
             .catch(() => alert("복사 실패 😢"));
     }
+});
+
+
+// 팔로워/팔로잉 카운트 표시
+document.addEventListener("DOMContentLoaded", () => {
+    const profileUserEmail = document.querySelector("#feedContainer").dataset.user;
+
+    // follower count
+    fetch(`/api/follow/${profileUserEmail}/follower/count`)
+        .then(res => res.json())
+        .then(count => {
+            const el = document.getElementById("followerCount");
+            if (el) el.textContent = count;
+        })
+        .catch(err => console.error("팔로워 수 가져오기 실패:", err));
+
+    // following count
+    fetch(`/api/follow/${profileUserEmail}/following/count`)
+        .then(res => res.json())
+        .then(count => {
+            const el = document.getElementById("followingCount");
+            if (el) el.textContent = count;
+        })
+        .catch(err => console.error("팔로잉 수 가져오기 실패:", err));
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const tabs = document.querySelectorAll(".follow-tabs .tab-btn");
+    const followersList = document.getElementById("followersList");
+    const followingList = document.getElementById("followingList");
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            tabs.forEach(t => t.classList.remove("is-active"));
+            tab.classList.add("is-active");
+
+            if (tab.dataset.tab === "followers") {
+                followersList.classList.remove("hidden");
+                followingList.classList.add("hidden");
+            } else {
+                followingList.classList.remove("hidden");
+                followersList.classList.add("hidden");
+            }
+        });
+    });
 });

@@ -36,16 +36,63 @@
 
     <!-- 프로필 카드 -->
     <section class="card profile-card">
+
+        <!-- 프로필 이미지 -->
         <div class="avatar-lg">
             <c:if test="${not empty user.profileImageUrl}">
                 <img src="${user.profileImageUrl}" alt="${user.nickname}" class="avatar-lg"/>
             </c:if>
         </div>
+
+        <!-- 프로필 정보 -->
         <div class="profile-info">
+
+            <!-- 아이디 + 닉네임 -->
             <div class="profile-top">
-                <h2 class="profile-name">@${user.userId}</h2>
+                <h2 class="profile-name">${user.userId}</h2>
+                <span class="muted">${user.nickname}</span>
             </div>
-            <p class="muted">${user.userIntroduce}</p>
+
+            <!-- 팔로워 / 팔로잉 -->
+            <div class="profile-stats">
+                <span>팔로워 <b id="followerCount">0</b></span>
+                <span>팔로잉 <b id="followingCount">0</b></span>
+            </div>
+
+            <!-- 짧은 소개 -->
+            <c:if test="${not empty user.userIntroduce}">
+                <p class="intro">${user.userIntroduce}</p>
+            </c:if>
+
+            <!-- 위치 -->
+            <c:if test="${not empty user.userLocation}">
+                <p class="muted">📍 ${user.userLocation}</p>
+            </c:if>
+
+            <!-- 관심 태그 -->
+            <c:if test="${not empty user.userInterestTag}">
+                <div class="tags">
+                    <c:forTokens items="${user.userInterestTag}" delims="," var="tag">
+                        <span class="chip">#${tag}</span>
+                    </c:forTokens>
+                </div>
+            </c:if>
+
+            <!-- SNS / 링크 아이콘 -->
+            <div class="profile-links">
+                <c:if test="${not empty user.userWebsite}">
+                    <a href="${user.userWebsite}" target="_blank" class="link-icon">🌐</a>
+                </c:if>
+                <c:if test="${not empty user.userInsta}">
+                    <a href="https://instagram.com/${user.userInsta}" target="_blank" class="link-icon">📸</a>
+                </c:if>
+                <c:if test="${not empty user.userYoutube}">
+                    <a href="https://youtube.com/${user.userYoutube}" target="_blank" class="link-icon">▶</a>
+                </c:if>
+                <c:if test="${not empty user.userBlog}">
+                    <a href="${user.userBlog}" target="_blank" class="link-icon">✍</a>
+                </c:if>
+            </div>
         </div>
     </section>
 
@@ -61,40 +108,72 @@
             <div id="feedContainer" data-user="${user.userEmail}"></div>
         </aside>
 
-        <!-- 사이드바: 팔로워/팔로잉 미리보기 -->
+        <!-- 사이드바 -->
         <aside class="feed-list sidebar">
-            <h2 class="section-title m-0">Followers</h2>
-            <c:forEach var="f" items="${followers}">
-                <div class="mini-card">
-                    <c:if test="${not empty f.member.profileImageUrl}">
-                        <img src="${f.member.profileImageUrl}" alt="">
-                    </c:if>
-                    <span>@${f.member.nickname}</span>
-                </div>
-            </c:forEach>
-            <c:if test="${followersHasNext}">
-                <a href="${pageContext.request.contextPath}/follow/${user.userEmail}/follower"
-                   class="btn small ghost">더보기</a>
-            </c:if>
+            <h2 class="section-title">Connections</h2>
 
-            <h2 class="section-title m-0">Following</h2>
-            <c:forEach var="f" items="${followings}">
-                <div class="mini-card">
-                    <c:if test="${not empty f.member.profileImageUrl}">
-                        <img src="${f.member.profileImageUrl}" alt="">
+            <!-- 탭 버튼 -->
+            <div class="follow-tabs">
+                <button class="tab-btn is-active" data-tab="following">Following</button>
+                <button class="tab-btn" data-tab="followers">Follower</button>
+            </div>
+
+            <!-- Following 목록 -->
+            <div id="followingList" class="follow-list">
+                <c:forEach var="f" items="${followings}" varStatus="st">
+                    <c:if test="${st.index < 10}">
+                        <div class="mini-card">
+                            <img src="${f.member.profileImageUrl}" alt="">
+                            <div class="mini-info">
+                                <span class="user-id">@${f.member.userId}</span>
+                                <span class="muted">${f.member.nickname}</span>
+                                <c:if test="${not empty f.member.userLocation}">
+                                    <span class="muted">📍 ${f.member.userLocation}</span>
+                                </c:if>
+                            </div>
+                        </div>
                     </c:if>
-                    <span>@${f.member.nickname}</span>
-                </div>
-            </c:forEach>
-            <c:if test="${followingsHasNext}">
-                <a href="${pageContext.request.contextPath}/follow/${user.userEmail}/following"
-                   class="btn small ghost">더보기</a>
-            </c:if>
+                </c:forEach>
+                <c:if test="${followingsHasNext}">
+                    <button class="btn small ghost">더보기</button>
+                </c:if>
+            </div>
+
+            <!-- Followers 목록 -->
+            <div id="followersList" class="follow-list hidden">
+                <c:forEach var="f" items="${followers}" varStatus="st">
+                    <c:if test="${st.index < 10}">
+                        <div class="mini-card">
+                            <img src="${f.member.profileImageUrl}" alt="">
+                            <div class="mini-info">
+                                <span class="user-id">@${f.member.userId}</span>
+                                <span class="muted">${f.member.nickname}</span>
+                                <c:if test="${not empty f.member.userLocation}">
+                                    <span class="muted">📍 ${f.member.userLocation}</span>
+                                </c:if>
+                            </div>
+                        </div>
+                    </c:if>
+                </c:forEach>
+                <c:if test="${followersHasNext}">
+                    <button class="btn small ghost">더보기</button>
+                </c:if>
+            </div>
         </aside>
     </section>
 </main>
 
-<!-- JS 로딩 -->
+<script>
+    // 프로필 주인 (지금 보고 있는 페이지의 대상 유저)
+    const profileUserEmail = "${user.userEmail}";
+
+    // 현재 로그인한 사용자
+    const currentUserEmail = "${pageContext.request.userPrincipal.name}";
+</script>
+
+
+<!-- JS -->
+<script src="<c:url value='/js/mypage/utils.js'/>"></script>
 <script src="<c:url value='/js/mypage/profile-feed.js'/>"></script>
 </body>
 </html>

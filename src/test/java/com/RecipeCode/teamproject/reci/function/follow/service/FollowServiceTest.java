@@ -28,16 +28,16 @@ class FollowServiceTest {
     void follow() {
         //given
         Member follower = new Member();
-        follower.setUserEmail("zxcv@gmail.com");
-        follower.setUserId("zxcv");
-        follower.setNickname("손주부");
+        follower.setUserEmail("kikiroro1506@gmail.com");
+        follower.setUserId("@kikiroro");
+        follower.setNickname("kikiroro");
         follower.setProfileStatus("PUBLIC");
         memberRepository.save(follower);
 
         Member following = new Member();
-        following.setUserEmail("sj12@naver.com");
-        following.setUserId("@sssjjj");
-        following.setNickname("봉추");
+        following.setUserEmail("zxcv@gmail.com");
+        following.setUserId("zxcv");
+        following.setNickname("손주부");
         following.setProfileStatus("PUBLIC");
         memberRepository.save(following);
 
