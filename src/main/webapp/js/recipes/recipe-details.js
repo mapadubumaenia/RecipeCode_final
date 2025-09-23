@@ -50,6 +50,9 @@
     const recipeBox = document.querySelector(".container[data-recipe-uuid]");
     if (!btnLike || !likeCnt || !recipeBox) return;
 
+    const initiallyLiked = btnLike.dataset.liked === "true";
+    btnLike.classList.toggle("active", initiallyLiked);
+
     const recipeUuid = recipeBox.dataset.recipeUuid;
 
     btnLike.addEventListener("click", async () => {
@@ -85,11 +88,14 @@
             const data = await resp.json();
             // 서버에서 내려준 dto 값 반영
             likeCnt.textContent = data.likesCount;
-            if (data.liked) {
-                btnLike.classList.add("active"); // CSS로 하트 색 변환
-            } else {
-                btnLike.classList.remove("active");
-            }
+            const now = (data.isLike ?? data.liked ?? false) === true;
+            btnLike.classList.toggle("active", now);
+            btnLike.dataset.liked = String(now);
+            // if (data.liked) {
+            //     btnLike.classList.add("active"); // CSS로 하트 색 변환
+            // } else {
+            //     btnLike.classList.remove("active");
+            // }
         } catch (err) {
             console.error(err);
             alert("좋아요 처리 중 오류 발생 😢");

@@ -20,6 +20,7 @@
 .privacy.public{background:#e0f7e9;color:#0a7}
 .privacy.private{background:#fde2e2;color:#c00}
 .feed-list{display:grid;gap:12px}
+.like.active {color:darkred; font-weight: bold;}
 
 /* 사이드 특징 배너 */
 .feature{display:flex;flex-direction:column;gap:10px}
