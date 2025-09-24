@@ -109,4 +109,5 @@ public interface MapStruct {
     @Mapping(source = "following", target = "member")  // 팔로잉 목록 조회 시
     FollowDto toFollowingDto(Follow follow);
 
+
 }

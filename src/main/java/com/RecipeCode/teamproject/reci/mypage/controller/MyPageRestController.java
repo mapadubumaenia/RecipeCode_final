@@ -49,8 +49,19 @@ public class MyPageRestController {
     }
 
     @GetMapping("/following")
-    public ResponseEntity<List<MemberDto>> getFollowing() {
-        return ResponseEntity.ok(Collections.emptyList());
+    public Slice<RecipesDto> getFollowingLatest(
+            @AuthenticationPrincipal SecurityUserDto user,
+            @PageableDefault(size = 5, sort = "insertTime",
+                    direction = Sort.Direction.DESC) Pageable pageable) {
+        return myPageService.getFollowingLatestFeed(user.getUsername(), pageable);
+    }
+
+    @GetMapping("/followers")
+    public Slice<RecipesDto> getFollowersLatest(
+            @AuthenticationPrincipal SecurityUserDto user,
+            @PageableDefault(size = 5, sort = "insertTime",
+                    direction = Sort.Direction.DESC) Pageable pageable){
+        return myPageService.getFollowersLatestFeed(user.getUsername(), pageable);
     }
 
 }

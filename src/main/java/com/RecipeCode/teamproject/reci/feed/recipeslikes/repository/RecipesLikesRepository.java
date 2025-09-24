@@ -42,10 +42,11 @@ public interface RecipesLikesRepository extends JpaRepository<RecipesLikes, Long
     Slice<Recipes> findByLikedRecipes(@Param("userEmail")String userEmail,
                                       Pageable pageable);
 
+    // 뷰어가 좋아요한 글들 일괄 조회
     @Query(value = "select l.recipes.uuid from RecipesLikes l\n" +
-                   "where l.member.userEmail = :email\n" +
+                   "where l.member.userEmail = :viewerEmail\n" +
                    "and l.recipes.uuid in :uuids")
-    List<String> findLikedRecipesUuids(@Param("email") String email,
-                                       @Param("uuids") Collection<String> uuids);
+    List<String> findLikedRecipesUuids(@Param("viewerEmail") String viewerEmail,
+                                       @Param("uuids") List<String> uuids);
 
 }

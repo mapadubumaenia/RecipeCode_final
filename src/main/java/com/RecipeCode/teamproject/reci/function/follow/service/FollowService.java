@@ -5,11 +5,13 @@ import com.RecipeCode.teamproject.common.MapStruct;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
+import com.RecipeCode.teamproject.reci.auth.service.MemberService;
 import com.RecipeCode.teamproject.reci.function.follow.dto.FollowDto;
 import com.RecipeCode.teamproject.reci.function.follow.entity.Follow;
 import com.RecipeCode.teamproject.reci.function.follow.repository.FollowRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.List;
 public class FollowService {
 
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final FollowRepository followRepository;
     private final MapStruct mapStruct;
     private final ErrorMsg errorMsg;
@@ -97,4 +100,60 @@ public class FollowService {
         Member user = findByUserIdOrThrow(userId, "errors.not.found");
         return followRepository.countByFollower(user);
     }
+
+    // owner(Network Profile)가 팔로우 중인 사람 목록에 대한 viewer(로그인 사용자)의 팔로우 여부
+    public Slice<FollowDto> getUserFollowingListWithStatus(String ownerEmail,
+                                                           String viewerEmail, Pageable pageable) {
+
+        // 로그인 사용자(viewer)
+        Member owner = memberService.getByUserEmail(ownerEmail);
+        Member viewer = memberService.getByUserEmail(viewerEmail);
+
+        // owner가 팔로우하는 관계들
+        Slice<Follow> slice = followRepository.findByFollower(owner, pageable);
+
+        // '대상 사용자'는 following
+        return slice.map(f-> {
+            Member target = f.getFollowing();
+
+            boolean iFollowHim = followRepository
+                    .existsByFollowerAndFollowing(viewer, target);
+            boolean heFollowsMe = followRepository
+                    .existsByFollowerAndFollowing(target, viewer);
+
+            FollowDto dto = new FollowDto();
+            dto.setMember(mapStruct.toDto(target));
+            dto.setFollowingStatus(iFollowHim);
+            dto.setFollowerStatus(heFollowsMe);
+            return dto;
+        });
+    }
+
+    // owner(Network Profile)를 팔로우 중인 사람 목록에 대한 viewer(로그인 사용자)의 팔로우 여부
+    public Slice<FollowDto> getUserFollowerListWithStatus(String ownerEmail,
+                                                          String viewerEmail, Pageable pageable) {
+
+        Member owner = memberService.getByUserEmail(ownerEmail);
+        Member viewer = memberService.getByUserEmail(viewerEmail);
+
+        // owner를 팔로우하는 관계들
+        Slice<Follow> slice = followRepository.findByFollowing(owner, pageable);
+
+        // '대상 사용자'는 follower
+        return slice.map(f-> {
+            Member target = f.getFollower();
+
+            boolean iFollowHim = followRepository
+                    .existsByFollowerAndFollowing(viewer, target);
+            boolean heFollowsMe = followRepository
+                    .existsByFollowerAndFollowing(target, viewer);
+
+            FollowDto dto = new FollowDto();
+            dto.setMember(mapStruct.toDto(target));
+            dto.setFollowingStatus(iFollowHim);
+            dto.setFollowerStatus(heFollowsMe);
+            return dto;
+        });
+    }
+
 }
