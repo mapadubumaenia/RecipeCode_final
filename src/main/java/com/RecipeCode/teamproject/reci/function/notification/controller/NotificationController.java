@@ -43,4 +43,5 @@ public class NotificationController {
     public void markAsRead(@PathVariable Long deliveryId) {
         notificationService.markAsRead(deliveryId);
     }
+
 }
