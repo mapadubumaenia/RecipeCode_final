@@ -8,17 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentTab = "myposts";
 
     function getApiUrl(){
-        const base = (typeof ctx === "string" ? ctx : "");
+        const base = `${typeof ctx === "string" ? ctx : ""}/api/mypage`;
         return currentTab === "myposts"
-            ? `/api/mypage/my-recipes?page=${page}&size=5`
-            : `/api/mypage/my-liked?page=${page}&size=5`;
+            ? `${base}/my-recipes?page=${page}&size=5`
+            : `${base}/my-liked?page=${page}&size=5`;
     }
 
     function loadFeeds() {
         if (isLast || isLoading) return;
         isLoading = true;
 
-        fetch(getApiUrl())
+        window.fetch(getApiUrl())
             .then(res => res.json())
             .then(data => {
                 data.content.forEach(recipe => {

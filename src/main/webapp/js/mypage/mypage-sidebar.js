@@ -1,40 +1,55 @@
+// mypage-sidebar.js
+
 document.addEventListener("DOMContentLoaded", () => {
     const sidebarTabs = document.querySelectorAll('#myfollowing .tabs .tab');
     const followContainer = document.querySelector("#followContainer");
 
-    let currentTab = "following";
-    let page = 0;
-    let isLast = false;
-    let isLoading = false;
+    const ctxPrefix = (typeof window.ctx === "string" ? window.ctx : "");
+    let currentTab  = "following";  // "following" | "followers"
+    let page = 0, isLast = false, isLoading = false;
 
     function getSidebarApiUrl() {
+        const base = `${ctxPrefix}/api/mypage`;
         return currentTab === "following"
-            // ? `/api/mypage/my-recipes?page=${page}&size=5` // 임시로 재활용
-            // : `/api/mypage/my-liked?page=${page}&size=5`;
-            ? `/api/mypage/following?page=${page}&size=5`
-            : `/api/mypage/followers?page=${page}&size=5`;
+            ? `${base}/following?page=${page}&size=5`
+            : `${base}/followers?page=${page}&size=5`;
     }
 
-    function loadSidebarFeeds() {
+    async function loadSidebarFeeds() {
         if (isLast || isLoading) return;
         isLoading = true;
-
-        fetch(getSidebarApiUrl())
-            .then(res => res.json())
-            .then(data => {
-                data.content.forEach(user => {
-                    const article = createFollowArticle(user);
-                    followContainer.appendChild(article);
-                });
-
-                isLast = data.last;
-                page++;
-                isLoading = false;
-            })
-            .catch(err => {
-                console.error("Error:", err);
-                isLoading = false;
+        try {
+            const res = await window.fetch(getSidebarApiUrl(), {
+                credentials: "include",
+                headers: {Accept: "application/json"}
             });
+
+            const ct = res.headers.get("content-type") || "";
+            if (!res.ok || !ct.includes("application/json")) {
+                const txt = await res.text();
+                throw new Error(`Not JSON (status ${res.status})\n${txt.slice(0,200)}`);
+            }
+
+            const data = await res.json();
+            const list = data.content || [];
+
+            list.forEach(recipe => {
+                const article = createFollowArticle(recipe); // utils.js 함수
+                followContainer.appendChild(article);
+            });
+
+            isLast = !!data.last;
+            page += 1;
+
+            if (page === 1 && list.length === 0) {
+                followContainer.innerHTML = `<p class="muted">표시할 레시피가 없어요.</p>`;
+            }
+
+        }catch(err) {
+            console.error("Error:", err);
+        } finally {
+            isLoading = false;
+        }
     }
 
     sidebarTabs.forEach(tab => {
