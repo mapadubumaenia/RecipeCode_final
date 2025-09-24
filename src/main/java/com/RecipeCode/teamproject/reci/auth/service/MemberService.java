@@ -2,7 +2,6 @@ package com.RecipeCode.teamproject.reci.auth.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.MapStruct;
-import com.RecipeCode.teamproject.reci.admin.repository.AdminRepository;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.membertag.entity.MemberTag;
@@ -22,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Log4j2
 @Service
@@ -37,7 +35,7 @@ public class MemberService {
     private final TagService tagService;
 
 
-//   회원가입
+    //   회원가입
     public void save(MemberDto memberDto) {
 //        중복이메일 검사
         if (memberRepository.existsById(memberDto.getUserEmail())) {
@@ -72,26 +70,30 @@ public class MemberService {
         }
     }
 
-//    상세조회(Profile 페이지용)
+    //    상세조회(Profile 페이지용)
     public Member getByUserEmail(String email) {
         return memberRepository.findByUserEmail(email)
-                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.register")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.register")));
 
     }
 
+    public Member getByUserId(String userId) {
+        return memberRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.register")));
+    }
 
     public Member getByUserEmailTags(String email) {
         return memberRepository.findByUserEmailWithTags(email)
-                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
     }
 
 
-//    프로필 업데이트
+    //    프로필 업데이트
     @Transactional
     public void updateProfile(MemberDto memberDto) {
         Member member = memberRepository.findByUserEmail((memberDto.getUserEmail()))
-                .orElseThrow(()-> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
         member.setNickname(memberDto.getNickname());
         member.setUserLocation(memberDto.getUserLocation());
