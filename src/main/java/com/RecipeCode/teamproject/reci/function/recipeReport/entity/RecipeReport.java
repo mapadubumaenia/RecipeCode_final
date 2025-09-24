@@ -27,7 +27,7 @@ public class RecipeReport extends BaseTimeEntity {
     private Long reportId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userEmail")
+    @JoinColumn(name = "USER_EMAIL")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
