@@ -1,7 +1,10 @@
 package com.RecipeCode.teamproject.reci.feed.commentslikes.service;
 
+import com.RecipeCode.teamproject.common.SecurityUtil;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
+import com.RecipeCode.teamproject.reci.feed.comments.repository.CommentsRepository;
 import com.RecipeCode.teamproject.reci.feed.commentslikes.entity.CommentsLikes;
 import com.RecipeCode.teamproject.reci.feed.commentslikes.repository.CommentsLikesRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,38 +15,48 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentsLikesService {
     private final CommentsLikesRepository commentsLikesRepository;
+    private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
 
     // 좋아요 체크
-    public boolean hasLiked(Member member, Comments comments) {
+    public boolean hasLiked(Comments comments) {
+        String userEmail = securityUtil.getLoginUserEmail();
+        Member member = memberRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         return commentsLikesRepository.existsByMemberAndComments(member, comments);
     }
 
-    // 추가
+    // 좋아요
     @Transactional
-    public void like(Member member, Comments comments) {
-        if (!hasLiked(member, comments)) {
-            CommentsLikes cl = new CommentsLikes();
-            cl.setMember(member);
-            cl.setComments(comments);
-            commentsLikesRepository.save(cl);
+    public void like(Comments comments) {
+        String userEmail = securityUtil.getLoginUserEmail();
+        Member member = memberRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-            comments.increaseLikeCount();
+        if (!commentsLikesRepository.existsByMemberAndComments(member, comments)) {
+            CommentsLikes like = new CommentsLikes();
+            like.setMember(member);
+            like.setComments(comments);
+            commentsLikesRepository.save(like);
         }
     }
 
-    // 취소
+    // 좋아요 취소
     @Transactional
-    public void unlike(Member member, Comments comments) {
-        if (hasLiked(member, comments)) {
-            commentsLikesRepository.deleteByMemberAndComments(member, comments);
+    public void unlike(Comments comments) {
+        String userEmail = securityUtil.getLoginUserEmail();
+        Member member = memberRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-            comments.decreaseLikeCount();
+        CommentsLikes like = commentsLikesRepository.findByMemberAndComments(member, comments);
+        if (like != null) {
+            commentsLikesRepository.delete(like);
         }
     }
 
-    // 개수 조회
-    public long countLikes(Comments comments) {
+    // 댓글 좋아요 수
+    public Long countLikes(Comments comments) {
         return commentsLikesRepository.countByComments(comments);
     }
-
 }
+

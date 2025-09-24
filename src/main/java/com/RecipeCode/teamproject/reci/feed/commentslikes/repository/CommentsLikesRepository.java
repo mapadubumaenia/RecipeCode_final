@@ -11,8 +11,7 @@ public interface CommentsLikesRepository extends JpaRepository<CommentsLikes, Lo
     // 눌렀는지 확인하기
     boolean existsByMemberAndComments(Member member, Comments comments);
 
-    // 지우기
-    void deleteByMemberAndComments(Member member, Comments comments);
+    CommentsLikes findByMemberAndComments(Member member, Comments comments);
 
     // 개수
     long countByComments(Comments comments);
