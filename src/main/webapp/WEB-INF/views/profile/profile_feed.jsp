@@ -70,9 +70,9 @@
             </c:if>
 
             <!-- 관심 태그 -->
-            <c:if test="${not empty user.userInterestTag}">
+            <c:if test="${not empty user.interestTags}">
                 <div class="tags">
-                    <c:forTokens items="${user.userInterestTag}" delims="," var="tag">
+                    <c:forTokens items="${user.interestTags}" delims="," var="tag">
                         <span class="chip">#${tag}</span>
                     </c:forTokens>
                 </div>
@@ -105,7 +105,7 @@
             </nav>
 
             <!-- JS에서 불러와서 채워질 컨테이너 -->
-            <div id="feedContainer" data-user="${user.userEmail}"></div>
+            <div id="feedContainer" data-user="${user.userId}"></div>
         </aside>
 
         <!-- 사이드바 -->
@@ -114,23 +114,68 @@
 
             <!-- 탭 버튼 -->
             <div class="follow-tabs">
-                <button class="tab-btn is-active" data-tab="following">Following</button>
-                <button class="tab-btn" data-tab="followers">Follower</button>
+                <button class="tab-btn is-active" data-tab="follower">Follower</button>
+                <button class="tab-btn" data-tab="followers">Following</button>
+            </div>
+
+            <!-- Followers 목록 -->
+            <div id="followersList" class="follow-list hidden">
+                <c:forEach var="f" items="${followers}" varStatus="st">
+                    <c:if test="${st.index < 10}">
+                        <div class="mini-card" data-userid="${f.member.userId}">
+                            <!-- 왼쪽: 프로필 이미지 -->
+                            <img src="${f.member.profileImageUrl}" alt="">
+
+                            <!-- 중앙: 유저 정보 -->
+                            <div class="mini-info">
+                                <div class="mini-top">
+                                    <span class="user-id">${f.member.userId}</span>
+                                    <span class="muted">${f.member.nickname}</span>
+                                    <div class="mini-stats">
+                                        <span class="f-count">팔로워 <b>0</b></span>
+                                        <span class="f-count">팔로잉 <b>0</b></span>
+                                    </div>
+                                </div>
+                                <c:if test="${not empty f.member.userLocation}">
+                                    <span class="muted">📍 ${f.member.userLocation}</span>
+                                </c:if>
+                            </div>
+
+                            <!-- 오른쪽: 향후 버튼 자리 -->
+                            <div class="mini-action"></div>
+                        </div>
+                    </c:if>
+                </c:forEach>
+                <c:if test="${followersHasNext}">
+                    <button class="btn small ghost">더보기</button>
+                </c:if>
             </div>
 
             <!-- Following 목록 -->
             <div id="followingList" class="follow-list">
                 <c:forEach var="f" items="${followings}" varStatus="st">
                     <c:if test="${st.index < 10}">
-                        <div class="mini-card">
+                        <div class="mini-card" data-userid="${f.member.userId}">
+                            <!-- 왼쪽: 프로필 이미지 -->
                             <img src="${f.member.profileImageUrl}" alt="">
+
+                            <!-- 중앙: 유저 정보 -->
                             <div class="mini-info">
-                                <span class="user-id">@${f.member.userId}</span>
-                                <span class="muted">${f.member.nickname}</span>
+                                <div class="mini-top">
+                                    <span class="user-id">${f.member.userId}</span>
+                                    <span class="muted">${f.member.nickname}</span>
+                                    <div class="mini-stats">
+                                        <span class="f-count">팔로워 <b>0</b></span>
+                                        <span class="f-count">팔로잉 <b>0</b></span>
+                                    </div>
+                                </div>
                                 <c:if test="${not empty f.member.userLocation}">
                                     <span class="muted">📍 ${f.member.userLocation}</span>
                                 </c:if>
                             </div>
+
+                            <!-- 오른쪽: 향후 버튼 자리 -->
+                            <div class="mini-action"></div>
                         </div>
                     </c:if>
                 </c:forEach>
@@ -139,33 +184,13 @@
                 </c:if>
             </div>
 
-            <!-- Followers 목록 -->
-            <div id="followersList" class="follow-list hidden">
-                <c:forEach var="f" items="${followers}" varStatus="st">
-                    <c:if test="${st.index < 10}">
-                        <div class="mini-card">
-                            <img src="${f.member.profileImageUrl}" alt="">
-                            <div class="mini-info">
-                                <span class="user-id">@${f.member.userId}</span>
-                                <span class="muted">${f.member.nickname}</span>
-                                <c:if test="${not empty f.member.userLocation}">
-                                    <span class="muted">📍 ${f.member.userLocation}</span>
-                                </c:if>
-                            </div>
-                        </div>
-                    </c:if>
-                </c:forEach>
-                <c:if test="${followersHasNext}">
-                    <button class="btn small ghost">더보기</button>
-                </c:if>
-            </div>
         </aside>
     </section>
 </main>
 
 <script>
     // 프로필 주인 (지금 보고 있는 페이지의 대상 유저)
-    const profileUserEmail = "${user.userEmail}";
+    const profileUserId = "${user.userId}";
 
     // 현재 로그인한 사용자
     const currentUserEmail = "${pageContext.request.userPrincipal.name}";

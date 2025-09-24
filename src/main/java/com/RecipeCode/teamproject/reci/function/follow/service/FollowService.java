@@ -25,18 +25,18 @@ public class FollowService {
     private final MapStruct mapStruct;
     private final ErrorMsg errorMsg;
 
-
-    // 공통 Member 조회 헬퍼 메서드
-    private Member findMemberOrThrow(String email, String errorCode) {
-        return memberRepository.findById(email)
+    // 공통 Member 조회 (userId → userEmail 변환)
+    private Member findByUserIdOrThrow(String userId, String errorCode) {
+        return memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage(errorCode)));
     }
 
     // 팔로우
     @Transactional
-    public void follow(String followerEmail, String followingEmail) {
-        Member follower = findMemberOrThrow(followerEmail, "errors.follower.notfound");
-        Member following = findMemberOrThrow(followingEmail, "errors.following.notfound");
+    public void follow(String followerEmail, String followingUserId) {
+        Member follower = memberRepository.findById(followerEmail)
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.follower.notfound")));
+        Member following = findByUserIdOrThrow(followingUserId, "errors.following.notfound");
 
         if (follower.equals(following)) {
             throw new IllegalArgumentException(errorMsg.getMessage("errors.follow.self"));
@@ -55,9 +55,10 @@ public class FollowService {
 
     // 언팔로우
     @Transactional
-    public void unfollow(String followerEmail, String followingEmail) {
-        Member follower = findMemberOrThrow(followerEmail, "errors.follower.notfound");
-        Member following = findMemberOrThrow(followingEmail, "errors.following.notfound");
+    public void unfollow(String followerEmail, String followingUserId) {
+        Member follower = memberRepository.findById(followerEmail)
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.follower.notfound")));
+        Member following = findByUserIdOrThrow(followingUserId, "errors.following.notfound");
 
         followRepository.findByFollowerAndFollowing(follower, following)
                 .ifPresent(followRepository::delete);
@@ -72,29 +73,28 @@ public class FollowService {
     }
 
     // 특정 유저의 팔로잉 목록
-    public Slice<FollowDto> getUserFollowingList(String userEmail, Pageable pageable) {
-        Member user = findMemberOrThrow(userEmail, "errors.not.found");
+    public Slice<FollowDto> getUserFollowingList(String userId, Pageable pageable) {
+        Member user = findByUserIdOrThrow(userId, "errors.not.found");
         return followRepository.findByFollower(user, pageable)
                 .map(mapStruct::toFollowingDto);
     }
 
     // 특정 유저의 팔로워 목록
-    public Slice<FollowDto> getUserFollowerList(String userEmail, Pageable pageable) {
-        Member user = findMemberOrThrow(userEmail, "errors.not.found");
+    public Slice<FollowDto> getUserFollowerList(String userId, Pageable pageable) {
+        Member user = findByUserIdOrThrow(userId, "errors.not.found");
         return followRepository.findByFollowing(user, pageable)
                 .map(mapStruct::toFollowerDto);
     }
 
     // 특정 유저의 팔로워 수
-    public long getUserFollowerCount(String userEmail) {
-        Member user = findMemberOrThrow(userEmail, "errors.not.found");
+    public long getUserFollowerCount(String userId) {
+        Member user = findByUserIdOrThrow(userId, "errors.not.found");
         return followRepository.countByFollowing(user);
     }
 
     // 특정 유저의 팔로잉 수
-    public long getUserFollowingCount(String userEmail) {
-        Member user = findMemberOrThrow(userEmail, "errors.not.found");
+    public long getUserFollowingCount(String userId) {
+        Member user = findByUserIdOrThrow(userId, "errors.not.found");
         return followRepository.countByFollower(user);
     }
-
 }

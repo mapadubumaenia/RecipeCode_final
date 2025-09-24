@@ -20,20 +20,19 @@ public class FollowController {
     private final FollowService followService;
     private final SecurityUtil securityUtil;
 
-
     /** 팔로우 */
-    @PostMapping("/{followingEmail}")
-    public ResponseEntity<String> follow(@PathVariable String followingEmail) {
-        String followerEmail = securityUtil.getLoginUser().getUsername();
-        followService.follow(followerEmail, followingEmail);
+    @PostMapping("/{userId}")
+    public ResponseEntity<String> follow(@PathVariable String userId) {
+        String followerEmail = securityUtil.getLoginUser().getUsername(); // 로그인한 사람은 email 기반
+        followService.follow(followerEmail, userId); // userId → email 변환 처리
         return ResponseEntity.ok("팔로우 성공");
     }
 
     /** 언팔로우 */
-    @DeleteMapping("/{followingEmail}")
-    public ResponseEntity<String> unfollow(@PathVariable String followingEmail) {
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<String> unfollow(@PathVariable String userId) {
         String followerEmail = securityUtil.getLoginUser().getUsername();
-        followService.unfollow(followerEmail, followingEmail);
+        followService.unfollow(followerEmail, userId);
         return ResponseEntity.ok("언팔로우 성공");
     }
 
@@ -52,17 +51,17 @@ public class FollowController {
     }
 
     /** 특정 유저 팔로잉 목록 */
-    @GetMapping("/{userEmail}/following")
+    @GetMapping("/{userId}/following")
     public ResponseEntity<Slice<FollowDto>> getUserFollowingList(
-            @PathVariable String userEmail, Pageable pageable) {
-        return ResponseEntity.ok(followService.getUserFollowingList(userEmail, pageable));
+            @PathVariable String userId, Pageable pageable) {
+        return ResponseEntity.ok(followService.getUserFollowingList(userId, pageable));
     }
 
     /** 특정 유저 팔로워 목록 */
-    @GetMapping("/{userEmail}/follower")
+    @GetMapping("/{userId}/follower")
     public ResponseEntity<Slice<FollowDto>> getUserFollowerList(
-            @PathVariable String userEmail, Pageable pageable) {
-        return ResponseEntity.ok(followService.getUserFollowerList(userEmail, pageable));
+            @PathVariable String userId, Pageable pageable) {
+        return ResponseEntity.ok(followService.getUserFollowerList(userId, pageable));
     }
 
     /** 내 팔로잉 수 */
@@ -80,23 +79,21 @@ public class FollowController {
     }
 
     /** 특정 유저 팔로잉 수 */
-    @GetMapping("/{userEmail}/following/count")
-    public ResponseEntity<Long> getUserFollowingCount(@PathVariable String userEmail) {
-        return ResponseEntity.ok(followService.getUserFollowingCount(userEmail));
+    @GetMapping("/{userId}/following/count")
+    public ResponseEntity<Long> getUserFollowingCount(@PathVariable String userId) {
+        return ResponseEntity.ok(followService.getUserFollowingCount(userId));
     }
 
     /** 특정 유저 팔로워 수 */
-    @GetMapping("/{userEmail}/follower/count")
-    public ResponseEntity<Long> getUserFollowerCount(@PathVariable String userEmail) {
-        return ResponseEntity.ok(followService.getUserFollowerCount(userEmail));
+    @GetMapping("/{userId}/follower/count")
+    public ResponseEntity<Long> getUserFollowerCount(@PathVariable String userId) {
+        return ResponseEntity.ok(followService.getUserFollowerCount(userId));
     }
 
-    // 서치바 검색 ㅇㅇ
+    /** 유저 검색 */
     @GetMapping("/mypage/search")
     public ResponseEntity<List<MemberDto>> searchUsers(
-            @RequestParam("keyword") String keyword){
-        List<MemberDto> users = followService.searchUsers(keyword);
-        return ResponseEntity.ok(users);
+            @RequestParam("keyword") String keyword) {
+        return ResponseEntity.ok(followService.searchUsers(keyword));
     }
-
 }
