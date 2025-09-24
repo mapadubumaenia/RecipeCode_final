@@ -8,6 +8,7 @@ import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,6 +38,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Optional<Member> memberOt = memberRepository.findByUserEmail(username);
         if (memberOt.isPresent()) {
             Member member = memberOt.get();
+
+            if ("Y".equals(member.getDeleted())) {
+                throw new DisabledException(errorMsg.getMessage("errors.deleted"));
+            }
+
             authorities.add(new SimpleGrantedAuthority(member.getRole()));
             return new SecurityUserDto(
                     member,
@@ -75,5 +81,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             );
         }
         throw new RuntimeException(errorMsg.getMessage("errors.not.found"));
+
     }
 }

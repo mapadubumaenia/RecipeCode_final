@@ -1,6 +1,7 @@
 package com.RecipeCode.teamproject.reci.auth.dto;
 
 
+import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +32,6 @@ public class SecurityUserDto implements UserDetails, OAuth2User {
     public String getNickname() { return member.getNickname(); }
     public String getUserEmail() { return member.getUserEmail(); }
     public String getUserId() { return member.getUserId(); }
-    public Member getMember() { return member; }
 
     // 홈페이지 로그인
     @Override
@@ -50,7 +50,7 @@ public class SecurityUserDto implements UserDetails, OAuth2User {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
+    @Override public boolean isEnabled() { return !"Y".equals(member.getDeleted()); }
 
     //소셜 로그인용
     @Override
@@ -61,4 +61,5 @@ public class SecurityUserDto implements UserDetails, OAuth2User {
         // OAuth2User 기본 식별자대신 우리 서비스 기준으로 이메일 사용
         return member.getUserEmail();
     }
+
 }

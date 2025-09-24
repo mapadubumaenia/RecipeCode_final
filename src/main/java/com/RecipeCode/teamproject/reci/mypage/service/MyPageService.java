@@ -2,6 +2,7 @@ package com.RecipeCode.teamproject.reci.mypage.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.RecipeMapStruct;
+
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,4 +47,5 @@ public class MyPageService {
 
         return new SliceImpl<>(dtos, pageable, slice.hasNext());
     }
+
 }

@@ -15,6 +15,8 @@
     <title>프로필 편집</title>
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/profile-edit.css'/>">
+    <%--  JS  --%>
+    <script src="<c:url value='/js/mypage/mypage-edit.js'/>"></script
 </head>
 <body>
 <form action="<c:url value='/mypage/updateProfile'/>" method="post" enctype="multipart/form-data">
@@ -183,6 +185,6 @@
     </section>
 </main>
 </form>
-<script src="<c:url value='/js/mypage/mypage-edit.js'/>"></script>
+>
 </body>
 </html>

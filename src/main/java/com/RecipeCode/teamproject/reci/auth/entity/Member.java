@@ -8,6 +8,7 @@ import com.RecipeCode.teamproject.reci.tag.entity.Tag;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +42,13 @@ public class Member extends BaseTimeEntity {
     private byte[] profileImage;
     private String profileImageUrl;
 
-    // 회원 ↔ 관심태그 (1:N)
+    // 회원 ↔ 관심태그
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<MemberTag> memberTags = new ArrayList<>();
+
+    // 삭제
+    private String deleted;
+    private LocalDateTime deletedAt;
 
 }

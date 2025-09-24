@@ -112,6 +112,26 @@ function edit_cancel() {
 }
 
 //계정삭제
-function edit_cancel() {
-    history.back(); // 브라우저 뒤로가기
+function delete_account() {
+    if (!confirm("정말로 계정을 삭제하시겠습니까?")) {
+        return;
+    }
+
+    fetch("/mypage/delete", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+        .then(response => {
+            if (response.ok) {
+                alert("계정이 탈퇴 처리되었습니다.");
+                window.location.href = "/";
+            } else {
+                return response.text().then(text => { throw new Error(text) });
+            }
+        })
+        .catch(error => {
+            alert("계정 삭제 중 오류 발생: " + error.message);
+        });
 }

@@ -20,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Log4j2
 @Service
@@ -37,22 +39,36 @@ public class MemberService {
 
     //   회원가입
     public void save(MemberDto memberDto) {
-//        중복이메일 검사
-        if (memberRepository.existsById(memberDto.getUserEmail())) {
-            throw new RuntimeException((errorMsg.getMessage("errors.register")));
+// 1) userId에 @ 자동 추가
+        String userId = memberDto.getUserId();
+        if (userId != null && !userId.startsWith("@")) {
+            userId = "@" + userId;
+        }
+        memberDto.setUserId(userId);
+
+//      이메일 검사
+        Optional<Member> existsMemberOpt = memberRepository.findByUserEmail(memberDto.getUserEmail());
+        if (existsMemberOpt.isPresent()) {
+            Member existingMember = existsMemberOpt.get();
+            if ("Y".equals(existingMember.getDeleted())) {
+                throw new RuntimeException(errorMsg.getMessage("errors.deleted")); // 탈퇴한 계정
+            } else {
+                throw new RuntimeException(errorMsg.getMessage("errors.register")); // 이미 사용중인 계정
+            }
         }
 
-//        비밀번호 암호화
+//      비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(memberDto.getPassword());
         Member member = mapStruct.toEntity(memberDto);
         member.setPassword(encodedPassword);
+//      기본값
         if (member.getProfileStatus() == null || member.getProfileStatus().isBlank()) {
             member.setProfileStatus("PUBLIC");
             member.setProvider("local");
             member.setRole("R_USER");
             memberRepository.save(member);
             memberRepository.flush();
-
+//          알림설정 기본값
             NotiSetting follow = NotiSetting.builder()
                     .member(member)
                     .typeCode("FOLLOW")
@@ -150,5 +166,14 @@ public class MemberService {
                 memberTagRepository.save(mt);
             }
         }
+    }
+
+    @Transactional
+    public void deletedMember(String email) {
+        Member member = memberRepository.findById(email)
+                .orElseThrow(() -> new RuntimeException("회원 없음"));
+        member.setDeleted("Y"); // Soft Delete
+        member.setDeletedAt(LocalDateTime.now()); // 탈퇴일 저장
+        memberRepository.save(member);
     }
 }
