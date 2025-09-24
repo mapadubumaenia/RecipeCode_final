@@ -1,0 +1,78 @@
+/* 전체 카드 */
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+/* 탭 스타일 */
+.tabs a {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-right: 4px;
+    border-radius: 4px;
+    text-decoration: none;
+    background: #f0f0f0;
+    color: #333;
+}
+
+.tabs a.active {
+    background: #333;
+    color: #fff;
+}
+
+.toolbar {
+    margin-top: 15px;
+}
+
+/* 테이블 */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.table th, .table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.table th {
+    background: #f7f7f7;
+}
+
+/* 버튼 */
+.btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn.green { background: #4CAF50; color: #fff; }
+.btn.red { background: #f44336; color: #fff; }
+.btn.small { font-size: 0.85rem; }
+
+/* 페이징 */
+.pagination {
+    margin-top: 15px;
+}
+
+.pagination a {
+    display: inline-block;
+    margin-right: 5px;
+    padding: 6px 10px;
+    text-decoration: none;
+    background: #f0f0f0;
+    border-radius: 4px;
+    color: #333;
+}
+
+.pagination a.active {
+    background: #4CAF50;
+    color: #fff;
+}
