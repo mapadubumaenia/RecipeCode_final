@@ -10,6 +10,8 @@
     <!-- 공통 CSS -->
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/profile_feed.css'/>">
+    <link rel="stylesheet" href="<c:url value='/css/notification.css'/>">
+
 </head>
 <body>
 <main class="container profile-page">
@@ -29,6 +31,10 @@
                 </form>
                 <div class="notif-wrap">
                     <button id="btnNotif" class="notif-btn" title="알림">🔔</button>
+                    <span id="noti-count" class="badge">0</span> <!-- 뱃지 숫자 -->
+                    <div id="noti-list" class="notif-dropdown hidden">
+                        <ul></ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -197,8 +203,10 @@
 </script>
 
 
-<!-- JS -->
+<!-- 무한 스크롤 기타 기능 JS -->
 <script src="<c:url value='/js/mypage/utils.js'/>"></script>
 <script src="<c:url value='/js/mypage/profile-feed.js'/>"></script>
+<%--알림 js--%>
+<script src="${pageContext.request.contextPath}/js/notification.js"></script>
 </body>
 </html>
