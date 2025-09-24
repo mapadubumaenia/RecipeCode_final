@@ -1,23 +1,27 @@
 package com.RecipeCode.teamproject.es.reco.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
-@ToString
+@AllArgsConstructor
 public class RecipeCardDto {
-
     private String id;
     private String title;
-    private String author;     // authorNick
+    private String authorNick;
     private long likes;
     private String createdAt;
     private List<String> tags;
-    private double recScore;
+    private double recScore;   // 개인화 점수(없으면 0)
 
-    // 🔥 추가: 카드 썸네일 용
-    private String thumbUrl;
+    private String thumbUrl;   // 레거시/폴백용 이미지
+
+    // 👇 신규: 라이트 유튜브/비디오/이미지 메타
+    private String mediaKind;  // "youtube" | "video" | "image"
+    private String mediaSrc;   // youtube: embed URL, video: 파일 URL, image: 이미지 URL
+    private String poster;     // 썸네일/포스터(없으면 null)
 }

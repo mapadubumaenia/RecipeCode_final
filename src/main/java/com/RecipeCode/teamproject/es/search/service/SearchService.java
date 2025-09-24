@@ -14,6 +14,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -58,14 +59,11 @@ public class SearchService {
         filters.add(Query.of(b -> b.term(t -> t.field("visibility").value("PUBLIC"))));
         filters.add(Query.of(b -> b.bool(bb -> bb.mustNot(mn -> mn.term(t -> t.field("deleted").value(true))))));
         if (tags != null && !tags.isEmpty()) {
-            // 필터로 넘어온 tagsCsv도 #가 있을 수 있으니 제거 후 정확일치(OR)
             List<String> cleaned = tags.stream()
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .map(s -> s.startsWith("#") ? s.substring(1) : s)
                     .toList();
-
-            // OR(terms) — keyword 필드 우선, 실패 대비로 tags(그대로)도 함께 should로 묶기
             filters.add(orTermsOnTagFields(cleaned));
         }
         Query boolQuery = Query.of(b -> b.bool(bb -> bb.must(main).filter(filters)));
@@ -75,36 +73,35 @@ public class SearchService {
                 .withQuery(boolQuery)
                 .withPageable(PageRequest.of(0, size));
 
-        // 4) 집계 (keyword 우선, 없으면 tags로도 동작)
+        // 4) 집계
         qb.withAggregation("tags", Aggregation.of(a -> a.terms(t -> t.field(TAGS_FIELD_KEYWORD).size(20))));
         qb.withAggregation("by_day", Aggregation.of(a -> a.dateHistogram(h -> h
                 .field("createdAt")
                 .fixedInterval(fi -> fi.time("1d")))));
 
-        // 5) 정렬 + 커서 지원 여부
+        // 5) 정렬 + 커서
         boolean cursorSortable = false;
         if ("hot".equalsIgnoreCase(sort)) {
             qb.withSort(s -> s.field(f -> f.field("likes").order(SortOrder.Desc)));
             qb.withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
-            qb.withSort(s -> s.field(f -> f.field("id").order(SortOrder.Desc))); // tie-breaker
+            qb.withSort(s -> s.field(f -> f.field("id").order(SortOrder.Desc)));
             cursorSortable = true;
         } else if ("new".equalsIgnoreCase(sort) || !StringUtils.hasText(sort)) {
             qb.withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
-            qb.withSort(s -> s.field(f -> f.field("id").order(SortOrder.Desc))); // tie-breaker
+            qb.withSort(s -> s.field(f -> f.field("id").order(SortOrder.Desc)));
             cursorSortable = true;
-        } // rel 모드는 ES 기본 score desc, search_after 미지원
+        }
 
-        // 6) after 적용
         if (cursorSortable) {
             List<Object> afterValues = CursorUtil.decode(after);
             if (afterValues != null) qb.withSearchAfter(afterValues);
         }
 
-        // 7) 검색 실행
+        // 6) 실행
         var nq = qb.build();
         SearchHits<RecipeSearchDoc> hits = es.search(nq, RecipeSearchDoc.class);
 
-        // 8) 결과 매핑
+// 7) 매핑
         var items = hits.getSearchHits().stream().map(h -> {
             var d = h.getContent();
             var m = new LinkedHashMap<String, Object>(16);
@@ -116,20 +113,20 @@ public class SearchService {
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("score", h.getScore());
-            m.put("thumbUrl", resolveThumb(d)); // 레거시/폴백 유지
+            m.put("thumbUrl", resolveThumb(d)); // 레거시/폴백
             m.put("comments", d.getComments() != null ? d.getComments() : 0L);
             m.put("views", d.getViews() != null ? d.getViews() : 0L);
 
-            // ⭐ 신규: 동영상/이미지 구분 메타
+            // ⭐ 라이트 유튜브용 메타
             Media media = buildMedia(d);
-            m.put("mediaKind", media.kind());
-            m.put("mediaSrc", media.src());
-            m.put("poster", media.poster());
+            m.put("mediaKind", media.kind());   // youtube | video | image
+            m.put("mediaSrc", media.src());     // youtube: embed URL, video: mp4 URL, image: img URL
+            m.put("poster", media.poster());    // 썸네일/포스터
 
             return m;
         }).toList();
 
-        // 9) next 커서
+// 8) next
         String next = null;
         if (cursorSortable && !hits.getSearchHits().isEmpty()) {
             var last = hits.getSearchHits().get(hits.getSearchHits().size() - 1);
@@ -139,15 +136,67 @@ public class SearchService {
             }
         }
 
+/* ✅ 8.5) 집계 추출 (제로 집계 보장)
+   - 결과가 0이어도 아래 구조를 항상 내려줌:
+     "aggs": { "tags": [], "by_day": [] }
+*/
+        // ✅ 집계 추출 (제로 집계 보장)
+        Map<String, Object> aggsOut = new LinkedHashMap<>();
+        try {
+            var aggContainer = hits.getAggregations(); // Spring Data ES의 AggregationsContainer
+            @SuppressWarnings("unchecked")
+            Map<String, Aggregate> aggs =
+                    (aggContainer != null) ? (Map<String, Aggregate>) aggContainer.aggregations() : null;
+
+            // terms: tags
+            List<Map<String, Object>> tagsBuckets = new ArrayList<>();
+            Aggregate tagsAgg = (aggs != null) ? aggs.get("tags") : null;
+            if (tagsAgg != null && tagsAgg.isSterms()) {
+                var buckets = tagsAgg.sterms().buckets();
+                if (buckets != null && buckets.isArray()) {
+                    buckets.array().forEach(b -> {
+                        tagsBuckets.add(Map.of(
+                                "key", b.key(),
+                                "docCount", b.docCount()
+                        ));
+                    });
+                }
+            }
+            aggsOut.put("tags", tagsBuckets); // 비어도 []
+
+            // date_histogram: by_day
+            List<Map<String, Object>> dayBuckets = new ArrayList<>();
+            Aggregate dayAgg = (aggs != null) ? aggs.get("by_day") : null;
+            if (dayAgg != null && dayAgg.isDateHistogram()) {
+                var buckets = dayAgg.dateHistogram().buckets();
+                if (buckets != null && buckets.isArray()) {
+                    buckets.array().forEach(b -> {
+                        dayBuckets.add(Map.of(
+                                "key", b.key(),                 // epoch millis
+                                "keyAsString", b.keyAsString(), // ISO 문자열
+                                "docCount", b.docCount()
+                        ));
+                    });
+                }
+            }
+            aggsOut.put("by_day", dayBuckets); // 비어도 []
+        } catch (Exception ignore) {
+            aggsOut.put("tags", List.of());
+            aggsOut.put("by_day", List.of());
+        }
+
+// ✅ 응답에 포함
         var res = new LinkedHashMap<String, Object>();
         res.put("total", hits.getTotalHits());
         res.put("items", items);
         res.put("next", next);
+        res.put("aggs", aggsOut);
 
-        // 10) 검색 로그
+// 10) 로그
         logs.log(q, tags, sort, 0, size, hits.getTotalHits(), null);
 
         return res;
+
     }
 
     /** q 규칙 */
@@ -157,13 +206,12 @@ public class SearchService {
             return Query.of(b -> b.matchAll(m -> m));
         }
 
-        // ✅ 입력한 #태그들을 추출 → 인덱스는 해시 없이 저장되므로 해시 제거
-        List<String> hashtags = extractHashtags(qv); // ["간단","매운"] 등
+        // 해시태그
+        List<String> hashtags = extractHashtags(qv);
         if (!hashtags.isEmpty()) {
-            // 각 태그에 대해 (tags.keyword:간단 OR tags:간단)를 MUST AND
             return Query.of(b -> b.bool(bb -> {
                 for (String tagCore : hashtags) {
-                    final String val = tagCore; // 해시 제거된 핵심 값
+                    final String val = tagCore;
                     bb.must(m -> m.bool(sb -> sb
                             .should(s1 -> s1.term(t1 -> t1.field(TAGS_FIELD_KEYWORD).value(val)))
                             .should(s2 -> s2.term(t2 -> t2.field(TAGS_FIELD).value(val)))
@@ -178,7 +226,7 @@ public class SearchService {
             return Query.of(b -> b.term(t -> t.field("authorNick").value(nick)));
         }
 
-        // 일반 검색 (기존 유지)
+        // 일반 검색
         return Query.of(b -> b.bool(bb -> bb
                 .should(s -> s.multiMatch(mm -> mm
                         .query(qv)
@@ -191,7 +239,6 @@ public class SearchService {
                 .minimumShouldMatch("1")));
     }
 
-    // ✅ 여러 해시태그 추출 유틸 (해시 제거해서 반환)
     private static List<String> extractHashtags(String q) {
         if (!StringUtils.hasText(q)) return List.of();
         Matcher m = HASHTAG.matcher(q);
@@ -203,9 +250,7 @@ public class SearchService {
         return out;
     }
 
-    // ✅ 필터(tagsCsv) OR terms를 keyword/tags 양쪽에 안전하게 거는 헬퍼
     private static Query orTermsOnTagFields(List<String> plainTags) {
-        // keyword 필드 terms OR 원 필드 terms를 should로 묶음
         List<FieldValue> vals = plainTags.stream().map(FieldValue::of).toList();
         return Query.of(b -> b.bool(bb -> bb
                 .should(s -> s.terms(t -> t.field(TAGS_FIELD_KEYWORD).terms(v -> v.value(vals))))
@@ -242,9 +287,9 @@ public class SearchService {
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
-            m.put("thumbUrl", resolveThumb(d)); // 레거시/폴백 유지
+            m.put("thumbUrl", resolveThumb(d)); // 레거시/폴백
 
-            // ⭐ 신규: 동영상/이미지 구분 메타
+            // ⭐ 라이트 유튜브용 메타
             Media media = buildMedia(d);
             m.put("mediaKind", media.kind());
             m.put("mediaSrc", media.src());
@@ -265,22 +310,19 @@ public class SearchService {
     }
 
     // ===============================
-    // 썸네일/미디어 보정 유틸 (핵심)
+    // 썸네일/미디어 보정 유틸
     // ===============================
 
-    /** ES 문서 기반으로 '항상 이미지 URL'이 되도록 보정 (레거시 유지) */
+    /** 레거시: 이미지 썸네일 폴백 */
     private String resolveThumb(RecipeSearchDoc d) {
         String t = d.getThumbUrl();
-        // 이미지로 보기에 안전하면 그대로 사용
         if (StringUtils.hasText(t) && !looksLikeYouTubeUrl(t)) {
             return t;
         }
-        // 유튜브거나 비어있으면 videoUrl에서 ID 추출 → i.ytimg.com
         String vid = extractYouTubeId(d.getVideoUrl());
         if (vid != null) {
             return "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
         }
-        // 마지막 폴백
         return (t != null) ? t : "";
     }
 
@@ -303,38 +345,37 @@ public class SearchService {
         return null;
     }
 
-    // ⭐ 신규: 동영상/유튜브/이미지 판단 → 프런트에서 바로 렌더 가능한 메타
+    // ⭐ 라이트 유튜브/비디오/이미지 메타
     private record Media(String kind, String src, String poster) {}
 
     private Media buildMedia(RecipeSearchDoc d) {
         String thumb = d.getThumbUrl();
         String video = d.getVideoUrl();
 
-        // 1) 동영상이 있으면 우선 처리
+        // 동영상 우선
         if (StringUtils.hasText(video)) {
             // YouTube
             String vid = extractYouTubeId(video);
             if (vid != null) {
                 String embed = "https://www.youtube.com/embed/" + vid
-                        + "?autoplay=0&mute=0&playsinline=1&modestbranding=1&rel=0";
+                        + "?playsinline=1&modestbranding=1&rel=0";
                 String poster = "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
                 return new Media("youtube", embed, poster);
             }
-            // 파일형(간단 판정: 확장자)
+            // 파일형
             String v = video.toLowerCase();
             if (v.endsWith(".mp4") || v.endsWith(".webm") || v.endsWith(".mov") || v.endsWith(".m4v")) {
-                // 썸네일 있으면 poster로 사용
                 String poster = (StringUtils.hasText(thumb) && !looksLikeYouTubeUrl(thumb)) ? thumb : null;
                 return new Media("video", video, poster);
             }
         }
 
-        // 2) 동영상이 없으면 이미지
+        // 이미지
         if (StringUtils.hasText(thumb) && !looksLikeYouTubeUrl(thumb)) {
             return new Media("image", thumb, null);
         }
 
-        // 3) 마지막: 유튜브 섬네일 폴백
+        // 유튜브 섬네일 폴백
         String vid = extractYouTubeId(video);
         if (vid != null) {
             String poster = "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
