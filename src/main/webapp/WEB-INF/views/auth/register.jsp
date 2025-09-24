@@ -42,9 +42,9 @@
 
                 <!-- 아이디(핸들) -->
                 <div class="field">
-                    <label for="handle">아이디 (@handle)</label>
+                    <label for="handle">아이디</label>
                     <div class="input-wrap">
-                        <input class="input" type="text" id="handle" name="userId" placeholder="@yourid" minlength="3" maxlength="20" required />
+                        <input class="input" type="text" id="handle" name="userId" placeholder="yourid" minlength="3" maxlength="20" required />
                     </div>
                     <div class="hint" id="handleHint">영문/숫자/밑줄, 3–20자</div>
                 </div>

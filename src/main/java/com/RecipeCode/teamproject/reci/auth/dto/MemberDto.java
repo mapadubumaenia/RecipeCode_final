@@ -5,6 +5,7 @@ import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -36,6 +37,8 @@ public class MemberDto {
     private Boolean noti_FOLLOW;
     private Boolean noti_COMMENT;
 
+    private String deleted;
+    private LocalDateTime deletedAt;
 
     // mypage userId 조회용 생성자
     public MemberDto (

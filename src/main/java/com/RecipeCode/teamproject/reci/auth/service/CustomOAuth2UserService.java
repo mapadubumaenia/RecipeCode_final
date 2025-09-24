@@ -1,5 +1,6 @@
 package com.RecipeCode.teamproject.reci.auth.service;
 
+import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.notisetting.entity.NotiSetting;
@@ -30,6 +31,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final MemberRepository memberRepository;
     private final NotiSettingRepository notiSettingRepository;
+    private final ErrorMsg errorMsg;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -80,7 +82,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             // 최초 로그인 → 회원 가입 처리
             member = Member.builder()
                     .userEmail(email)
-                    .userId(nickname != null ? nickname : "@" + provider + "_" + providerId)
+                    .userId(    nickname != null
+                            ? (nickname.startsWith("@") ? nickname : "@" + nickname)
+                            : "@" + provider + "_" + providerId)
                     .nickname(nickname != null ? nickname : provider + "_" + providerId)
                     .profileImage(profileImage)
                     .profileStatus("PUBLIC")
@@ -112,6 +116,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             member.setProvider(provider);
             member.setProviderId(providerId);
             memberRepository.save(member);
+        }
+
+        // 탈퇴 계정이면 차단
+        if ("Y".equals(member.getDeleted())) {
+            throw new RuntimeException(errorMsg.getMessage("errors.deleted"));
         }
 
         return new SecurityUserDto(member,
