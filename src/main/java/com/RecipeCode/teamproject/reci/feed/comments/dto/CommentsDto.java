@@ -18,11 +18,15 @@ public class CommentsDto {
     private String commentsContent; // 내용
     private Long likeCount;         // 좋아요 수
     private Long reportCount;       // 신고 수
+    private boolean liked;
+    private boolean alreadyReported;
     private Long parentId;          // 부모 댓글 ID (대댓글이면 채워짐)
 
     private LocalDateTime insertTime;
     private LocalDateTime updateTime;
+    private LocalDateTime deletedAt;
 
+    private Long commentsCount;
     private int replyCount;
 
 
