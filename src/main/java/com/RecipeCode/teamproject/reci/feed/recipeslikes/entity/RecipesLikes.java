@@ -32,5 +32,4 @@ public class RecipesLikes extends BaseTimeEntity {
     @JoinColumn(name = "UUID", nullable = false)
     private Recipes recipes;
 
-
 }

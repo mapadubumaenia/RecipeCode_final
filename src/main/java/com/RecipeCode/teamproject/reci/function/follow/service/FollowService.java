@@ -8,11 +8,14 @@ import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.function.follow.dto.FollowDto;
 import com.RecipeCode.teamproject.reci.function.follow.entity.Follow;
 import com.RecipeCode.teamproject.reci.function.follow.repository.FollowRepository;
+import com.RecipeCode.teamproject.reci.function.notification.enums.NotificationEvent;
+import com.RecipeCode.teamproject.reci.function.notification.service.NotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -24,6 +27,7 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final MapStruct mapStruct;
     private final ErrorMsg errorMsg;
+    private final NotificationService notificationService;
 
     // 공통 Member 조회 (userId → userEmail 변환)
     private Member findByUserIdOrThrow(String userId, String errorCode) {
@@ -51,6 +55,15 @@ public class FollowService {
         follow.setFollowing(following);
 
         followRepository.save(follow);
+
+        // 알림 생성
+        notificationService.createNotification(
+                follower.getUserEmail(),                  // 알림을 발생시킨 사람
+                following.getUserEmail(),                 // 알림을 받는 사람
+                NotificationEvent.FOLLOW,                 // enum 넘김
+                "FOLLOW",                                 // 소스 타입
+                String.valueOf(follow.getFollowId())      // 소스 ID
+        );
     }
 
     // 언팔로우

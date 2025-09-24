@@ -15,7 +15,7 @@ $(function () {
 
             list.forEach(item => {
                 const li = `
-                    <li data-id="${item.deliveryId}" class="${item.read ? 'read' : 'unread'}">
+                    <li data-id="${item.deliveryId}" class="${item.isRead ? 'read' : 'unread'}">
                         ${item.notification.message}
                     </li>`;
                 $list.append(li);

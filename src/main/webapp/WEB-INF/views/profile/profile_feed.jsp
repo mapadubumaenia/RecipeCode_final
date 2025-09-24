@@ -202,7 +202,8 @@
     const currentUserEmail = "${pageContext.request.userPrincipal.name}";
 </script>
 
-
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- 무한 스크롤 기타 기능 JS -->
 <script src="<c:url value='/js/mypage/utils.js'/>"></script>
 <script src="<c:url value='/js/mypage/profile-feed.js'/>"></script>

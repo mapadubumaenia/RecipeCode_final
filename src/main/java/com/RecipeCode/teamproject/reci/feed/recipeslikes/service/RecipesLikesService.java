@@ -9,6 +9,8 @@ import com.RecipeCode.teamproject.reci.feed.recipes.repository.RecipesRepository
 import com.RecipeCode.teamproject.reci.feed.recipeslikes.dto.RecipesLikesDto;
 import com.RecipeCode.teamproject.reci.feed.recipeslikes.entity.RecipesLikes;
 import com.RecipeCode.teamproject.reci.feed.recipeslikes.repository.RecipesLikesRepository;
+import com.RecipeCode.teamproject.reci.function.notification.enums.NotificationEvent;
+import com.RecipeCode.teamproject.reci.function.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ public class RecipesLikesService {
     private final MemberRepository memberRepository;
     private final RecipeMapStruct recipeMapStruct;
     private final ErrorMsg errorMsg;
+    private final NotificationService notificationService;
 
     // 좋아요 토글 기능
     @Transactional
@@ -51,6 +54,16 @@ public class RecipesLikesService {
 
             recipes.setLikeCount(recipes.getLikeCount() + 1);
             liked = true;
+
+//            // 알림 생성
+//            notificationService.createNotification(
+//                    like.getMember().getUserEmail(),                 // 좋아요 누른 사람
+//                    like.getRecipes().getMember().getUserEmail(),    // 레시피 작성자
+//                    NotificationEvent.LIKE,                          // 이벤트 타입 (LIKE)
+//                    "LIKE",                                          // 소스 타입
+//                    String.valueOf(like.getLikeId())                 // 소스 ID
+//            );
+
         }
 
         // 결과 DTO 채우기
