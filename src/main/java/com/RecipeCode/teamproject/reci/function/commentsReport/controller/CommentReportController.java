@@ -13,9 +13,7 @@ import com.RecipeCode.teamproject.reci.function.commentsReport.service.CommentRe
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -98,9 +96,10 @@ public class CommentReportController {
         model.addAttribute("reports", page.getContent());
         model.addAttribute("page", page);
 
-        model.addAttribute("대기중", commentReportService.getReportsByStatus(0L,pageable).getTotalElements());
-        model.addAttribute("처리중", commentReportService.getReportsByStatus(1L,pageable).getTotalElements());
-        model.addAttribute("완료",commentReportService.getReportsByStatus(2L,pageable).getTotalElements());
+        model.addAttribute("total", commentReportService.countAllReports());
+        model.addAttribute("pending", commentReportService.countByStatus(0L));
+        model.addAttribute("processing", commentReportService.countByStatus(1L));
+        model.addAttribute("completed",commentReportService.countByStatus(2L));
         return "function/commentsReport/commentReport_all"; // JSP 경로
     }
 }

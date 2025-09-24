@@ -58,7 +58,17 @@ public class CommentReportService {
         return commentReportRepository.existsByComments_CommentsIdAndMember_UserEmail(commentsId, userEmail);
     }
 
-    // 전체조회
+    // CommentReportService
+    public long countAllReports() {
+        return commentReportRepository.count();
+    }
+
+    public long countByStatus(Long status) {
+        return commentReportRepository.countByReportStatus(status);
+    }
+
+
+    // 페이징
     public Page<CommentReportDto> getAllReports(Pageable pageable) {
         return commentReportRepository.findAll(pageable)
                 .map(this::toDtoWithExtras);

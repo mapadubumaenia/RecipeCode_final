@@ -4,6 +4,7 @@
 <html>
 <head>
     <title>댓글 신고 관리</title>
+    <link rel="stylesheet" href="/css/commentReport.css">
 </head>
 <body>
 <div class="card" id="tab-reports">
@@ -13,16 +14,16 @@
         <!-- 상태별 탭 -->
         <div class="tabs">
             <a href="/comments/report/list" class="${param.reportStatus == null ? 'active' : ''}">
-                전체 (${page.totalElements})
+                전체 (${total})
             </a>
             <a href="/comments/report/list?reportStatus=0" class="${param.reportStatus == '0' ? 'active' : ''}">
-                대기중 (${대기중})
+                대기중 (${pending})
             </a>
             <a href="/comments/report/list?reportStatus=1" class="${param.reportStatus == '1' ? 'active' : ''}">
-                처리중 (${처리중})
+                처리중 (${processing})
             </a>
             <a href="/comments/report/list?reportStatus=2" class="${param.reportStatus == '2' ? 'active' : ''}">
-                완료 (${완료})
+                완료 (${completed})
             </a>
         </div>
 
