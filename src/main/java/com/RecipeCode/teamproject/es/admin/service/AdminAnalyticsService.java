@@ -3,7 +3,9 @@ package com.RecipeCode.teamproject.es.admin.service;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.FieldDateMath;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.RecipeCode.teamproject.es.search.document.RecipeSearchDoc;
 import com.RecipeCode.teamproject.es.search.document.SearchLogDoc;
 import lombok.extern.log4j.Log4j2;
@@ -19,6 +21,8 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import org.springframework.data.elasticsearch.core.SearchHits;
+
+import java.io.IOException;
 import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,40 +186,97 @@ public class AdminAnalyticsService {
         return out;
     }
 
-    /* -------------------------------------------
-     * 3) 최근 많이 업로드된 태그 (Trending Tags)
-     * ------------------------------------------- */
+    // 3) 최근 많이 업로드된 태그 (Trending Tags)  -- 메서드 전체 교체
     public List<Map<String, Object>> trendingTags(int days, int size) {
         final int daysF = (days <= 0) ? 30 : days;
         final int sizeF = Math.min(Math.max(size, 1), 100);
         final Instant fromF = Instant.now().minus(daysF, ChronoUnit.DAYS);
 
-        NativeQueryBuilder qb = NativeQuery.builder()
-                .withQuery(Query.of(b -> b.bool(bb -> bb
-                        .filter(f -> f.range(r -> r.field("createdAt")
-                                .gte(co.elastic.clients.json.JsonData.of(fromF.toString()))
-                        ))
-                        .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
-                        .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
-                )))
-                // 🔴 기존 "tags.keyword" → 🟢 "tags" 로 변경
-                .withAggregation("tags", Aggregation.of(a -> a
-                        .terms(t -> t.field("tags").size(sizeF))
-                ))
-                .withPageable(org.springframework.data.domain.PageRequest.of(0, 1));
+        try {
+            // ---- 진단: 문서 개수(기간/가시성/삭제조건) ----
+            var baseBool = new co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery.Builder()
+                    .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
+                    .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
+                    .filter(f -> f.range(r -> r.field("createdAt")
+                            .gte(co.elastic.clients.json.JsonData.of(fromF.toString()))))
+                    .build();
 
-        var hits = es.search(qb.build(), RecipeSearchDoc.class);
-        Map<String, Aggregate> aggs = safeAggs(hits);
+            long total = esClient.count(c -> c.index("recipe").query(q -> q.bool(baseBool))).count();
+            long hasTags = esClient.count(c -> c.index("recipe").query(q -> q.bool(b -> b
+                    .filter(baseBool.filter())
+                    .must(baseBool.must())
+                    .mustNot(baseBool.mustNot())
+                    .filter(f -> f.exists(e -> e.field("tags")))
+            ))).count();
+            long hasTagsCsv = esClient.count(c -> c.index("recipe").query(q -> q.bool(b -> b
+                    .filter(baseBool.filter())
+                    .must(baseBool.must())
+                    .mustNot(baseBool.mustNot())
+                    .filter(f -> f.exists(e -> e.field("TAGSCSV")))
+            ))).count();
 
-        List<Map<String, Object>> out = new ArrayList<>();
-        Aggregate tags = aggs.get("tags");
-        if (tags != null && tags.isSterms() && tags.sterms().buckets().isArray()) {
-            tags.sterms().buckets().array().forEach(b ->
-                    out.add(Map.of("tag", b.key(), "count", b.docCount()))
-            );
+            log.info("[TRENDS] total={}, has(tags)={}, has(TAGSCSV)={}, from={}", total, hasTags, hasTagsCsv, fromF);
+
+            // ---- 집계 실행 함수 ----
+            java.util.function.Function<String, List<Map<String,Object>>> runAgg = (String field) -> {
+                var req = new co.elastic.clients.elasticsearch.core.SearchRequest.Builder()
+                        .index("recipe")
+                        .size(0)
+                        .query(q -> q.bool(baseBool))
+                        .aggregations("tags", a -> a.terms(t -> t.field(field).size(sizeF)))
+                        .build();
+
+                SearchResponse<RecipeSearchDoc> resp = null;
+                try {
+                    resp = esClient.search(req, RecipeSearchDoc.class);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                var agg = resp.aggregations().get("tags");
+                var buckets = (agg == null || agg.sterms() == null) ? null : agg.sterms().buckets();
+
+                var out = new ArrayList<Map<String,Object>>();
+                if (buckets != null && buckets.isArray()) {
+                    for (var b : buckets.array()) {
+                        String tag = null;
+
+                        // 1) 키 추출: StringTermsBucket의 key()는 FieldValue 인 경우가 많음
+                        Object k = b.key();
+                        if (k instanceof co.elastic.clients.elasticsearch._types.FieldValue fv) {
+                            if (fv.isString())      tag = fv.stringValue();
+                            else if (fv.isLong())   tag = Long.toString(fv.longValue());
+                            else if (fv.isDouble()) tag = Double.toString(fv.doubleValue());
+                            else if (fv.isBoolean())tag = Boolean.toString(fv.booleanValue());
+                            else                    tag = String.valueOf(k);
+                        } else if (k instanceof String s) {
+                            tag = s;
+                        } else if (k != null) {
+                            tag = k.toString();
+                        }
+
+                        // 2) 필터: 빈값/아이디 스타일 제외
+                        if (tag == null || tag.isBlank() || tag.charAt(0) == '@') continue;
+
+                        out.add(Map.of("tag", tag, "count", b.docCount()));
+                    }
+                }
+                log.info("[TRENDS] field='{}' buckets={}", field, out.size());
+                return out;
+            };
+
+            // 1차: tags
+            List<Map<String,Object>> out = runAgg.apply("tags");
+            if (out.isEmpty()) {
+                // 2차: TAGSCSV.keyword (과거 CSV 필드가 실제로 들어있는지 확인)
+                out = runAgg.apply("TAGSCSV.keyword");
+            }
+            return out;
+        } catch (Exception e) {
+            log.error("[TRENDS] ES error", e);
+            return List.of();
         }
-        return out;
     }
+
 
     /* -------------------------------------------
      * 4) 최근 좋아요 많이 받은 게시물 (Likes Top-N)
@@ -254,127 +315,182 @@ public class AdminAnalyticsService {
         return out;
     }
 
-    /* -------------------------------------------
-     * 5) 일자별 신규 업로드 수 (최근 N일)
-     *    extended_bounds + min_doc_count=0 로 제로 집계 보장
-     * ------------------------------------------- */
-    // ---------- 5) 일자별 신규 업로드 수 (최근 N일, 자바에서 0 채우기) ----------
+    // ---------- 5) 일자별 신규 업로드 수 (최근 N일, KST 기준, 자바에서 0 채우기) ----------
     public List<Map<String, Object>> uploadsByDay(int days) {
         final int daysF = (days <= 0) ? 30 : days;
 
-        // [fromF, toF) : from은 오늘 00:00 - daysF, to는 내일 00:00
-        final Instant toF   = Instant.now().truncatedTo(ChronoUnit.DAYS).plus(1, ChronoUnit.DAYS);
-        final Instant fromF = toF.minus(daysF, ChronoUnit.DAYS);
+        // KST(Asia/Seoul) 기준 자정 경계 계산
+        final java.time.ZoneId KST = java.time.ZoneId.of("Asia/Seoul");
+        final java.time.ZonedDateTime nowKst = java.time.ZonedDateTime.now(KST).truncatedTo(java.time.temporal.ChronoUnit.DAYS);
+        final java.time.ZonedDateTime toKst   = nowKst.plusDays(1);          // 내일 00:00 (exclusive)
+        final java.time.ZonedDateTime fromKst = toKst.minusDays(daysF);      // 시작일 00:00 (inclusive)
+        final java.time.Instant fromI = fromKst.toInstant();
+        final java.time.Instant toI   = toKst.toInstant();
 
-        NativeQueryBuilder qb = NativeQuery.builder()
-                .withQuery(Query.of(b -> b.bool(bb -> bb
-                        .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
-                        .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
-                        // 집계 대상 문서 범위를 제한 (버킷 갯수 줄여 성능도 이득)
-                        .filter(f -> f.range(r -> r.field("createdAt")
-                                .gte(co.elastic.clients.json.JsonData.of(fromF.toString()))
-                                .lte(co.elastic.clients.json.JsonData.of(toF.toString()))
-                        ))
-                )))
-                .withAggregation("by_day", Aggregation.of(a -> a.dateHistogram(h -> h
-                        .field("createdAt")
-                        .fixedInterval(fi -> fi.time("1d"))
-                        .minDocCount(0) // 0 허용
-                )))
-                .withPageable(org.springframework.data.domain.PageRequest.of(0, 1));
+        try {
+            // createdAt ∈ [fromI, toI) + 공개/삭제 필터
+            var baseBool = new co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery.Builder()
+                    .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
+                    .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
+                    .filter(f -> f.range(r -> r.field("createdAt")
+                            .gte(co.elastic.clients.json.JsonData.of(fromI.toString()))
+                            .lt (co.elastic.clients.json.JsonData.of(toI.toString()))
+                    ))
+                    .build();
 
-        var hits = es.search(qb.build(), RecipeSearchDoc.class);
+            var req = new co.elastic.clients.elasticsearch.core.SearchRequest.Builder()
+                    .index("recipe")
+                    .size(0) // 문서는 불필요, 집계만
+                    .query(q -> q.bool(baseBool))
+                    .aggregations("by_day", a -> a.dateHistogram(h -> h
+                                    .field("createdAt")
+                                    .calendarInterval(co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval.Day)
+                                    .timeZone("+09:00") // KST 경계로 버킷팅
+                            // minDocCount(0)은 extended_bounds 없으면 빈 버킷을 만들지 않으니
+                            // 우리는 아래에서 자바로 0을 채움
+                    ))
+                    .build();
 
-        // 1) ES가 준 버킷을 (LocalDate -> count) 맵으로
-        java.util.Map<java.time.LocalDate, Long> raw = new java.util.HashMap<>();
-        var aggs = safeAggs(hits);
-        var dh = aggs.get("by_day");
-        if (dh != null && dh.isDateHistogram() && dh.dateHistogram().buckets().isArray()) {
-            dh.dateHistogram().buckets().array().forEach(b -> {
-                // keyAsString: "2025-09-23T00:00:00.000Z" 형태
-                String s = b.keyAsString();
-                java.time.LocalDate day;
-                try {
-                    day = java.time.OffsetDateTime.parse(s).toLocalDate();
-                } catch (Exception e) {
-                    // 혹시 몰라 millis 키도 처리
-                    day = java.time.Instant.ofEpochMilli(b.key())
-                            .atOffset(java.time.ZoneOffset.UTC).toLocalDate();
+            var resp = esClient.search(req, com.RecipeCode.teamproject.es.search.document.RecipeSearchDoc.class);
+
+            // ES 버킷 -> (LocalDate -> count) 매핑
+            java.util.Map<java.time.LocalDate, Long> raw = new java.util.HashMap<>();
+            var agg = resp.aggregations().get("by_day");
+            if (agg != null && agg.dateHistogram() != null && agg.dateHistogram().buckets().isArray()) {
+                for (var b : agg.dateHistogram().buckets().array()) {
+                    java.time.LocalDate day;
+                    String ks = b.keyAsString(); // 예: "2025-09-24T00:00:00.000+09:00"
+                    try {
+                        day = java.time.OffsetDateTime.parse(ks).toLocalDate();
+                    } catch (Exception e) {
+                        // 혹시 문자열 파싱 실패 시 epoch millis로 복구
+                        day = java.time.Instant.ofEpochMilli(b.key())
+                                .atZone(KST).toLocalDate();
+                    }
+                    raw.put(day, b.docCount());
                 }
-                raw.put(day, b.docCount());
-            });
-        }
+            }
 
-        // 2) fromF~toF-1d 까지 하루 단위로 0 채우며 List 생성
-        java.time.LocalDate fromD = fromF.atOffset(java.time.ZoneOffset.UTC).toLocalDate();
-        java.time.LocalDate toD   = toF.atOffset(java.time.ZoneOffset.UTC).toLocalDate(); // exclusive
-        java.util.List<java.util.Map<String,Object>> out = new java.util.ArrayList<>();
-        for (java.time.LocalDate d = fromD; d.isBefore(toD); d = d.plusDays(1)) {
-            long cnt = raw.getOrDefault(d, 0L);
-            out.add(java.util.Map.of(
-                    "date", d.toString(), // "yyyy-MM-dd"
-                    "count", cnt
-            ));
+            // [fromKst, toKst) 구간을 하루씩 돌며 0 채워서 리스트 생성
+            java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+            for (java.time.LocalDate d = fromKst.toLocalDate(); d.isBefore(toKst.toLocalDate()); d = d.plusDays(1)) {
+                long cnt = raw.getOrDefault(d, 0L);
+                out.add(java.util.Map.of("date", d.toString(), "count", cnt));
+            }
+            return out;
+
+        } catch (Exception e) {
+            log.error("[UPLOADS_BY_DAY] ES error", e);
+            // 에러 시에도 요청 구간만큼 0으로 채워 반환 (UI 안정성)
+            java.util.List<java.util.Map<String, Object>> fallback = new java.util.ArrayList<>();
+            for (java.time.LocalDate d = fromKst.toLocalDate(); d.isBefore(toKst.toLocalDate()); d = d.plusDays(1)) {
+                fallback.add(java.util.Map.of("date", d.toString(), "count", 0L));
+            }
+            return fallback;
         }
-        return out;
     }
 
-    /* -------------------------------------------
-     * 6) 상위 크리에이터 (최근 N일)
-     *    terms(authorNick.keyword) + sum(likes/views)
-     * ------------------------------------------- */
+
+    // 6) 상위 크리에이터 (최근 N일)  -- 메서드 전체 교체
     public List<Map<String, Object>> topCreators(int days, int size) {
         final int daysF = (days <= 0) ? 30 : days;
         final int sizeF = Math.min(Math.max(size, 1), 50);
         final Instant fromF = Instant.now().minus(daysF, ChronoUnit.DAYS);
 
-        NativeQueryBuilder qb = NativeQuery.builder()
-                .withQuery(Query.of(b -> b.bool(bb -> bb
-                        .filter(f -> f.range(r -> r.field("createdAt")
-                                .gte(JsonData.of(fromF.toString()))
-                        ))
-                        .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
-                        .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
-                )))
-                .withAggregation("by_creator", Aggregation.of(a -> a
-                        .terms(t -> t.field("authorNick.keyword").size(sizeF))
-                        .aggregations("sum_likes", Aggregation.of(aa -> aa.sum(s -> s.field("likes"))))
-                        .aggregations("sum_views", Aggregation.of(aa -> aa.sum(s -> s.field("views"))))
-                ))
-                .withPageable(PageRequest.of(0, 1));
+        try {
+            // 공통 필터
+            var baseBool = new co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery.Builder()
+                    .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
+                    .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
+                    .filter(f -> f.range(r -> r.field("createdAt")
+                            .gte(co.elastic.clients.json.JsonData.of(fromF.toString()))))
+                    .build();
 
-        SearchHits<RecipeSearchDoc> hits = es.search(qb.build(), RecipeSearchDoc.class);
-        Map<String, Aggregate> aggs = safeAggs(hits);
+            // 진단 로그(선택)
+            long hasAuthor = esClient.count(c -> c.index("recipe")
+                    .query(q -> q.bool(b -> b
+                            .filter(baseBool.filter())
+                            .must(baseBool.must())
+                            .mustNot(baseBool.mustNot())
+                            .filter(f -> f.exists(e -> e.field("authorNick")))))).count();
+            log.info("[CREATORS] from={}, days={}, docsWithAuthorNick={}", fromF, daysF, hasAuthor);
 
-        List<Map<String, Object>> out = new ArrayList<>();
-        Aggregate creators = aggs.get("by_creator");
-        if (creators != null && creators.isSterms() && creators.sterms().buckets().isArray()) {
-            creators.sterms().buckets().array().forEach(b -> {
-                long posts = b.docCount();
-                double sumLikes = 0, sumViews = 0;
-                Map<String, Aggregate> sub = b.aggregations();
-                if (sub != null) {
-                    Aggregate sl = sub.get("sum_likes");
-                    if (sl != null && sl.isSum()) {
-                        double v = sl.sum().value();           // primitive double
-                        if (!Double.isNaN(v)) sumLikes = v;    // 문서가 없으면 NaN일 수 있음
-                    }
-                    Aggregate sv = sub.get("sum_views");
-                    if (sv != null && sv.isSum()) {
-                        double v = sv.sum().value();
-                        if (!Double.isNaN(v)) sumViews = v;
+            // 집계 실행 함수 (필드명 바꿔 재시도 가능)
+            java.util.function.Function<String, List<Map<String,Object>>> runAgg = (String field) -> {
+                var req = new co.elastic.clients.elasticsearch.core.SearchRequest.Builder()
+                        .index("recipe")
+                        .size(0)
+                        .query(q -> q.bool(baseBool))
+                        .aggregations("by_creator", a -> a
+                                .terms(t -> t.field(field).size(sizeF))
+                                .aggregations("sum_likes", aa -> aa.sum(s -> s.field("likes")))
+                                .aggregations("sum_views", aa -> aa.sum(s -> s.field("views")))
+                        )
+                        .build();
+
+                SearchResponse<RecipeSearchDoc> resp = null;
+                try {
+                    resp = esClient.search(req, RecipeSearchDoc.class);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                var agg  = resp.aggregations().get("by_creator");
+                var buckets = (agg == null || agg.sterms() == null) ? null : agg.sterms().buckets();
+
+                var out = new ArrayList<Map<String,Object>>();
+                if (buckets != null && buckets.isArray()) {
+                    for (var b : buckets.array()) {
+                        // 키 안전 추출 (FieldValue 대응)
+                        String author = null;
+                        Object k = b.key();
+                        if (k instanceof co.elastic.clients.elasticsearch._types.FieldValue fv) {
+                            if (fv.isString())      author = fv.stringValue();
+                            else if (fv.isLong())   author = Long.toString(fv.longValue());
+                            else if (fv.isDouble()) author = Double.toString(fv.doubleValue());
+                            else if (fv.isBoolean())author = Boolean.toString(fv.booleanValue());
+                            else                    author = String.valueOf(k);
+                        } else if (k instanceof String s) {
+                            author = s;
+                        } else if (k != null) {
+                            author = k.toString();
+                        }
+                        if (author == null || author.isBlank()) continue;
+
+                        // 합계 파싱 (sum은 double일 수 있음 → long으로 캐스팅)
+                        double sumLikesD = 0, sumViewsD = 0;
+                        var sub = b.aggregations();
+                        if (sub != null) {
+                            var sl = sub.get("sum_likes");
+                            if (sl != null && sl.isSum() && !Double.isNaN(sl.sum().value()))
+                                sumLikesD = sl.sum().value();
+                            var sv = sub.get("sum_views");
+                            if (sv != null && sv.isSum() && !Double.isNaN(sv.sum().value()))
+                                sumViewsD = sv.sum().value();
+                        }
+
+                        out.add(Map.of(
+                                "authorNick", author,
+                                "posts", b.docCount(),
+                                "sumLikes", (long) sumLikesD,
+                                "sumViews", (long) sumViewsD
+                        ));
                     }
                 }
+                log.info("[CREATORS] field='{}' buckets={}", field, out.size());
+                return out;
+            };
 
-                out.add(Map.of(
-                        "authorNick", b.key(),
-                        "posts", posts,
-                        "sumLikes", (long) sumLikes,
-                        "sumViews", (long) sumViews
-                ));
-            });
+            // 1차: 매핑 그대로 (authorNick은 keyword라 .keyword 불필요)
+            List<Map<String,Object>> out = runAgg.apply("authorNick");
+
+            // 혹시나 비어있으면 레거시 매핑 대비로 한 번 더 시도
+            if (out.isEmpty()) out = runAgg.apply("authorNick.keyword");
+
+            return out;
+        } catch (Exception e) {
+            log.error("[CREATORS] ES error", e);
+            return List.of();
         }
-        return out;
     }
 
 
