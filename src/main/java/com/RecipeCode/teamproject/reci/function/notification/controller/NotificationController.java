@@ -38,10 +38,17 @@ public class NotificationController {
         return notificationService.getUnreadCount(userEmail);
     }
 
-    // 알림 읽음 처리 (알림 클릭하면)
+    // 알림 읽음 처리
     @PatchMapping("/{deliveryId}/read")
     public void markAsRead(@PathVariable Long deliveryId) {
         notificationService.markAsRead(deliveryId);
+    }
+
+    // 전체 알림 읽음 처리
+    @PatchMapping("/readAll")
+    public int markAllAsRead() {
+        String userEmail = securityUtil.getLoginUser().getUsername();
+        return notificationService.markAllAsRead(userEmail);
     }
 
 }

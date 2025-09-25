@@ -29,7 +29,8 @@ public class NotificationDeliveryDto {
                 delivery.getNotification().getEvent(),
                 delivery.getNotification().getMessage(),
                 delivery.getNotification().getSourceType(),
-                delivery.getNotification().getSourceId()
+                delivery.getNotification().getSourceId(),
+                delivery.getNotification().getInsertTime()
         );
 
         return new NotificationDeliveryDto(

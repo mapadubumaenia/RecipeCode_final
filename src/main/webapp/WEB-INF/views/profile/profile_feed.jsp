@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -24,16 +24,45 @@
                 <a href="${pageContext.request.contextPath}/feed/main" class="float-text">home</a>
             </div>
 
-            <!-- 알림 + 로그아웃 -->
+            <!-- ▶ 추가: 알림 + 로그아웃 -->
             <div class="header-actions">
                 <form action="${pageContext.request.contextPath}/logout" method="post">
                     <button type="submit" class="btn-logout">logout</button>
                 </form>
+
                 <div class="notif-wrap">
-                    <button id="btnNotif" class="notif-btn" title="알림">🔔</button>
-                    <span id="noti-count" class="badge">0</span> <!-- 뱃지 숫자 -->
-                    <div id="noti-list" class="notif-dropdown hidden">
-                        <ul></ul>
+                    <!-- 알림 버튼 -->
+                    <button
+                            id="btnNotif"
+                            class="notif-btn"
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                            aria-controls="notifPanel"
+                            title="알림"
+                    >
+                        🔔
+                        <span class="notif-dot" aria-hidden="true"></span>
+                    </button>
+
+                    <!-- 드롭다운 패널 -->
+                    <div
+                            id="notifPanel"
+                            class="notif-panel"
+                            role="dialog"
+                            aria-label="알림 목록"
+                    >
+                        <div class="notif-head">
+                            <strong>알림</strong>
+                            <div class="actions">
+                                <button class="btn small ghost" id="markAll">모두 읽음</button>
+                            </div>
+                        </div>
+
+                        <div class="notif-list" id="notifList"><!-- JS 렌더 --></div>
+
+                        <div class="notif-foot">
+                            <button class="btn small ghost" id="closeNotif">닫기</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -116,7 +145,7 @@
 
         <!-- 사이드바 -->
         <aside class="feed-list sidebar">
-            <h2 class="section-title">Connections</h2>
+            <h2 class="section-title">Network</h2>
 
             <!-- 탭 버튼 -->
             <div class="follow-tabs">

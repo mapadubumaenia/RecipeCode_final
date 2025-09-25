@@ -26,9 +26,7 @@ public class NotificationService {
     private final NotificationSettingRepository settingRepository;
     private final ErrorMsg errorMsg;
 
-
     // 알림 생성 + Delivery 전송
-
     public void createNotification(String actorEmail,
                                    String targetEmail,
                                    NotificationEvent event,
@@ -64,23 +62,24 @@ public class NotificationService {
     }
 
     // 유저 알림 목록 조회
-    @Transactional
     public List<NotificationDelivery> getUserNotifications(String userEmail) {
         return deliveryRepository.findByReceiverEmailOrderByDeliveryIdDesc(userEmail);
     }
 
     // 유저의 안 읽은 알림 개수
-    @Transactional
     public Long getUnreadCount(String userEmail) {
         return deliveryRepository.countByReceiverEmailAndIsRead(userEmail, false);
     }
 
-    // 알림 읽음 처리
+    // 개별 알림 읽음 처리
     public void markAsRead(Long deliveryId) {
         NotificationDelivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.notification.notfound")));
         delivery.setRead(true);
         delivery.setReadTime(LocalDateTime.now());
-
+    }
+    // 전체 알림 읽음 처리
+    public int markAllAsRead(String userEmail) {
+        return deliveryRepository.markAllAsRead(userEmail);
     }
 }

@@ -2,6 +2,8 @@ package com.RecipeCode.teamproject.reci.function.notification.dto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,6 +17,7 @@ public class NotificationDto {
     private String message;
     private String sourceType;
     private String sourceId;
+    private LocalDateTime insertTime;
 
 
 }
