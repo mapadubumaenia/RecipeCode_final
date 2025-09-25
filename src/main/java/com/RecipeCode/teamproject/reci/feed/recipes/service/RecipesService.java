@@ -216,7 +216,7 @@ public class RecipesService {
         if (userEmail != null && ! userEmail.isBlank()) {
             memberRepository.findByUserEmail(userEmail).ifPresent(viewer ->{
                 boolean l = recipesLikesRepository.existsByMemberAndRecipes(viewer, recipe);
-                dto.setLiked(false);
+                dto.setLiked(l);
             });
         } else {
             dto.setLiked(false);
