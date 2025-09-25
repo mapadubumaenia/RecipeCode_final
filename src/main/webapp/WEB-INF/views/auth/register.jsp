@@ -22,9 +22,9 @@
     <header class="profile-header">
         <div class="flex-row">
             <h1 class="page-title">Sign Up</h1>
-            <a href="newfeed-ver-main-wireframe.html" class="float-text">home</a>
+            <a href="/home" class="float-text">home</a>
         </div>
-        <a class="btn-logout" href="newfeed-ver-main-wireframe.html">Back</a>
+        <a class="btn-logout" href="/home">Back</a>
     </header>
 
     <!-- 가입 카드 -->
