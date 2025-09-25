@@ -203,5 +203,6 @@
 </form>
 <%--  JS  --%>
 <script src="<c:url value='/js/mypage/mypage-edit.js'/>"></script>
+<script src="<c:url value='/js/auth/password.js'/>"></script>
 </body>
 </html>
