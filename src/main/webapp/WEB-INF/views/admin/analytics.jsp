@@ -1,37 +1,27 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<!doctype html>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<!-- Chart.js -->
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 
-<html lang="ko">
-<head>
-  <meta charset="utf-8">
-  <title>Admin Analytics</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style>
-    body{font-family:system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans KR', Arial, sans-serif; margin:20px;}
-    h1{margin:0 0 8px}
-    h2{margin:28px 0 8px}
-    .grid{display:grid; gap:16px}
-    @media(min-width:1100px){ .grid{grid-template-columns:1fr 1fr} }
-    table{width:100%; border-collapse:collapse; background:#fff}
-    th,td{border-bottom:1px solid #eee; padding:8px 10px; text-align:left}
-    th{background:#fafafa}
-    .controls{display:flex; gap:8px; align-items:center; margin:8px 0 12px}
-    .chip{display:inline-block; padding:4px 10px; border-radius:999px; background:#f3f4f6; margin:2px 4px 2px 0}
-    .card{background:#fff; border:1px solid #eee; border-radius:12px; padding:12px}
-    .muted{color:#666; font-size:12px}
-    .btn{padding:6px 12px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer}
-    .btn.primary{background:#111827; color:#fff; border-color:#111827}
-    .right{float:right}
-    .error{color:#b91c1c}
-  </style>
-</head>
-<body>
-<h1>관리자 대시보드</h1>
+<style>
+  h1{margin:0 0 8px}
+  h2{margin:28px 0 8px}
+  .grid{display:grid; gap:16px}
+  @media(min-width:1100px){ .grid{grid-template-columns:1fr 1fr} }
+  table{width:100%; border-collapse:collapse; background:#fff}
+  th,td{border-bottom:1px solid #eee; padding:8px 10px; text-align:left}
+  th{background:#fafafa}
+  .controls{display:flex; gap:8px; align-items:center; margin:8px 0 12px}
+  .chip{display:inline-block; padding:4px 10px; border-radius:999px; background:#f3f4f6; margin:2px 4px 2px 0}
+  .card{background:#fff; border:1px solid #eee; border-radius:12px; padding:12px}
+  .muted{color:#666; font-size:12px}
+  .btn{padding:6px 12px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer}
+  .btn.primary{background:#111827; color:#fff; border-color:#111827}
+  .error{color:#b91c1c}
+</style>
+
+<h1>분석 · 차트</h1>
 <div class="muted">/api/admin/analytics/* 엔드포인트 기반</div>
 
 <section class="card">
@@ -117,11 +107,5 @@
   <canvas id="udChart" height="110"></canvas>
 </section>
 
-<!-- 컨텍스트 경로 전역 주입 -->
-<script>
-  window.APP_CTX = '${pageContext.request.contextPath}';
-</script>
-<!-- 외부 JS (정적 리소스 경로에 맞게) -->
-<script src="${pageContext.request.contextPath}/js/admin-analytics.js"></script>
-</body>
-</html>
+<!-- page script -->
+<script src="<c:url value='/js/admin-analytics.js'/>" defer></script>

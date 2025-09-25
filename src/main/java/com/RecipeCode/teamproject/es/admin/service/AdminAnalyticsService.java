@@ -3,6 +3,7 @@ package com.RecipeCode.teamproject.es.admin.service;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
 import co.elastic.clients.elasticsearch._types.aggregations.FieldDateMath;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -19,13 +20,10 @@ import org.springframework.stereotype.Service;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
-import org.springframework.data.elasticsearch.core.SearchHits;
+
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
@@ -546,6 +544,81 @@ public class AdminAnalyticsService {
             return List.of();
         }
     }
+
+
+
+    /**  7 트래픽(검색 로그 수) 스파크라인 */
+    public List<Map<String, Object>> traffic(Instant from, Instant to, String intervalRaw) {
+        final Instant toF   = (to   == null) ? Instant.now() : to;
+        final Instant fromF = (from == null) ? toF.minus(24, ChronoUnit.HOURS) : from;
+
+        // 캘린더 간격만 사용 (Minute / Hour / Day)
+        CalendarInterval cal = parseCalendarInterval(intervalRaw);
+
+        var req = new co.elastic.clients.elasticsearch.core.SearchRequest.Builder()
+                .index("rc-search-logs-000001")
+                .size(0)
+                .query(q -> q.range(r -> r
+                        .field("at")
+                        .gte(co.elastic.clients.json.JsonData.of(fromF.toString()))
+                        .lte(co.elastic.clients.json.JsonData.of(toF.toString()))
+                ))
+                .aggregations("by_time", a -> a.dateHistogram(dh -> dh
+                        .field("at")
+                        .calendarInterval(cal)   // ← calendar interval만 사용
+                        .minDocCount(0)
+                        .timeZone("+09:00")     // KST 경계로 보고 싶으면 유지
+                ))
+                .build();
+
+        try {
+            var resp  = esClient.search(req, com.RecipeCode.teamproject.es.search.document.SearchLogDoc.class);
+            var agg   = resp.aggregations().get("by_time");
+            var bucks = (agg != null && agg.dateHistogram() != null) ? agg.dateHistogram().buckets() : null;
+
+            List<Map<String,Object>> out = new ArrayList<>();
+            if (bucks != null && bucks.isArray()) {
+                for (var b : bucks.array()) {
+                    long count = b.docCount();                       // primitive long
+                    String iso  = Instant.ofEpochMilli(b.key()).toString(); // epoch → ISO
+                    out.add(Map.of("ts", iso, "views", count));
+                }
+            }
+            return out;
+        } catch (Exception e) {
+            log.error("[TRAFFIC] ES error", e);
+            return List.of();
+        }
+    }
+
+    /** interval 문자열 → CalendarInterval 로만 매핑 */
+    private CalendarInterval parseCalendarInterval(String raw) {
+        if (raw == null || raw.isBlank()) return CalendarInterval.Hour;
+        String s = raw.trim().toLowerCase();
+        switch (s) {
+            case "minute":
+            case "min":
+            case "1m":   return CalendarInterval.Minute;
+            case "hour":
+            case "hr":
+            case "1h":   return CalendarInterval.Hour;
+            case "day":
+            case "d":
+            case "1d":   return CalendarInterval.Day;
+            default:
+                // 15m, 30m, 2h 같은 고정 간격은 A안에서는 지원하지 않음 → 가장 가까운 캘린더 간격으로 폴백
+                if (s.endsWith("m")) return CalendarInterval.Minute;
+                if (s.endsWith("h")) return CalendarInterval.Hour;
+                if (s.endsWith("d")) return CalendarInterval.Day;
+                return CalendarInterval.Hour;
+        }
+    }
+
+
+
+
+
+
 
 
     private static Map<String, co.elastic.clients.elasticsearch._types.aggregations.Aggregate> safeAggs(
