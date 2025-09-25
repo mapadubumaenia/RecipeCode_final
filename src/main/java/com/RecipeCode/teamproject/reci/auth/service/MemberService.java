@@ -120,6 +120,14 @@ public class MemberService {
         member.setUserBlog(memberDto.getUserBlog());
         member.setProfileStatus(memberDto.getProfileStatus());
 
+        //비밀번호 변경(공란일시 변경x)
+        if (memberDto.getPassword() != null && !memberDto.getPassword().isBlank()) {
+            // passwordEncoder는 @Autowired 또는 생성자 주입으로 받아와야 함
+            String encodedPw = passwordEncoder.encode(memberDto.getPassword());
+            member.setPassword(encodedPw);
+        }
+
+
         MultipartFile file = memberDto.getProfileImage();
         if (file != null && !file.isEmpty()) {
             try {
