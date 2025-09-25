@@ -20,6 +20,7 @@ public class ProfileFeedService {
     private final MemberRepository memberRepository;
     private final ErrorMsg errorMsg;
 
+    // 특정 유저의 레시피 목록 조회 (무한 스크롤용)
     @Transactional
     public Slice<RecipesDto> getUserRecipes(String userId, Pageable pageable) {
         // 1) userId → userEmail 변환
@@ -37,5 +38,4 @@ public class ProfileFeedService {
         return recipesRepository.findByUserEmail(userEmail, pageable)
                 .map(recipeMapStruct::toRecipeDto);
     }
-
 }

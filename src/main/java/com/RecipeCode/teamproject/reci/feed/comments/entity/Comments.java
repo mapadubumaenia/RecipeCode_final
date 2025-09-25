@@ -38,10 +38,12 @@ public class Comments extends BaseTimeEntity {
 
     private Long likeCount;
 
-    @Column(nullable = false)
-    private Long reportCount = 0L;
+    private Long reportCount;
 
     private LocalDateTime updateTime;
+    private LocalDateTime deletedAt;
+
+    private Long commentsCount;
 
 //  대댓글용(자기참조객체)
     @ManyToOne(fetch = FetchType.LAZY)

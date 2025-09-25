@@ -138,12 +138,13 @@
 
 <!-- FAQ 플로팅 버튼 -->
 <a id="faq-btn" class="faq-btn" href="<c:url value="faq" />">FAQ</a>
-<script>
-    const ctx = "${pageContext.request.contextPath}";
-</script>
 <%--<script src="${pageContext.request.contextPath}/js/notifs.js"></script>--%>
 <%--<script src="${pageContext.request.contextPath}/js/position-fixed.js"></script>--%>
-<script>const currentUserEmail = "${currentUserEmail}";</script>
+<script>
+    // 전역은 여기 한 번만
+    window.ctx = "${pageContext.request.contextPath}";
+    window.currentUserEmail = "${currentUserEmail}";
+</script>
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-searchResult.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-feed.js"></script>

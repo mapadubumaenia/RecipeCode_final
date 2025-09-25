@@ -76,13 +76,13 @@
                 //     method: "POST",
                 //     headers
             });
-            if (!resp.ok){
+            if (!resp.ok) {
                 const msg = await resp.text();
-                if(resp.status === 401){
-                    if(confirm(msg + "\n로그인 페이지로 이동할까요?")){
+                if (resp.status === 401) {
+                    if (confirm(msg + "\n로그인 페이지로 이동할까요?")) {
                         window.location.href = `${ctx}/auth/login`;
                     }
-                } else if(resp.status === 400){
+                } else if (resp.status === 400) {
                     alert(msg); // "본인 레시피에는 좋아요를 누를 수 없습니다!"
                 } else {
                     alert("알 수 없는 오류 발생. 관리자에게 문의하세요!")
@@ -137,37 +137,56 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // 새로운 신고 모달
-    const myModal = document.getElementById("myReportModal");
-    const myBtnClose = myModal.querySelector("#myReportClose");
-    const myForm = myModal.querySelector("#myReportForm");
+        const myModal = document.getElementById("myReportModal");
+        const myBtnClose = myModal.querySelector("#myReportClose");
+        const myForm = myModal.querySelector("#myReportForm");
 
-    myBtnClose?.addEventListener("click", () => {
-        myModal.hidden = true;
-    });
-
-    myForm?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = Object.fromEntries(new FormData(myForm));
-
-        try {
-            const res = await fetch(`${ctx}/comments/report/save`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(formData)
-            });
-
-            if (!res.ok) throw new Error("신고 실패");
-            await res.json();
-            alert("신고가 접수되었습니다.");
+        myBtnClose?.addEventListener("click", () => {
             myModal.hidden = true;
+            currentReportBtn = null;
+        });
 
-        } catch (err) {
-            console.error(err);
-            alert("신고 중 오류가 발생했습니다.");
-        }
-    });
+        myForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!currentReportBtn) return;
 
-    // 댓글 DOM 생성 (XSS 방지)
+            // hidden input 재확인
+            const hiddenInput = myForm.querySelector("#commentsId");
+            if (!hiddenInput || !hiddenInput.value) {
+                alert("댓글 ID가 설정되지 않았습니다.");
+                return;
+            }
+
+            const formData = Object.fromEntries(new FormData(myForm));
+            try {
+                const res = await fetch(`${ctx}/comments/report/save`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(formData),
+                    credentials: "include"
+                });
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error("신고 실패: " + text);
+                }
+
+                const countMatch = currentReportBtn.textContent.match(/\d+/);
+                const count = countMatch ? parseInt(countMatch[0], 10) + 1 : 1;
+                currentReportBtn.textContent = `신고 (${count})`;
+                currentReportBtn.disabled = true;
+                currentReportBtn.classList.add("reported");
+
+                alert("신고가 접수되었습니다.");
+                myModal.hidden = true;
+                currentReportBtn = null;
+
+            } catch (err) {
+                console.error(err);
+                alert("신고 중 오류가 발생했습니다: " + err.message);
+            }
+        });
+
+        // 댓글 DOM 생성 (XSS 방지)
         function createCommentElem(c) {
             const div = document.createElement("div");
             div.className = "comment";
@@ -208,26 +227,39 @@ document.addEventListener("DOMContentLoaded", () => {
             actions.querySelector(".btnReply").addEventListener("click", () => openReplyInput(c.commentsId, repliesDiv));
             actions.querySelector(".btnEdit").addEventListener("click", () => editComment(c.commentsId, content));
             actions.querySelector(".btnDelete").addEventListener("click", () => deleteComment(c.commentsId, div));
-            actions.querySelector(".btnLike").addEventListener("click", () => likeComment(c.commentsId, actions.querySelector(".btnLike")));
+
+            // 좋아요 버튼 초기 상태 반영
+            const btnLike = actions.querySelector(".btnLike");
+            const liked = c.liked ?? false; // DB에서 내려오는 값
+            btnLike.textContent = liked ? `❤️ ${c.likeCount || 0}` : `🤍 ${c.likeCount || 0}`;
+            btnLike.classList.toggle("active", liked);
+            btnLike.addEventListener("click", () => likeComment(c.commentsId, btnLike));
 
             // 신고 버튼 → 새 모달 열기
             const reportBtn = actions.querySelector(".myBtnReport");
             if (reportBtn) {
+                if (c.alreadyReported) {
+                    reportBtn.disabled = true;
+                    reportBtn.classList.add("reported");
+                }
                 reportBtn.addEventListener("click", () => {
-                    const commentId = reportBtn.dataset.commentsId;
+                    currentReportBtn = reportBtn;
                     myModal.hidden = false;
-                    myForm.querySelector("#commentsId").value = commentId;
+
+                    const hiddenInput = myForm.querySelector("#commentsId");
+                    if (hiddenInput) hiddenInput.value = c.commentsId;
+                    else console.error("commentsId input 없음");
                 });
             }
 
             // 대댓 항상 띄우기
             loadReplies(c.commentsId, repliesDiv);
-
             return div;
         }
 
         // 댓글 불러오기
         async function loadComments(reset = false) {
+
             try {
                 if (reset) {
                     cmtList.innerHTML = "";
@@ -272,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
-                    }
+                    },
                     // [운영 시 다시 활성화]
                     // const csrfMeta = document.querySelector('meta[name="_csrf"]');
                     // const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
@@ -285,8 +317,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     //     headers,
                     //     body: JSON.stringify({ commentsContent: content })
                     // });
-                    ,
-                    body: JSON.stringify({commentsContent: content})
+                    body: JSON.stringify({commentsContent: content}),
+                    credentials: "include"
                 });
 
                 if (!res.ok) throw new Error("댓글 작성 실패");
@@ -305,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // 댓글 수정
         async function editComment(commentsId, contentElem) {
             const oldContent = contentElem.textContent;
-            const cmtCard = contentElem.closest(".cmtCard");
+            const cmtCard = contentElem.closest(".comment");
             cmtCard?.classList.add("editing");
 
             const textarea = document.createElement("textarea");
@@ -428,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     btn.remove();
                 }
                 await loadCommentsCount();
-                await loadComments(true);
+
             });
 
             container.appendChild(textarea);
@@ -453,16 +485,26 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const res = await fetch(`${ctx}/comments/likes/${commentId}`, {
                     method: "POST",
-                    headers: {"Content-Type": "application/json"}
+                    headers: {"Content-Type": "application/json"},
+                    credentials: "include"
                 });
                 if (res.status === 401) {
                     alert("로그인이 필요합니다.");
                     return;
                 }
+                if (!res.ok) {
+                    const msg = await res.text();
+                    throw new Error(msg || "좋아요 처리 실패");
+                }
+
                 const data = await res.json();
-                btn.textContent = data.liked ? `❤️ ${data.likesCount}` : `🤍 ${data.likesCount}`;
+
+                const nowLiked = data.liked ?? false;
+                btn.textContent = nowLiked ? `❤️ ${data.likesCount}` : `🤍 ${data.likesCount}`;
+                btn.classList.toggle("active", nowLiked);
             } catch (err) {
                 console.error(err);
+                alert("좋아요 처리중 오류 발생")
             }
         }
 

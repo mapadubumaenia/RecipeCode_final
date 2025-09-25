@@ -20,19 +20,21 @@ public class FollowController {
     private final FollowService followService;
     private final SecurityUtil securityUtil;
 
+//    TODO : 엔드포인트 userId
+
     /** 팔로우 */
-    @PostMapping("/{userId}")
-    public ResponseEntity<String> follow(@PathVariable String userId) {
+    @PostMapping("/{userEmail}")
+    public ResponseEntity<String> follow(@PathVariable String userEmail) {
         String followerEmail = securityUtil.getLoginUser().getUsername(); // 로그인한 사람은 email 기반
-        followService.follow(followerEmail, userId); // userId → email 변환 처리
+        followService.follow(followerEmail, userEmail); // userId → email 변환 처리
         return ResponseEntity.ok("팔로우 성공");
     }
 
     /** 언팔로우 */
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<String> unfollow(@PathVariable String userId) {
+    @DeleteMapping("/{userEmail}")
+    public ResponseEntity<String> unfollow(@PathVariable String userEmail) {
         String followerEmail = securityUtil.getLoginUser().getUsername();
-        followService.unfollow(followerEmail, userId);
+        followService.unfollow(followerEmail, userEmail);
         return ResponseEntity.ok("언팔로우 성공");
     }
 
@@ -40,28 +42,34 @@ public class FollowController {
     @GetMapping("/following")
     public ResponseEntity<Slice<FollowDto>> getMyFollowingList(Pageable pageable) {
         String userEmail = securityUtil.getLoginUser().getUsername();
-        return ResponseEntity.ok(followService.getUserFollowingList(userEmail, pageable));
+
+        String viewerEmail = securityUtil.getLoginUser().getUsername();
+        return ResponseEntity.ok(followService.getUserFollowingListWithStatus(userEmail, viewerEmail, pageable));
     }
 
     /** 내 팔로워 목록 */
     @GetMapping("/follower")
     public ResponseEntity<Slice<FollowDto>> getMyFollowerList(Pageable pageable) {
         String userEmail = securityUtil.getLoginUser().getUsername();
-        return ResponseEntity.ok(followService.getUserFollowerList(userEmail, pageable));
+
+        String viewerEmail = securityUtil.getLoginUser().getUsername();
+        return ResponseEntity.ok(followService.getUserFollowerListWithStatus(userEmail, viewerEmail, pageable));
     }
 
-    /** 특정 유저 팔로잉 목록 */
-    @GetMapping("/{userId}/following")
+    /** 특정 유저 팔로잉 목록 + 로그인 유저가 팔로우 한 상태인지? */
+    @GetMapping("/{userEmail}/following")
     public ResponseEntity<Slice<FollowDto>> getUserFollowingList(
-            @PathVariable String userId, Pageable pageable) {
-        return ResponseEntity.ok(followService.getUserFollowingList(userId, pageable));
+            @PathVariable String userEmail, Pageable pageable) {
+        String viewerEmail = securityUtil.getLoginUser().getUsername();
+        return ResponseEntity.ok(followService.getUserFollowingListWithStatus(userEmail, viewerEmail, pageable));
     }
 
-    /** 특정 유저 팔로워 목록 */
-    @GetMapping("/{userId}/follower")
+    /** 특정 유저 팔로워 목록 + 로그인 유저가 팔로우 한 상태인지? */
+    @GetMapping("/{userEmail}/follower")
     public ResponseEntity<Slice<FollowDto>> getUserFollowerList(
-            @PathVariable String userId, Pageable pageable) {
-        return ResponseEntity.ok(followService.getUserFollowerList(userId, pageable));
+            @PathVariable String userEmail, Pageable pageable) {
+        String viewerEmail = securityUtil.getLoginUser().getUsername();
+        return ResponseEntity.ok(followService.getUserFollowerListWithStatus(userEmail, viewerEmail, pageable));
     }
 
     /** 내 팔로잉 수 */
@@ -91,7 +99,7 @@ public class FollowController {
     }
 
     /** 유저 검색 */
-    @GetMapping("/mypage/search")
+    @GetMapping("/network/search")
     public ResponseEntity<List<MemberDto>> searchUsers(
             @RequestParam("keyword") String keyword) {
         return ResponseEntity.ok(followService.searchUsers(keyword));

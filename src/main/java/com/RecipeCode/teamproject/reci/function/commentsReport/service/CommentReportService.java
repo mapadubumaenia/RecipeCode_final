@@ -54,9 +54,35 @@ public class CommentReportService {
         return toDtoWithExtras(saved);
     }
 
+    public boolean hasUserReported(Long commentsId, String userEmail) {
+        return commentReportRepository.existsByComments_CommentsIdAndMember_UserEmail(commentsId, userEmail);
+    }
+
+    // CommentReportService
+    public long countAllReports() {
+        return commentReportRepository.count();
+    }
+
+    public long countByStatus(Long status) {
+        return commentReportRepository.countByReportStatus(status);
+    }
+
+
+    // 페이징
+    public Page<CommentReportDto> getAllReports(Pageable pageable) {
+        return commentReportRepository.findAll(pageable)
+                .map(this::toDtoWithExtras);
+    }
+
     // 상태별 조회
     public Page<CommentReportDto> getReportsByStatus(Long status, Pageable pageable) {
         return commentReportRepository.findByReportStatus(status, pageable)
+                .map(this::toDtoWithExtras);
+    }
+
+    // 유형별 조회
+    public Page<CommentReportDto> getReportsByType(Long Type, Pageable pageable) {
+        return commentReportRepository.findByReportType(Type, pageable)
                 .map(this::toDtoWithExtras);
     }
 

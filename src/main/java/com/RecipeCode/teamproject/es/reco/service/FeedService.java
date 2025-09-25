@@ -13,9 +13,12 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -83,21 +86,28 @@ public class FeedService {
                 .map(SearchHit::getContent)
                 .collect(Collectors.toMap(RecipeSearchDoc::getId, r -> r, (a, b) -> a));
 
-        // 추천 순서 유지 + 썸네일 포함 매핑
+        // 추천 순서 유지 + 미디어 메타 포함 매핑
         List<RecipeCardDto> items = new ArrayList<>();
         for (UserRecsDoc.Item it : page) {
             RecipeSearchDoc d = byId.get(it.getRecipeId());
             if (d == null) continue; // 삭제/비공개/미존재 스킵
 
+            Media media = buildMedia(d);
+
             items.add(new RecipeCardDto(
                     d.getId(),
-                    d.getTitle(),
-                    d.getAuthorNick() == null ? "" : d.getAuthorNick(),
-                    d.getLikes(),
-                    d.getCreatedAt() == null ? "" : d.getCreatedAt().toString(),
-                    d.getTags() == null ? List.of() : d.getTags(),
+                    nvl(d.getTitle()),
+                    nvl(d.getAuthorNick()),
+                    nvlLong(d.getLikes()),
+                    (d.getCreatedAt() == null) ? "" : d.getCreatedAt().toString(),
+                    (d.getTags() == null) ? List.of() : d.getTags(),
                     it.getScore(),
-                    d.getThumbUrl() == null ? "" : d.getThumbUrl()   // 🔥 썸네일 세팅
+                    // 기존 thumbUrl(레거시/폴백) 유지
+                    nvl(d.getThumbUrl()),
+                    // 👇 신규: 라이트 유튜브/비디오/이미지 메타
+                    media.kind,
+                    media.src,
+                    media.poster
             ));
         }
 
@@ -117,15 +127,8 @@ public class FeedService {
             String id = Objects.toString(m.get("id"), "");
             String title = Objects.toString(m.get("title"), "");
             String authorNick = Objects.toString(m.get("authorNick"), "");
-
-            long likes;
-            Object lk = m.get("likes");
-            if (lk instanceof Number) likes = ((Number) lk).longValue();
-            else likes = parseLongOrZero(Objects.toString(lk, "0"));
-
-            String createdAt = "";
-            Object ts = m.get("createdAt");
-            if (ts != null) createdAt = ts.toString();
+            long likes = coerceLong(m.get("likes"));
+            String createdAt = (m.get("createdAt") == null) ? "" : m.get("createdAt").toString();
 
             List<String> tags = new ArrayList<>();
             Object tg = m.get("tags");
@@ -133,11 +136,16 @@ public class FeedService {
                 for (Object o : (List<?>) tg) tags.add(Objects.toString(o, ""));
             }
 
-            // 🔥 통합검색측 Map에 thumbUrl 있으면 전달
             String thumbUrl = Objects.toString(m.getOrDefault("thumbUrl", ""), "");
 
+            // 🔥 검색 서비스 응답에 media*가 포함되어 있으면 사용, 없으면 로컬에서 유추 불가 → 이미지 폴백
+            String mediaKind = Objects.toString(m.getOrDefault("mediaKind", "image"), "image");
+            String mediaSrc  = Objects.toString(m.getOrDefault("mediaSrc", thumbUrl), thumbUrl);
+            String poster    = Objects.toString(m.getOrDefault("poster", thumbUrl), thumbUrl);
+
             items.add(new RecipeCardDto(
-                    id, title, authorNick, likes, createdAt, tags, 0.0, thumbUrl
+                    id, title, authorNick, likes, createdAt, tags, 0.0, thumbUrl,
+                    mediaKind, mediaSrc, poster
             ));
         }
 
@@ -150,9 +158,78 @@ public class FeedService {
         return new FeedPageDto(total, items, next);
     }
 
-    // ---- utils ----
-    private static long parseLongOrZero(String s) {
-        try { return Long.parseLong(s); } catch (Exception e) { return 0L; }
+    // ===============================
+    // 미디어 유틸
+    // ===============================
+
+    private static final Pattern YT_V = Pattern.compile("[?&]v=([A-Za-z0-9_-]{11})");
+    private static final Pattern YT_SHORTS_EMBED = Pattern.compile("/(shorts|embed)/([A-Za-z0-9_-]{11})");
+    private static final Pattern YT_BE = Pattern.compile("youtu\\.be/([A-Za-z0-9_-]{11})");
+
+    private static class Media {
+        final String kind;   // youtube | video | image
+        final String src;    // youtube: embed URL, video: 파일 URL, image: 이미지 URL
+        final String poster; // 이미지/포스터
+        Media(String k, String s, String p){ this.kind=k; this.src=s; this.poster=p; }
+    }
+
+    private Media buildMedia(RecipeSearchDoc d) {
+        String thumb = d.getThumbUrl();
+        String video = d.getVideoUrl();
+
+        if (StringUtils.hasText(video)) {
+            String vid = extractYouTubeId(video);
+            if (vid != null) {
+                String embed = "https://www.youtube.com/embed/" + vid + "?playsinline=1&modestbranding=1&rel=0";
+                String poster = "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
+                return new Media("youtube", embed, poster);
+            }
+            String v = video.toLowerCase();
+            if (v.endsWith(".mp4") || v.endsWith(".webm") || v.endsWith(".mov") || v.endsWith(".m4v")) {
+                String poster = (StringUtils.hasText(thumb) && !looksLikeYouTubeUrl(thumb)) ? thumb : null;
+                return new Media("video", video, poster);
+            }
+        }
+
+        if (StringUtils.hasText(thumb) && !looksLikeYouTubeUrl(thumb)) {
+            return new Media("image", thumb, null);
+        }
+
+        String vid = extractYouTubeId(video);
+        if (vid != null) {
+            String poster = "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
+            return new Media("image", poster, null);
+        }
+        return new Media("image", "", null);
+    }
+
+    private String extractYouTubeId(String url) {
+        if (!StringUtils.hasText(url)) return null;
+        Matcher m = YT_V.matcher(url);
+        if (m.find()) return m.group(1);
+        m = YT_BE.matcher(url);
+        if (m.find()) return m.group(1);
+        m = YT_SHORTS_EMBED.matcher(url);
+        if (m.find()) return m.group(2);
+        return null;
+    }
+
+    private boolean looksLikeYouTubeUrl(String url) {
+        if (!StringUtils.hasText(url)) return false;
+        String u = url.toLowerCase();
+        return u.contains("youtube.com") || u.contains("youtu.be");
+    }
+
+    // ===============================
+    // 기타 유틸
+    // ===============================
+
+    private static String nvl(String s){ return (s == null) ? "" : s; }
+    private static long nvlLong(Long v){ return (v == null) ? 0L : v; }
+
+    private static long coerceLong(Object o) {
+        if (o instanceof Number) return ((Number) o).longValue();
+        try { return Long.parseLong(String.valueOf(o)); } catch (Exception e) { return 0L; }
     }
 
     private static int decode(String after) {

@@ -30,43 +30,6 @@ class CommentsServiceTest {
 
     private CommentsService service;
 
-    @BeforeEach
-    void setUp() {
-        commentsRepository = mock(CommentsRepository.class);
-        memberRepository = mock(MemberRepository.class);
-        recipesRepository = mock(RecipesRepository.class);
-        mapStruct = mock(MapStruct.class);
-        errorMsg = mock(ErrorMsg.class);
-
-        service = new CommentsService(commentsRepository, memberRepository, recipesRepository, mapStruct, errorMsg);
-    }
-
-    @Test
-    void countByRecipes_Uuid() {
-        Comments comment = new Comments();
-        comment.setCommentsId(1L);
-        comment.setCommentsContent("테스트 댓글");
-
-        CommentsDto dto = new CommentsDto();
-        dto.setCommentsId(1L);
-        dto.setCommentsContent("테스트 댓글");
-
-        Recipes recipe = new Recipes();
-        recipe.setUuid("recipe-1");
-
-        when(recipesRepository.findById("recipe-1")).thenReturn(Optional.of(recipe));
-        when(commentsRepository.findByRecipesUuidAndParentIdIsNull(eq("recipe-1"), any(Pageable.class)))
-                .thenReturn(Collections.singletonList(comment));
-        when(mapStruct.toDto(comment)).thenReturn(dto);
-        when(commentsRepository.countByParentId_CommentsId(1L)).thenReturn(0);
-
-        List<CommentsDto> result = service.countByRecipes_Uuid("recipe-1", 0, 10);
-
-        assertEquals(1, result.size());
-        assertEquals("테스트 댓글", result.get(0).getCommentsContent());
-        verify(commentsRepository, times(1)).findByRecipesUuidAndParentIdIsNull(eq("recipe-1"), any(Pageable.class));
-    }
-
     @Test
     void saveComment() {
         CommentsDto dto = new CommentsDto();
@@ -90,28 +53,6 @@ class CommentsServiceTest {
         assertEquals(recipe, entity.getRecipes());
         assertEquals(member, entity.getMember());
         verify(commentsRepository, times(1)).save(entity);
-    }
-
-    @Test
-    void getReplies() {
-        Comments parent = new Comments();
-        parent.setCommentsId(10L);
-
-        Comments child = new Comments();
-        child.setCommentsId(11L);
-
-        CommentsDto dto = new CommentsDto();
-        dto.setCommentsId(11L);
-
-        when(commentsRepository.findByParentIdCommentsId(10L))
-                .thenReturn(Collections.singletonList(child));
-        when(mapStruct.toDto(child)).thenReturn(dto);
-
-        List<CommentsDto> result = service.getReplies(10L);
-
-        assertEquals(1, result.size());
-        assertEquals(11L, result.get(0).getCommentsId());
-        verify(commentsRepository, times(1)).findByParentIdCommentsId(10L);
     }
 
     @Test

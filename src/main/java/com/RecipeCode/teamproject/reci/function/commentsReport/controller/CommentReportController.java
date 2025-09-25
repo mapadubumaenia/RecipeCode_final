@@ -1,14 +1,18 @@
 package com.RecipeCode.teamproject.reci.function.commentsReport.controller;
 
+import com.RecipeCode.teamproject.common.SecurityUtil;
+import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
 import com.RecipeCode.teamproject.reci.feed.comments.repository.CommentsRepository;
 import com.RecipeCode.teamproject.reci.function.commentsReport.dto.CommentReportDto;
 import com.RecipeCode.teamproject.reci.function.commentsReport.entity.CommentReport;
+import com.RecipeCode.teamproject.reci.function.commentsReport.repository.CommentReportRepository;
 import com.RecipeCode.teamproject.reci.function.commentsReport.service.CommentReportService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,21 +25,27 @@ import org.springframework.web.bind.annotation.*;
 public class CommentReportController {
     private final CommentReportService commentReportService;
     private final CommentsRepository commentsRepository;
+    private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
+    private final CommentReportRepository commentReportRepository;
 
     @PostMapping("/save")
     @ResponseBody
-    public CommentReportDto saveReport(@RequestBody CommentReportDto dto, HttpSession session) {
+    public CommentReportDto saveReport(@RequestBody CommentReportDto dto) {
         Comments comments = commentsRepository.findById(dto.getCommentsId())
                 .orElseThrow(() -> new RuntimeException("댓글 존재하지않음"));
-        Member member = (Member) session.getAttribute("loginMember");
 
-        // 테스트용
+        SecurityUserDto loginUser = securityUtil.getLoginUser();
+        if (loginUser == null) {
+            throw new RuntimeException("로그인 후 이용 가능합니다.");
+        }
 
+        Member member = memberRepository.findByUserEmail(loginUser.getUsername())
+                .orElseThrow(()->new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        if (member == null) {
-            member = new Member();
-            member.setUserEmail("test@test.com");
-            member.setUserId("test001");
+        boolean alreadyReported = commentReportService.hasUserReported(comments.getCommentsId(), loginUser.getUserEmail());
+        if (alreadyReported) {
+            throw new RuntimeException("이미 신고한 댓글입니다.");
         }
 
         // CommentReport 엔티티 생성
@@ -60,6 +70,9 @@ public class CommentReportController {
     @PostMapping("/delete")
     @ResponseBody
     public void deleteReport(@RequestParam Long reportId) {
+        CommentReport report = commentReportRepository.findById(reportId)
+                .orElseThrow(()->new RuntimeException("신고를 찾을 수 없습니다."));
+
         commentReportService.deleteById(reportId);
     }
 
@@ -68,12 +81,25 @@ public class CommentReportController {
                              @RequestParam(required = false) Long reportStatus,
                              @RequestParam(required = false) Long reportType,
                              Pageable pageable) {
-        var page = (reportStatus != null && reportType != null)
-                ? commentReportService.getReportsByStatusAndType(reportStatus, reportType, pageable)
-                : (reportStatus != null)
-                ? commentReportService.getReportsByStatus(reportStatus, pageable)
-                : commentReportService.getReportsByStatus(0L, pageable); // 기본: 대기중
+        Page<CommentReportDto> page;
+
+        if (reportStatus != null && reportType != null) {
+            page = commentReportService.getReportsByStatusAndType(reportStatus, reportType, pageable);
+        }else if (reportStatus != null) {
+            page = commentReportService.getReportsByStatus(reportStatus, pageable);
+        }else if (reportType != null) {
+            page = commentReportService.getReportsByType(reportType, pageable);
+        }else {
+            page = commentReportService.getAllReports(pageable);
+        }
+
+        model.addAttribute("reports", page.getContent());
         model.addAttribute("page", page);
-        return "admin/commentReportList"; // JSP 경로
+
+        model.addAttribute("total", commentReportService.countAllReports());
+        model.addAttribute("pending", commentReportService.countByStatus(0L));
+        model.addAttribute("processing", commentReportService.countByStatus(1L));
+        model.addAttribute("completed",commentReportService.countByStatus(2L));
+        return "function/commentsReport/commentReport_all"; // JSP 경로
     }
 }

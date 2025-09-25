@@ -23,6 +23,8 @@ public interface CommentReportRepository extends JpaRepository<CommentReport, Lo
     // 특정 유저가 한 신고 내역 조회
     List<CommentReport> findByMemberUserEmail(String userEmail);
 
+    boolean existsByComments_CommentsIdAndMember_UserEmail(Long commentsId, String userEmail);
+
     // 특정 신고 유형만 조회 (0=욕설, 1=스팸, 2=저작권)
     Page<CommentReport> findByReportType(Long reportType, Pageable pageable);
 

@@ -70,16 +70,16 @@ class FollowServiceTest {
     void 중복팔로우_무시() {
         // given
         Member follower = new Member();
-        follower.setUserEmail("zxcv@gmail.com");
-        follower.setUserId("zxcv");
-        follower.setNickname("손주부");
+        follower.setUserEmail("jitzel@anyany.com");
+        follower.setUserId("@jitzel");
+        follower.setNickname("jitzel");
         follower.setProfileStatus("PUBLIC");
         memberRepository.save(follower);
 
         Member following = new Member();
-        following.setUserEmail("sj12@naver.com");
-        following.setUserId("@sssjjj");
-        following.setNickname("봉추");
+        following.setUserEmail("kikiroro1506@gmail.com");
+        following.setUserId("@kikiroro");
+        following.setNickname("kikiroro");
         following.setProfileStatus("PUBLIC");
         memberRepository.save(following);
 

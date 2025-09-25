@@ -6,12 +6,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>쉐프리드 — 레시피 피드</title>
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://i.ytimg.com">
+    <link rel="preconnect" href="https://www.google.com">
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/newfeed-ver-main-wireframe.css'/>">
     <style>
         /* 링크가 카드 영역을 블록으로 덮도록 */
         .post-link { display:block; text-decoration:none; color:inherit; }
         .post-link.disabled { cursor:default; }
+
+        /* ▶ 미디어 공통 스타일 */
+        .media {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
+        }
+        .media.aspect { aspect-ratio: 16 / 9; }
+        .media > iframe,
+        .media > video,
+        .media > img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        /* ▶ 라이트 유튜브: 플레이스홀더 버튼 */
+        .light-yt { cursor: pointer; }
+        .light-yt:focus { outline: 3px solid #8ac4ff; outline-offset: 2px; }
+        .light-yt .play-badge {
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.85);
+            display: grid; place-items: center;
+            font-size: 28px; line-height: 1;
+            user-select: none;
+        }
+        .light-yt:hover .play-badge { background: rgba(255,255,255,0.95); }
     </style>
 </head>
 <body>
@@ -86,17 +123,12 @@
 
         <h2 class="section-title">Trending Recipes</h2>
         <div id="trending" class="trend-grid">
-            <!-- 카드 1 -->
+            <!-- (데모 이미지들 그대로 두어도 됨. 실제로는 서버 데이터로 대체 가능) -->
             <article class="card p-12 trend-card">
                 <div class="thumb badge">
-                    <img
-                            src="https://picsum.photos/seed/pasta/800/500"
-                            alt="Spaghetti Aglio e Olio"
-                    />
+                    <img src="https://picsum.photos/seed/pasta/800/500" alt="Spaghetti Aglio e Olio"/>
                 </div>
-                <div>
-                    <div class="trend-title">Spaghetti Aglio e Olio</div>
-                </div>
+                <div><div class="trend-title">Spaghetti Aglio e Olio</div></div>
                 <div class="actions">
                     <div>
                         <button class="btn-none">❤️ Like</button>
@@ -105,54 +137,27 @@
                     <button class="followbtn-sm" data-user-id="u_123" data-following="false">Follow</button>
                 </div>
             </article>
-
-            <!-- 카드 2 -->
             <article class="card p-12 trend-card">
-                <div class="thumb">
-                    <img
-                            src="https://picsum.photos/seed/pancake/800/500"
-                            alt="Fluffy Pancakes"
-                    />
-                </div>
-                <div>
-                    <div class="trend-title">Fluffy Pancakes</div>
-                </div>
+                <div class="thumb"><img src="https://picsum.photos/seed/pancake/800/500" alt="Fluffy Pancakes"/></div>
+                <div><div class="trend-title">Fluffy Pancakes</div></div>
                 <div class="actions">
                     <button class="btn-none">❤️ Like</button>
                     <button class="btn-none">💬 12</button>
                     <button class="btn-none">Follow</button>
                 </div>
             </article>
-
-            <!-- 카드 3 -->
             <article class="card p-12 trend-card">
-                <div class="thumb">
-                    <img
-                            src="https://picsum.photos/seed/salad/800/500"
-                            alt="Caprese Salad"
-                    />
-                </div>
-                <div>
-                    <div class="trend-title">Caprese Salad</div>
-                </div>
+                <div class="thumb"><img src="https://picsum.photos/seed/salad/800/500" alt="Caprese Salad"/></div>
+                <div><div class="trend-title">Caprese Salad</div></div>
                 <div class="actions">
                     <button class="btn-none">❤️ Like</button>
                     <button class="btn-none">💬 12</button>
                     <button class="btn-none">Follow</button>
                 </div>
             </article>
-
-            <!-- 카드 4 -->
             <article class="card p-12 trend-card">
-                <div class="thumb">
-                    <img
-                            src="https://picsum.photos/seed/risotto/800/500"
-                            alt="Mushroom Risotto"
-                    />
-                </div>
-                <div>
-                    <div class="trend-title">Mushroom Risotto</div>
-                </div>
+                <div class="thumb"><img src="https://picsum.photos/seed/risotto/800/500" alt="Mushroom Risotto"/></div>
+                <div><div class="trend-title">Mushroom Risotto</div></div>
                 <div class="actions">
                     <button class="btn-none">❤️ Like</button>
                     <button class="btn-none">💬 12</button>
@@ -165,18 +170,10 @@
         <section id="popular" class="card populartag p-16">
             <h3 class="section-title">Popular Tags</h3>
             <div class="tags">
-                <div class="tag-item">
-                    <span>🥦 Vegetarian</span><span class="chip">12k</span>
-                </div>
-                <div class="tag-item">
-                    <span>🥩 Meat Lovers</span><span class="chip">8.4k</span>
-                </div>
-                <div class="tag-item">
-                    <span>🥗 Healthy</span><span class="chip">15k</span>
-                </div>
-                <div class="tag-item">
-                    <span>🍰 Desserts</span><span class="chip">9.2k</span>
-                </div>
+                <div class="tag-item"><span>🥦 Vegetarian</span><span class="chip">12k</span></div>
+                <div class="tag-item"><span>🥩 Meat Lovers</span><span class="chip">8.4k</span></div>
+                <div class="tag-item"><span>🥗 Healthy</span><span class="chip">15k</span></div>
+                <div class="tag-item"><span>🍰 Desserts</span><span class="chip">9.2k</span></div>
             </div>
         </section>
 
@@ -232,17 +229,8 @@
                     } else {
                         url = '/api/feed/hot?';
                     }
-
-                    // 쿼리 파라미터 정리
-                    if (url.indexOf('?') === -1) {
-                        url += '?';
-                    } else if (url.charAt(url.length - 1) !== '&' && url.charAt(url.length - 1) !== '?') {
-                        url += '&';
-                    }
-
-                    if (nextCursor) {
-                        url += 'after=' + encodeURIComponent(nextCursor) + '&';
-                    }
+                    if (url.indexOf('?') === -1) url += '?'; else if (!/[&?]$/.test(url)) url += '&';
+                    if (nextCursor) url += 'after=' + encodeURIComponent(nextCursor) + '&';
                     url += 'size=' + encodeURIComponent(pageSize);
                     return url;
                 }
@@ -264,7 +252,35 @@
                     return 'https://picsum.photos/seed/' + encodeURIComponent(seed || 'rc') + '/1200/800';
                 }
 
-                /* ✅ 여기서부터 변경: 링크 포함 카드(상세 이동 지원) */
+                // ▶ 라이트 유튜브/비디오/이미지 블록 생성
+                function renderMediaHtml(it){
+                    var kind = it.mediaKind || 'image';
+                    if (kind === 'youtube') {
+                        var poster = it.poster || pickThumb(it);
+                        var src = it.mediaSrc || '';
+                        return '' +
+                            '<div class="media aspect light-yt" role="button" tabindex="0" ' +
+                            'aria-label="' + esc(it.title || '') + ' 동영상 재생" data-yt-src="' + esc(src) + '">' +
+                            '<img src="' + esc(poster) + '" alt="">' +
+                            '<div class="play-badge">▶</div>' +
+                            '</div>';
+                    } else if (kind === 'video') {
+                        var vsrc = it.mediaSrc || '';
+                        var poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
+                        return '' +
+                            '<div class="media aspect">' +
+                            '<video controls preload="metadata"' + poster + ' src="' + esc(vsrc) + '"></video>' +
+                            '</div>';
+                    } else {
+                        var img = (it.mediaSrc && it.mediaSrc.length > 0) ? it.mediaSrc : pickThumb(it);
+                        return '' +
+                            '<div class="media aspect">' +
+                            '<img src="' + esc(img) + '" alt="">' +
+                            '</div>';
+                    }
+                }
+
+                /* ✅ 여기부터: 링크 포함 카드(상세 이동 지원) */
                 function safeId(it){
                     // 서비스가 RecipeCardDto.id로 UUID를 내려줌. 혹시 대비해 uuid/_id도 폴백.
                     return (it.id || it.uuid || it._id || '').toString();
@@ -281,27 +297,26 @@
                     }
                     var score = (typeof it.recScore === 'number' && it.recScore > 0) ? (' · score ' + it.recScore) : '';
                     var likes = (typeof it.likes === 'number') ? it.likes : (it.likes || 0);
-                    var thumb = pickThumb(it);
 
                     var rid = safeId(it);
                     var hasUuid = isUuid36(rid);
                     var href = hasUuid ? detailUrl(rid) : '#';
+
+                    var mediaBlock = renderMediaHtml(it);
 
                     var html = ''
                         + '<article class="card p-16 post" data-id="' + esc(rid) + '">'
                         +   '<div class="post-head">'
                         +     '<div class="avatar-ss"><img src="" alt=""></div>'
                         +     '<div class="post-info">'
-                        +       '<div class="post-id">@' + esc(it.author || it.authorNick || '') + '</div>'
+                        +       '<div class="post-id">@' + esc(it.authorNick || it.author || '') + '</div>'
                         +       '<div class="muted">' + esc(it.createdAt || '') + '</div>'
                         +     '</div>'
-                        +     '<button class="followbtn-sm" data-user-id="' + esc(it.author || it.authorNick || '') + '" data-following="false"></button>'
+                        +     '<button class="followbtn-sm" data-user-id="' + esc(it.authorNick || it.author || '') + '" data-following="false"></button>'
                         +   '</div>'
+                        +   mediaBlock
                         +   (hasUuid ? ('<a class="post-link" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">')
-                        +     '<div class="thumb">'
-                        +       '<img src="' + esc(thumb) + '" alt="' + esc(it.title || '') + '">'
-                        +     '</div>'
-                        +     '<p class="muted">' + esc(it.title || '') + score + '</p>'
+                        +     '<p class="muted" style="margin-top:8px">' + esc(it.title || '') + score + '</p>'
                         +     (tagsHtml ? ('<p class="muted">' + tagsHtml + '</p>') : '')
                         +   (hasUuid ? '</a>' : '</div>')
                         +   '<div class="post-cta">'
@@ -369,13 +384,47 @@
                     // a.post-link 자체는 기본 동작으로 이동
                     if (e.target.closest('a.post-link')) return;
 
+                    // ▶ 라이트 유튜브 클릭 처리 (iframe 주입)
+                    var lyt = e.target.closest('.light-yt[data-yt-src]');
+                    if (lyt) { attachLightYouTube(lyt); return; }
+
                     var card = e.target.closest('article.post[data-id]');
                     if (!card) return;
                     var rid = card.getAttribute('data-id');
-                    if (isUuid36(rid)) {
-                        window.location.href = detailUrl(rid);
+                    if (isUuid36(rid)) window.location.href = detailUrl(rid);
+                });
+
+                // ▶ 키보드 접근성: Enter/Space 시 라이트 유튜브 재생
+                document.addEventListener('keydown', function(e){
+                    if (e.key !== 'Enter' && e.key !== ' ') return;
+                    var el = document.activeElement;
+                    if (el && el.classList && el.classList.contains('light-yt') && el.hasAttribute('data-yt-src')) {
+                        e.preventDefault();
+                        attachLightYouTube(el);
                     }
                 });
+
+                // ▶ 라이트 유튜브: 클릭 시에만 iframe 주입
+                function attachLightYouTube(container){
+                    if (!container) return;
+                    var src = container.getAttribute('data-yt-src');
+                    if (!src) return;
+                    var iframe = document.createElement('iframe');
+                    var finalSrc = src + (src.includes('?') ? '&' : '?') + 'autoplay=1&mute=0';
+                    iframe.src = finalSrc;
+                    iframe.title = 'YouTube video player';
+                    iframe.setAttribute('allow',
+                        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+                    iframe.setAttribute('allowfullscreen', '');
+                    iframe.setAttribute('loading', 'eager');
+                    iframe.frameBorder = '0';
+                    container.innerHTML = '';
+                    container.appendChild(iframe);
+                    container.classList.remove('light-yt');
+                    container.removeAttribute('role');
+                    container.removeAttribute('tabindex');
+                    container.removeAttribute('aria-label');
+                }
             })();
         </script>
         <!-- === /For You 추천 피드 === -->
@@ -398,11 +447,7 @@
         <!-- 팔로우 피드: -->
         <div class="followingfeed">
             <h2 class="section-title">Following</h2>
-            <section
-                    id="following"
-                    class="card p-16 feature"
-                    style="margin-top: 12px"
-            >
+            <section id="following" class="card p-16 feature" style="margin-top: 12px">
                 <div class="post-head">
                     <div class="avatar-ss"><img src="" alt=""></div>
                     <div class="post-info mb-8">
@@ -412,10 +457,7 @@
                     <button class="followbtn-sm is-active" data-user-id="u_987" data-following="true"></button>
                 </div>
                 <div class="thumb">
-                    <img
-                            src="https://picsum.photos/seed/smoothie/1200/800"
-                            alt="Smoothie Bowl photo"
-                    />
+                    <img src="https://picsum.photos/seed/smoothie/1200/800" alt="Smoothie Bowl photo"/>
                 </div>
                 <p class="muted">Hand-picked favorites from our creators.</p>
             </section>
@@ -428,11 +470,7 @@
 <!-- 모바일:하단 고정, PC: display:none -->
 <footer>
     <div class="authbar">
-        <input
-                class="search"
-                type="search"
-                placeholder="재료·요리·해시태그 검색"
-        />
+        <input class="search" type="search" placeholder="재료·요리·해시태그 검색"/>
         <button class="search-btn" aria-label="검색">🔍</button>
     </div>
     <nav class="tabs">

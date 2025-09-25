@@ -75,6 +75,15 @@ Optional<Recipes> findByIdWithTags(@Param("uuid") String uuid);
     List<Recipes> findAllIncludingDeleted();
 
 
+    // userId 기준, 각 유저의 가장 최신 public 레시피
+    @Query(value = " select r from Recipes r\n" +
+                   " where r.deleted = false and r.postStatus = 'PUBLIC'\n" +
+                   " and r.member.userId in :userIds\n" +
+                   " and r.insertTime = ( select max(r2.insertTime) from Recipes r2" +
+                   " where r2.deleted = false and r2.postStatus = 'PUBLIC' and r2.member = r.member)" +
+                   " order by r.insertTime desc")
+    Page<Recipes> findLatestPublicPerUser(@Param("userIds") List<String> userIds, Pageable pageable);
+
 
 
 }

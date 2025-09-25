@@ -1,0 +1,89 @@
+/* =========================
+   알림 (Notification)
+   ========================= */
+.notif-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.notif-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    position: relative;
+    color: var(--text);
+    transition: transform 0.15s;
+}
+
+.notif-btn:hover {
+    transform: scale(1.1);
+}
+
+/* 알림 뱃지 (안 읽은 개수) */
+#noti-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--danger); /* 프로젝트 danger 컬러 사용 */
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 20px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* 알림 드롭다운 */
+.notif-dropdown {
+    position: absolute;
+    right: 0;
+    top: 36px;
+    width: 280px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.notif-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.notif-dropdown li {
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text);
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.notif-dropdown li:hover {
+    background: var(--chip);
+}
+
+/* 안 읽은 알림 강조 */
+.notif-dropdown li.unread {
+    font-weight: 600;
+    background: #f9fafb;
+}
+
+/* 읽은 알림 */
+.notif-dropdown li.read {
+    font-weight: 400;
+    color: var(--muted);
+}
+
+/* 숨김 처리 */
+.hidden {
+    display: none;
+}
