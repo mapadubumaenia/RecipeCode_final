@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     el.addEventListener("click", () => {
                         const uid = el.dataset.userId;
                         // TODO: 여기여기 url 수정
-                        window.location.href = "/follow/" + uid;
+                        window.location.href = "/follow/network/" + uid;
                     });
                 });
             })

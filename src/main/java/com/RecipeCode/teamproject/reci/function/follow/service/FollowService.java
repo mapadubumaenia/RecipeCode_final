@@ -40,10 +40,12 @@ public class FollowService {
 
     // 팔로우
     @Transactional
-    public void follow(String followerEmail, String followingUserId) {
+    public void follow(String followerEmail, String followingEmail) {
         Member follower = memberRepository.findById(followerEmail)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.follower.notfound")));
-        Member following = findByUserIdOrThrow(followingUserId, "errors.following.notfound");
+        Member following = memberRepository.findById(followingEmail)
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.following.notfound")));
+//        Member following = findByUserIdOrThrow(followingUserId, "errors.following.notfound");
 
         if (follower.equals(following)) {
             throw new IllegalArgumentException(errorMsg.getMessage("errors.follow.self"));
@@ -60,21 +62,22 @@ public class FollowService {
         followRepository.save(follow);
 
         // 알림 생성
-        notificationService.createNotification(
-                follower.getUserEmail(),                  // 알림을 발생시킨 사람
-                following.getUserEmail(),                 // 알림을 받는 사람
-                NotificationEvent.FOLLOW,                 // enum 넘김
-                "FOLLOW",                                 // 소스 타입
-                String.valueOf(follow.getFollowId())      // 소스 ID
-        );
+//        notificationService.createNotification(
+//                follower.getUserEmail(),                  // 알림을 발생시킨 사람
+//                following.getUserEmail(),                 // 알림을 받는 사람
+//                NotificationEvent.FOLLOW,                 // enum 넘김
+//                "FOLLOW",                                 // 소스 타입
+//                String.valueOf(follow.getFollowId())      // 소스 ID
+//        );
     }
 
     // 언팔로우
     @Transactional
-    public void unfollow(String followerEmail, String followingUserId) {
+    public void unfollow(String followerEmail, String followingEmail) {
         Member follower = memberRepository.findById(followerEmail)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.follower.notfound")));
-        Member following = findByUserIdOrThrow(followingUserId, "errors.following.notfound");
+        Member following = memberRepository.findById(followingEmail)
+                .orElseThrow(()->new RuntimeException(errorMsg.getMessage("errors.following.notfound")));
 
         followRepository.findByFollowerAndFollowing(follower, following)
                 .ifPresent(followRepository::delete);
