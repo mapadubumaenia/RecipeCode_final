@@ -28,6 +28,12 @@ public class MemberController {
         return "auth/login";
     }
 
+    // 비밀번호 찾기
+    @GetMapping("/auth/findPassword")
+    public String findPassword() {
+        return "auth/findPassword";
+    }
+
 //    회원가입 페이지 이동
     @GetMapping("/auth/register")
     public String register() {
