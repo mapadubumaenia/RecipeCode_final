@@ -117,6 +117,16 @@ public class FollowService {
         return followRepository.countByFollower(user);
     }
 
+    // 나를 팔로우하는 사람 수
+    public long countFollowersOf(Member owner) {
+        return followRepository.countByFollowing(owner);
+    }
+
+    // 내가 팔로잉하는 사람 수
+    public long countFollowingOf(Member owner) {
+        return followRepository.countByFollower(owner);
+    }
+
     // owner(Network Profile)가 팔로우 중인 사람 목록에 대한 viewer(로그인 사용자)의 팔로우 여부
     public Slice<FollowDto> getUserFollowingListWithStatus(String ownerEmail,
                                                            String viewerEmail, Pageable pageable) {
@@ -127,6 +137,8 @@ public class FollowService {
 
         // owner가 팔로우하는 관계들
         Slice<Follow> slice = followRepository.findByFollower(owner, pageable);
+
+        var fCount = followRepository.countByFollower(owner);
 
         // '대상 사용자'는 following
         return slice.map(f-> {
@@ -141,6 +153,7 @@ public class FollowService {
             dto.setMember(mapStruct.toDto(target));
             dto.setFollowingStatus(iFollowHim);
             dto.setFollowerStatus(heFollowsMe);
+
             return dto;
         });
     }

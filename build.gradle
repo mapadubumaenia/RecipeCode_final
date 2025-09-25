@@ -76,6 +76,11 @@ dependencies {
 
 	// TODO: 계정인증용 메일 추가
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// TODO: fn jstl 추가
+	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+	implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.1'
+	implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
 }
 
 tasks.named('test') {

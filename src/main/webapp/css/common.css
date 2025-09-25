@@ -46,6 +46,7 @@ a{color:inherit;text-decoration:none;cursor:pointer}
 .hidden{display:none !important}
 .m-0{margin: 0;}
 .mb-8{margin-bottom:8px}
+.ml-8{margin-left:8px}
 .mb-12{margin-bottom:12px}
 .p-12{padding:12px}
 .p-16{padding:16px}
@@ -77,6 +78,15 @@ a{color:inherit;text-decoration:none;cursor:pointer}
 .stack-btns{display:none} /* 모바일에서 안보임 */
 /* 좋아요 눌렀을 때 빨간색 */
 #btnLike.active {color: darkred; font-weight: bold;}
+/* like 버튼 공통 */
+.like {border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex;
+  align-items: center; gap: 6px; padding: 0;}
+.like .icon::before { content: "♡"; font-size: 1.1em; line-height: 1; display: inline-block;
+  transform: translateY(-1px); transition: transform 120ms ease, color 120ms ease; color: #aaa;}
+/* 활성(좋아요) 상태 */
+.like.active .icon::before { content: "♥"; color: #e53935; transform: translateY(-1px) scale(1.1); /* 살짝 팝 */}
+/* 접근성: 모션 최소화 설정 존중 */
+@media (prefers-reduced-motion: reduce) {.like .icon::before { transition: none; }}
 
 
 /* 6) 헤더 공통 */

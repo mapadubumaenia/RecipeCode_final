@@ -107,6 +107,86 @@
     });
 })();
 
+(() => {
+    const btn = document.getElementById("btnFollow");
+    if (!btn) return;
+
+    // 게스트면 클릭 시 로그인 유도
+    if (btn.getAttribute("aria-disabled") === "true") {
+        btn.addEventListener("click", () => {
+            alert("팔로우 기능은 로그인 후 이용할 수 있습니다.");
+            location.href = `${ctx}/auth/login`; // 원하면 리다이렉트
+        });
+        return; // 더 이상 로직 진행하지 않음
+    }
+
+    const owner = btn.dataset.owner;
+    const ctx = window.ctx || "";
+
+    const setUI = (following) => {
+        btn.dataset.following = String(following);
+        btn.textContent = following ? "Unfollow" : "Follow";
+        btn.classList.toggle("is-following", following);
+        btn.setAttribute("aria-pressed", String(following));
+    };
+    setUI(btn.dataset.following === "true");
+
+    btn.addEventListener("click", async () => {
+        // 요청 중 중복클릭 방지
+        if (btn.dataset.busy === "true") return;
+        btn.dataset.busy = "true";
+
+        const following = btn.dataset.following === "true";
+        const method = following ? "DELETE" : "POST";
+        const url = `${ctx}/api/follow/${encodeURIComponent(owner)}`;
+
+        //나중에
+        const t = document.querySelector('meta[name="_csrf"]');
+        const h = document.querySelector('meta[name="_csrf_header"]');
+        const headers = {"Accept": "application/json"};
+        if (t && h) headers[h.content] = t.content;
+
+        try {
+            const res = await fetch(url, { method, credentials: "same-origin", headers });
+
+            // 🔎 디버그
+            console.log("[follow] status:", res.status, res.statusText);
+
+            let body = null;
+            const ctype = res.headers.get("content-type") || "";
+            if (ctype.includes("application/json")) {
+                try { body = await res.json(); } catch {}
+            } else {
+                // text/plain 같은 경우
+                try { body = { message: await res.text() }; } catch {}
+            }
+
+            if (!res.ok) {
+                if (res.status === 401) { alert("로그인 후 이용해주세요."); return; }
+                if (res.status === 403 && body && (body.code === "SELF_FOLLOW_FORBIDDEN" || /본인/.test(body.message||""))) {
+                    alert("본인 계정은 팔로우할 수 없습니다.");
+                    return;
+                }
+                alert(body?.message || "처리 중 오류가 발생했어요.");
+                return;
+            }
+
+            // 표준 응답: { following: boolean } 를 기대
+            const now = (body && typeof body.following === "boolean")
+                ? body.following
+                : !following; // 혹시 바디가 비었으면 토글 추정
+
+            setUI(now);
+
+        } catch (e) {
+            console.error(e);
+            alert("네트워크 오류가 발생했어요.");
+        } finally {
+            delete btn.dataset.busy;
+        }
+    });
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
         // TODO: 댓글 디버깅 코드 추가 -- 여기서 시작
         const elRecipe = document.querySelector('.container[data-recipe-uuid]');

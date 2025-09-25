@@ -1,9 +1,12 @@
 package com.RecipeCode.teamproject.reci.feed.recipes.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
+import com.RecipeCode.teamproject.common.MapStruct;
 import com.RecipeCode.teamproject.common.RecipeMapStruct;
+import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
+import com.RecipeCode.teamproject.reci.feed.comments.repository.CommentsRepository;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
 import com.RecipeCode.teamproject.reci.feed.ingredient.repository.IngredientRepository;
 import com.RecipeCode.teamproject.reci.feed.ingredient.service.IngredientService;
@@ -16,6 +19,7 @@ import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 import com.RecipeCode.teamproject.reci.feed.recipes.repository.RecipesRepository;
 import com.RecipeCode.teamproject.reci.feed.recipeslikes.repository.RecipesLikesRepository;
+import com.RecipeCode.teamproject.reci.function.follow.repository.FollowRepository;
 import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,12 +29,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,10 +49,12 @@ public class RecipesService {
     private final IngredientRepository ingredientRepository;
     private final RecipeContentRepository recipeContentRepository;
     private final RecipesLikesRepository  recipesLikesRepository;
-    private final RecipeTagRepository recipeTagRepository;
+    private final CommentsRepository commentsRepository;
     private final MemberRepository memberRepository;
     private final RecipeMapStruct recipeMapStruct;
+    private final FollowRepository followRepository;
     private final ErrorMsg errorMsg;
+    private final MapStruct mapStruct;
 
 
     // 내 팔로우 페이지 : 특정 ID 팔로우 피드보기 (최신순)
@@ -193,10 +201,38 @@ public class RecipesService {
     /* 상세 조회 */
     @Transactional
     public RecipesDto getRecipeDetails(String uuid, @Nullable String userEmail) {
+
+        // 1) 레시피 + 작성자 불러오기
         Recipes recipe = recipesRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException(
                         errorMsg.getMessage("errors.not.found")
                 ));
+        Member owner = recipe.getMember();
+
+        // 2) DTO 매핑
+        RecipesDto dto = recipeMapStruct.toRecipeDto(recipe);
+
+        // 3) 좋아요 여부
+        if (userEmail != null && ! userEmail.isBlank()) {
+            memberRepository.findByUserEmail(userEmail).ifPresent(viewer ->{
+                boolean l = recipesLikesRepository.existsByMemberAndRecipes(viewer, recipe);
+                dto.setLiked(false);
+            });
+        } else {
+            dto.setLiked(false);
+        }
+
+        // 4) 팔로우 여부
+        boolean followingOwner = false;
+        if (userEmail != null && ! userEmail.isBlank() && !userEmail.equals(owner.getUserEmail())) {
+            Member viewer = memberRepository.findByUserEmail(userEmail)
+                    .orElse(null);
+            if(viewer != null) {
+                followingOwner = followRepository.existsByFollowerAndFollowing(viewer, owner);
+            }
+        }
+        dto.setFollowingOwner(followingOwner);
+
 
         // 재료/단계는 단방향이라 개별 repo 조회
         var ingredients = ingredientRepository
@@ -204,20 +240,9 @@ public class RecipesService {
         var contents = recipeContentRepository
                 .findByRecipesUuidOrderByStepOrderAsc(uuid);
 
-        RecipesDto dto = recipeMapStruct.toRecipeDto(recipe);
-
-        boolean liked = false;
-        if (userEmail != null) {
-            Member viewer = memberRepository.findByUserEmail(userEmail)
-                    .orElse(null);
-            if (viewer != null) {
-                liked = recipesLikesRepository.existsByMemberAndRecipes(viewer, recipe);
-            }
-        }
-
         dto.setIngredients(recipeMapStruct.toIngredientDtoList(ingredients));
         dto.setContents(recipeMapStruct.toRecipeContentDtoList(contents));
-        dto.setLiked(liked);
+
         return dto;
     }
 
@@ -266,6 +291,20 @@ public class RecipesService {
         Recipes recipe = recipesRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
         recipe.setViewCount(recipe.getViewCount() + 1);
+    }
+
+    /* 코멘트수 */
+    public void fillCommentCounts(List<RecipesDto> dtos) {
+        if (dtos.isEmpty()) return;
+
+        List<String> uuids = dtos.stream().map(RecipesDto::getUuid).distinct().toList();
+
+        var rows = commentsRepository.countByRecipeUuids(uuids);
+        var map = rows.stream().collect(Collectors.toMap(
+                CommentsRepository.CommentCountView::getUuid,
+                CommentsRepository.CommentCountView::getCnt
+        ));
+        dtos.forEach(dto -> dto.setCommentCount(map.getOrDefault(dto.getUuid(), 0L)));
     }
 
     // ---------------------------

@@ -3,6 +3,7 @@ package com.RecipeCode.teamproject.es.admin.service;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
 import co.elastic.clients.elasticsearch._types.aggregations.FieldDateMath;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -19,13 +20,11 @@ import org.springframework.stereotype.Service;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
-import org.springframework.data.elasticsearch.core.SearchHits;
+
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -281,6 +280,7 @@ public class AdminAnalyticsService {
     /* -------------------------------------------
      * 4) 최근 좋아요 많이 받은 게시물 (Likes Top-N)
      * ------------------------------------------- */
+    // AdminAnalyticsService.java
     public List<Map<String, Object>> topLiked(int days, int size) {
         final int daysF = (days <= 0) ? 7 : days;
         final int sizeF = Math.min(Math.max(size, 1), 50);
@@ -288,9 +288,7 @@ public class AdminAnalyticsService {
 
         NativeQueryBuilder qb = NativeQuery.builder()
                 .withQuery(Query.of(b -> b.bool(bb -> bb
-                        .filter(f -> f.range(r -> r.field("createdAt")
-                                .gte(JsonData.of(fromF.toString()))
-                        ))
+                        .filter(f -> f.range(r -> r.field("createdAt").gte(JsonData.of(fromF.toString()))))
                         .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
                         .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
                 )))
@@ -303,17 +301,71 @@ public class AdminAnalyticsService {
         List<Map<String, Object>> out = new ArrayList<>();
         for (SearchHit<RecipeSearchDoc> h : hits) {
             RecipeSearchDoc d = h.getContent();
+            Media media = buildMedia(d); // 👈 아래 유틸 추가
+
             out.add(Map.of(
                     "id", h.getId(),
-                    "title", d.getTitle(),
-                    "authorNick", d.getAuthorNick(),
-                    "likes", d.getLikes() == null ? 0 : d.getLikes(),
-                    "views", d.getViews() == null ? 0 : d.getViews(),
-                    "createdAt", d.getCreatedAt()
+                    "title", nvl(d.getTitle()),
+                    "authorNick", nvl(d.getAuthorNick()),
+                    "likes", d.getLikes() == null ? 0L : d.getLikes(),
+                    "comments", d.getComments() == null ? 0L : d.getComments(),  // ✅ 댓글 포함
+                    "views", d.getViews() == null ? 0L : d.getViews(),
+                    "createdAt", d.getCreatedAt() == null ? "" : d.getCreatedAt().toString(),
+                    // 미디어 메타 (라이트 유튜브/비디오/이미지)
+                    "mediaKind", media.kind,
+                    "mediaSrc",  media.src,
+                    "poster",    media.poster == null ? "" : media.poster
             ));
         }
         return out;
     }
+
+    /* ====== 아래 유틸(FeedService와 동일한 로직 요약본) ====== */
+    private static class Media { final String kind, src, poster; Media(String k,String s,String p){kind=k;src=s;poster=p;} }
+    private Media buildMedia(RecipeSearchDoc d) {
+        String thumb = d.getThumbUrl();
+        String video = d.getVideoUrl();
+
+        if (StringUtils.hasText(video)) {
+            String vid = extractYouTubeId(video);
+            if (vid != null) {
+                String embed = "https://www.youtube.com/embed/" + vid + "?playsinline=1&modestbranding=1&rel=0";
+                String poster = "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
+                return new Media("youtube", embed, poster);
+            }
+            String v = video.toLowerCase();
+            if (v.endsWith(".mp4") || v.endsWith(".webm") || v.endsWith(".mov") || v.endsWith(".m4v")) {
+                String poster = (StringUtils.hasText(thumb) && !looksLikeYouTubeUrl(thumb)) ? thumb : null;
+                return new Media("video", video, poster);
+            }
+        }
+        if (StringUtils.hasText(thumb) && !looksLikeYouTubeUrl(thumb)) {
+            return new Media("image", thumb, null);
+        }
+        String vid = extractYouTubeId(video);
+        if (vid != null) {
+            String poster = "https://i.ytimg.com/vi/" + vid + "/hqdefault.jpg";
+            return new Media("image", poster, null);
+        }
+        return new Media("image", "", null);
+    }
+    private String extractYouTubeId(String url) {
+        if (!StringUtils.hasText(url)) return null;
+        var m = java.util.regex.Pattern.compile("[?&]v=([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(1);
+        m = java.util.regex.Pattern.compile("youtu\\.be/([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(1);
+        m = java.util.regex.Pattern.compile("/(shorts|embed)/([A-Za-z0-9_-]{11})").matcher(url);
+        if (m.find()) return m.group(2);
+        return null;
+    }
+    private boolean looksLikeYouTubeUrl(String url){
+        if (!StringUtils.hasText(url)) return false;
+        String u = url.toLowerCase();
+        return u.contains("youtube.com") || u.contains("youtu.be");
+    }
+    private static String nvl(String s){ return (s==null) ? "" : s; }
+
 
     // ---------- 5) 일자별 신규 업로드 수 (최근 N일, KST 기준, 자바에서 0 채우기) ----------
     public List<Map<String, Object>> uploadsByDay(int days) {
@@ -492,6 +544,81 @@ public class AdminAnalyticsService {
             return List.of();
         }
     }
+
+
+
+    /**  7 트래픽(검색 로그 수) 스파크라인 */
+    public List<Map<String, Object>> traffic(Instant from, Instant to, String intervalRaw) {
+        final Instant toF   = (to   == null) ? Instant.now() : to;
+        final Instant fromF = (from == null) ? toF.minus(24, ChronoUnit.HOURS) : from;
+
+        // 캘린더 간격만 사용 (Minute / Hour / Day)
+        CalendarInterval cal = parseCalendarInterval(intervalRaw);
+
+        var req = new co.elastic.clients.elasticsearch.core.SearchRequest.Builder()
+                .index("rc-search-logs-000001")
+                .size(0)
+                .query(q -> q.range(r -> r
+                        .field("at")
+                        .gte(co.elastic.clients.json.JsonData.of(fromF.toString()))
+                        .lte(co.elastic.clients.json.JsonData.of(toF.toString()))
+                ))
+                .aggregations("by_time", a -> a.dateHistogram(dh -> dh
+                        .field("at")
+                        .calendarInterval(cal)   // ← calendar interval만 사용
+                        .minDocCount(0)
+                        .timeZone("+09:00")     // KST 경계로 보고 싶으면 유지
+                ))
+                .build();
+
+        try {
+            var resp  = esClient.search(req, com.RecipeCode.teamproject.es.search.document.SearchLogDoc.class);
+            var agg   = resp.aggregations().get("by_time");
+            var bucks = (agg != null && agg.dateHistogram() != null) ? agg.dateHistogram().buckets() : null;
+
+            List<Map<String,Object>> out = new ArrayList<>();
+            if (bucks != null && bucks.isArray()) {
+                for (var b : bucks.array()) {
+                    long count = b.docCount();                       // primitive long
+                    String iso  = Instant.ofEpochMilli(b.key()).toString(); // epoch → ISO
+                    out.add(Map.of("ts", iso, "views", count));
+                }
+            }
+            return out;
+        } catch (Exception e) {
+            log.error("[TRAFFIC] ES error", e);
+            return List.of();
+        }
+    }
+
+    /** interval 문자열 → CalendarInterval 로만 매핑 */
+    private CalendarInterval parseCalendarInterval(String raw) {
+        if (raw == null || raw.isBlank()) return CalendarInterval.Hour;
+        String s = raw.trim().toLowerCase();
+        switch (s) {
+            case "minute":
+            case "min":
+            case "1m":   return CalendarInterval.Minute;
+            case "hour":
+            case "hr":
+            case "1h":   return CalendarInterval.Hour;
+            case "day":
+            case "d":
+            case "1d":   return CalendarInterval.Day;
+            default:
+                // 15m, 30m, 2h 같은 고정 간격은 A안에서는 지원하지 않음 → 가장 가까운 캘린더 간격으로 폴백
+                if (s.endsWith("m")) return CalendarInterval.Minute;
+                if (s.endsWith("h")) return CalendarInterval.Hour;
+                if (s.endsWith("d")) return CalendarInterval.Day;
+                return CalendarInterval.Hour;
+        }
+    }
+
+
+
+
+
+
 
 
     private static Map<String, co.elastic.clients.elasticsearch._types.aggregations.Aggregate> safeAggs(

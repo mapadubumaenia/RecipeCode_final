@@ -106,6 +106,9 @@ public interface RecipeMapStruct {
     @Mapping(source = "member.userId", target = "userId")
     @Mapping(source = "recipeTag", target = "tags")  // RecipeTag → TagDto 변환 필요
     @Mapping(target = "liked", ignore = true)
+    @Mapping(target = "nickname",        source = "member.nickname")
+    @Mapping(target = "userLocation",    source = "member.userLocation")
+    @Mapping(target = "profileImageUrl", source = "member.profileImageUrl")
     RecipesDto toRecipeDto(Recipes recipes);
 
     List<RecipesDto> toRecipeDtoList(List<Recipes> recipes);

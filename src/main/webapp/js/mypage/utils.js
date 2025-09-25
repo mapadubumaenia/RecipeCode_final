@@ -30,13 +30,15 @@ function createFeedArticle(recipe, currentUserEmail) {
     const el = document.createElement("article");
     el.className = "card p-16 post";
 
-    const canEdit = recipe.userEmail === currentUserEmail;
+    // const canEdit = recipe.userEmail === currentUserEmail;
     const editBtn = (recipe.userEmail === currentUserEmail)
         ? `<a href="/recipes/${recipe.uuid}/edit" class="btn-none float-text edit-feed">✎ Edit</a>`
         : "";
 
     const isLike = (recipe.isLike ?? recipe.liked ?? false) === true;
     const likeClass = recipe.isLike ? "like active" : "like";
+    const likeCnt = Number(recipe.likeCount || 0); // ← 숫자로 캐스팅
+    const isOwner = recipe.userEmail === currentUserEmail;
 
     el.innerHTML = `
     <div class="post-head">
@@ -58,7 +60,15 @@ function createFeedArticle(recipe, currentUserEmail) {
     </a>
     <div class="post-cta flex-box">
       <div class="leftBox">
-        <button class="${likeClass} btn-none" data-uuid="${recipe.uuid}" data-like="${String(isLike)}">❤️${recipe.likeCount || 0}</button>
+        <button class="${likeClass} btn-none"
+                data-uuid="${recipe.uuid}"
+                data-like="${String(isLike)}"
+                data-owner="${String(isOwner)}"
+                aria-pressed="${String(isLike)}"
+                ${isOwner ? 'aria-disabled="true" title="본인 레시피에는 좋아요를 누를 수 없습니다."' : ''}
+                >
+                <span class="icon" aria-hidden="true"></span>
+                <span class="cnt">${likeCnt}</span></button>
         <a href="/recipes/${recipe.uuid}" class="btn-none post-cmt">💬 ${recipe.commentCount || 0}</a>
         <button class="btn-none share-btn float-text" data-uuid="${recipe.uuid}">↗ Share</button>
       </div>
@@ -84,6 +94,9 @@ function createFollowArticle(recipe) {
     const title   = recipe.recipeTitle || recipe.recipeIntro || "";
     const isLike  = (recipe.isLike ?? recipe.liked ?? false) === true;
     const likeCnt = Number(recipe.likeCount || 0);
+    const isOwner = (recipe.userEmail && window.currentUserEmail)
+        ? recipe.userEmail === window.currentUserEmail
+        : false;
 
     el.innerHTML = `
     <div class="post-head">
@@ -99,18 +112,21 @@ function createFollowArticle(recipe) {
                     data-uuid="${recipe.uuid}"
                     data-like="${String(isLike)}"
                     aria-pressed="${String(isLike)}"
-                    >❤️${likeCnt}</button>    
-        <a class="btn-none" href="/recipes/${encodeURIComponent(recipe.uuid)}">보기</a>
+                    ${isOwner ? 'aria-disabled="true" title="본인 레시피에는 좋아요를 누를 수 없습니다."' : ''}>
+                    <span class="icon" aria-hidden="true"></span>
+                     <span class="cnt">${likeCnt}</span></button>
         </div>
     </div>
     <div class="thumb">
           ${
         recipe.recipeType === "IMAGE"
-            ? `<img src="${recipe.thumbnailUrl || 'https://picsum.photos/seed/default/800/500'}" alt="recipe">`
-            : `<iframe src="${recipe.thumbnailUrl}" allowfullscreen></iframe>`
+            ? `<img src="${thumb}" alt="recipe">`
+            : `<iframe src="${thumb}" allowfullscreen></iframe>`
     }
     </div>
-    <div class="post-meta flex-box"><p>${title}</p></div>`;
+    <div class="post-meta flex-box">
+    <p>${title}</p>
+    <a class="btn-none" href="/recipes/${encodeURIComponent(recipe.uuid)}">더보기</a></div>`;
     return el;
 }
 
@@ -118,6 +134,12 @@ function createFollowArticle(recipe) {
 document.addEventListener("click", async (e) => {
     const heart = e.target.closest(".like");
     if (!heart || !heart.dataset.uuid) return;
+
+    // 내 레시피에는 못누름
+    if (heart.dataset.owner === "true") {
+        alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
+        return;
+    }
 
     const uuid   = heart.dataset.uuid;
     const isLike = heart.dataset.like === "true";
@@ -130,14 +152,28 @@ document.addEventListener("click", async (e) => {
             credentials: "same-origin",
             headers: { "Content-Type": "application/json" }
         });
-        if (!res.ok) throw new Error("Like 토글 실패");
+        if (!res.ok) {
+            let msg = "";
+            try {
+                const err = await res.json();
+                msg = err.message || err.msg || "";
+            } catch {}
+            if (res.status === 403 || res.status === 400 || msg.includes("SELF_LIKE")) {
+                alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
+            } else {
+             alert("실패했습니다. 다시 시도해주세요.");
+            }
+            return;
+        }
         const dto = await res.json();
-
         const now = (dto.isLike ?? dto.liked ?? false) === true;
         heart.classList.toggle("active", now);
         heart.dataset.like = String(now);
-        const newCnt = dto.likesCount ?? Number((heart.textContent.match(/\d+/) || ['0'])[0]);
-        heart.textContent = `❤️${newCnt}`;
+        heart.setAttribute("aria-pressed", String(now));
+
+        const cntEl = heart.querySelector(".cnt");
+        const newCnt = Number(dto.likesCount ?? (cntEl ? cntEl.textContent : "0"));
+        if (cntEl) cntEl.textContent = String(newCnt);
     } catch (err) {
         console.error(err);
         alert("실패했습니다. 다시 시도해주세요.");

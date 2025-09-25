@@ -76,28 +76,40 @@
                 <img src="${user.profileImageUrl}" alt="${user.nickname}" class="avatar-lg"/>
             </c:if>
         </div>
-        <div class="profile-info">
+        <div class="profile-info flex-box">
             <div class="profile-top">
+                <div class="userInfo">
                 <h2 class="profile-name">${user.userId}</h2>
                 <a href="${pageContext.request.contextPath}/mypage/edit" class="edit-profile">✎ Edit</a>
+                </div>
+                <div class="profile-left">
+                    <span>${user.nickname}</span>
+                    <span>${user.userLocation}</span>
+                </div>
             </div>
-            <div class="profile-actions btn-none">
-                <a class="followbtn-md" href="${pageContext.request.contextPath}/mypage/followers">
-                    Followers <%-- ${user.followingCount} --%>
-                </a>
-                <a class="followbtn-md" href="${pageContext.request.contextPath}/mypage/following">
-                    Following <%-- ${user.followingCount} --%>
-                </a>
+            <div class="profile-right">
+                <div class="follow-count">
+                <span>Followers ${followersCount} </span>
+                <span>Following ${followingCount}</span>
+                </div>
+                <c:if test="${not empty user.interestTags}">
+                    <div class="tags">
+                        <c:forEach items="${user.interestTags}" var="tag">
+                            <span class="chip">#${tag.tag}</span>
+                        </c:forEach>
+                    </div>
+                </c:if>
+
             </div>
         </div>
     </section>
 
     <!-- (옵션) 팔로잉 사용자 검색 -->
-        <div class="search-bar search-following">
-            <input type="text" id="searchInput" placeholder="팔로잉한 사용자 아이디 검색 (@username)" >
-            <button id="searchBtn" class="btn">Search</button>
-        </div>
-        <div id="searchResult"></div>
+<%--        <div class="search-bar search-following">--%>
+<%--            <input type="text" id="searchInput" placeholder="팔로잉한 사용자 아이디 검색 (@username)" >--%>
+<%--            <button id="searchBtn" class="btn">Search</button>--%>
+<%--        </div>--%>
+<%--        <div id="searchResult"></div>--%>
 
     <!-- 내 피드 -->
     <section class="container layout">
@@ -146,7 +158,6 @@
     window.currentUserEmail = "${currentUserEmail}";
 </script>
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
-<script src="${pageContext.request.contextPath}/js/mypage/mypage-searchResult.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-feed.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-sidebar.js"></script>
 </body>

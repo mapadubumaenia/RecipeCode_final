@@ -79,6 +79,17 @@ public class AdminAnalyticsController {
     }
 
 
+    @GetMapping("/traffic")
+    public List<Map<String, Object>> traffic(
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false, defaultValue = "1h") String interval
+    ) {
+        Instant f = safeParseInstant(from);
+        Instant t = safeParseInstant(to);
+        return svc.traffic(f, t, interval);
+    }
+
 
 
 
