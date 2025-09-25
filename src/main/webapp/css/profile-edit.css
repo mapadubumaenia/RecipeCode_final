@@ -26,6 +26,14 @@
 .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .actions .spacer{flex:1}
 
+/* 인풋 그룹 (아이콘/토글) */
+.input-wrap{position:relative}
+.input-wrap .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
+
+/* 비밀번호 강도 */
+.strength{height:8px;background:#eee;border-radius:999px;overflow:hidden}
+.strength > span{display:block;height:100%;width:0;background:var(--danger);transition:width .25s ease, background .25s ease}
+
 /* 반응형 */
 @media (min-width:680px){
   .form{display:flex;align-items:flex-start;gap:12px}

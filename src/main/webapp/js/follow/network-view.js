@@ -37,7 +37,7 @@ function pick(row) {
     return {
         userId: m.userId ?? "unknown",
         userEmail: m.userEmail ?? "unknown",
-        userNickname: m.userNickname ?? "",
+        userNickname: m.nickname ?? "",
         profileImageUrl: m.profileImageUrl ?? "",
         userLocation: m.userLocation ?? "",
         followingStatus: !!(row.followingStatus ?? false),
@@ -68,33 +68,67 @@ function renderItem(row) {
     const el = document.createElement("article");
     el.className = "card p-12 post";
     const email = d.userEmail;
-
-    const profileHref = `/follow/profile/${encodeURIComponent(
-        d.userId.startsWith("@") ? d.userId.slice(1) : d.userId
-    )}`;
-
     const followText = d.followingStatus ? "UnFollow" : "Follow";
-
+    const followCls  = d.followingStatus ? "is-following" : "";
+    const hideBtn = email === viewerEmail;
 
     el.innerHTML = `
-    <div class="post-head">
+    <div class="post-head flex-row">
+      <div class="leftBox jump flex-box" data-uid="${d.userId}">
       <div class="avatar-ss">
         <img src="${d.profileImageUrl || ""}" alt="${d.userId}">
       </div>
-      <div class="post-info">
+      <div class="post-info ml-8">
         <div class="post-id">${d.userId}</div>
-        <div class="muted">${d.userNickname}</div>
+        <div class="muted">${d.userNickname} ${d.userLocation}</div>
+      </div>
       </div>
       <div class="rightBox">
-        <button class="follow-btn"
+ ${hideBtn ? "" : `
+        <button class="follow-btn ${followCls}"
                 data-email="${email}"
                 data-following="${String(d.followingStatus)}"
+                data-uid="${d.userId}"
                 >${followText}</button>
+`}
       </div>
     </div>
 `;
     return el;
 }
+
+// 유저 카드 클릭 → 이동
+document.addEventListener("click", (e) => {
+    const jump = e.target.closest(".jump");
+    if (!jump) return;
+
+    if (e.target.closest(".follow-btn")) return;
+
+    const uid = jump.dataset.uid;
+    if(!uid) return;
+        // TODO: 여기여기 url 수정
+        window.location.href = `${ctx}/follow/profile/${encodeURIComponent(uid)}`;
+    });
+
+function resetAndReload(kind) {
+    const S = state[kind];
+    S.page = 0;
+    S.last = false;
+    S.loading = false;
+    (kind === "following" ? followingListEl : followerListEl).innerHTML = "";
+    return load(kind);
+}
+
+function refreshAfterChange() {
+    if (isDesktop()) {
+        // 동시 재로딩
+        return Promise.all([resetAndReload("following"), resetAndReload("follower")]);
+    } else {
+        const active = document.querySelector(".list-pane.active")?.dataset.pane || "following";
+        return resetAndReload(active);
+    }
+}
+
 
 document.addEventListener("click", async (e) => {
     const btn = e.target.closest(".follow-btn");
@@ -106,9 +140,16 @@ document.addEventListener("click", async (e) => {
     const following = btn.dataset.following === "true";
     const method = following ? "DELETE" : "POST";
     const url = `${ctx}/api/follow/${encodeURIComponent(email)}`;
+    const who = btn.dataset.uid || email;
+
+    // 언팔로우일 때만 확인
+    if (following) {
+        const ok = window.confirm(`정말 ${who} 님을 언팔로우하시겠습니까?`);
+        if (!ok) return;
+    }
 
 
-    // btn.disabled = true;
+    btn.disabled = true;
     try {
         const res = await fetch(url,{
             method,
@@ -116,16 +157,20 @@ document.addEventListener("click", async (e) => {
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        // UI 즉시 갱신
+        // 버튼 즉시 반영
         const now = !following;
         btn.dataset.following = String(now);
         btn.textContent = now ? "UnFollow" : "Follow";
+        btn.classList.toggle("is-following", now);
 
-        // 만약 '팔로잉' 리스트에서 언팔하면 카드 제거하고 싶으면:
-        // if (!now && /* 현재 pane이 following이면 */) btn.closest("article")?.remove();
+        // 팔로우/언팔로우 즉시 리스트 새로 불러오기
+        await refreshAfterChange();
+
     } catch (err) {
         console.error(err);
         alert("실패했습니다. 다시 시도해주세요.");
+    } finally {
+        btn.disabled = false;
     }
 });
 

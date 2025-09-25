@@ -69,7 +69,7 @@
                 <div class="actions" style="margin-top:12px">
                     <div class="left">
                         <a class="btn ghost" href="/auth/register">회원가입</a>
-                        <a class="btn ghost" href="#">비밀번호 찾기</a>
+                        <a class="btn ghost" href="/auth/findPassword">비밀번호 찾기</a>
                     </div>
                     <button class="btn primary" id="submitBtn" type="submit">로그인</button>
                 </div>

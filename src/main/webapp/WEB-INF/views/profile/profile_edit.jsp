@@ -15,8 +15,6 @@
     <title>프로필 편집</title>
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/profile-edit.css'/>">
-    <%--  JS  --%>
-    <script src="<c:url value='/js/mypage/mypage-edit.js'/>"></script
 </head>
 <body>
 <form action="<c:url value='/mypage/updateProfile'/>" method="post" enctype="multipart/form-data">
@@ -134,6 +132,23 @@
             <!-- 환경설정 -->
             <article class="card p-16">
                 <h3 class="ttl">환경설정</h3>
+                <div class="grid cols-2 mb-8">
+                    <div class="row">
+                        <label for="pw" class="label">비밀번호(변경 시 입력)</label>
+                        <div class="input-wrap mb-8">
+                            <input class="input" type="password" id="pw" name="password" placeholder="8자 이상, 대/소문자+숫자 조합 권장" minlength="8" />
+                            <button class="toggle" type="button" aria-label="비밀번호 표시" data-target="#pw">👁️</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="label">비밀번호 확인</label>
+                        <div class="input-wrap mb-8">
+                        <input class="input" type="password" id="pw2" placeholder="다시 입력"  />
+                        <button class="toggle" type="button" aria-label="비밀번호 표시" data-target="#pw2">👁️</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="strength mb-8" aria-hidden="true"><span id="pwBar"></span></div>
 
                 <div class="grid cols-2">
                     <div class="row">
@@ -171,6 +186,7 @@
                     <span class="spacer"></span>
                     <button id="deletebtn" type="button" onclick="delete_account()" class="btn danger">회원탈퇴</button>
                 </div>
+                <div class="error" id="formError" aria-live="polite"></div>
             </article>
 
         </main>
@@ -185,6 +201,7 @@
     </section>
 </main>
 </form>
->
+<%--  JS  --%>
+<script src="<c:url value='/js/mypage/mypage-edit.js'/>"></script>
 </body>
 </html>
