@@ -171,7 +171,7 @@ public class RecipesViewController {
          String viewerEmail = (user != null) ? user.getUsername() : null;
 
         // 서비스에서 DTO로 가져와 뷰에 그대로 바인딩
-        RecipesDto dto = recipesService.getRecipeDetails(uuid, viewerEmail); // 서비스에 맞게 메서드명 조정
+        RecipesDto dto = recipesService.getRecipeDetails(uuid,viewerEmail); // 서비스에 맞게 메서드명 조정
 
         // 업로드 시간 문자열
         String insertTime = "";
@@ -196,6 +196,7 @@ public class RecipesViewController {
         model.addAttribute("embedUrl", embedUrl);
         model.addAttribute("isVideo", isVideo);
         model.addAttribute("insertTime", insertTime);
+        model.addAttribute("viewerEmail", viewerEmail);
         return "feed/recipe_details"; // JSP 경로
     }
 

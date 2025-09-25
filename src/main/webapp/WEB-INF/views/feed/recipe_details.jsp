@@ -165,7 +165,33 @@
                             </div>
                         </div>
                     </div>
-                    <a class="followbtn-sm" id="btnFollow">Follow</a>
+                    <c:set var="isOwner" value="${viewerEmail != null && viewerEmail == recipe.userEmail}" />
+                    <c:choose>
+                        <c:when test="${isOwner}"><%-- 본인글버튼없음 --%></c:when>
+                    <c:otherwise>
+                        <c:choose>
+                            <c:when test="${empty viewerEmail}">
+                                <%-- 게스트 --%>
+                                <a class="followbtn-sm"
+                                   id="btnFollow"
+                                   data-owner="${recipe.userEmail}"
+                                   data-following="false"
+                                   aria-disabled="true"
+                                   title="로그인이 필요합니다">Follow</a>
+                            </c:when>
+                            <c:otherwise>
+                                <%-- 로그인 사용자 --%>
+                                <a class="followbtn-sm ${recipe.followingOwner ? 'is-following' : ''}"
+                                   id="btnFollow"
+                                   data-owner="${recipe.userEmail}"
+                                   data-following="${recipe.followingOwner}"
+                                   aria-pressed="${recipe.followingOwner}">
+                                    ${recipe.followingOwner ? 'Unfollow' : 'Follow'}</a>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:otherwise>
+                    </c:choose>
+
                 </div>
 
                 <div class="actions">
@@ -280,5 +306,8 @@
     </div>
 </div>
 
+<script>
+    const ctx = "${pageContext.request.contextPath}";
+</script>
 </body>
 </html>
