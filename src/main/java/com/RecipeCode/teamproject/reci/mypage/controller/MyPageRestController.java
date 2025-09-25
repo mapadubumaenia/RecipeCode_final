@@ -61,7 +61,7 @@ public class MyPageRestController {
             @AuthenticationPrincipal SecurityUserDto user,
             @PageableDefault(size = 5, sort = "insertTime",
                     direction = Sort.Direction.DESC) Pageable pageable){
-        return myPageService.getFollowersLatestFeed(user.getUsername(), pageable);
+        return myPageService.getFollowingLatestFeed(user.getUsername(), pageable);
     }
 
 }

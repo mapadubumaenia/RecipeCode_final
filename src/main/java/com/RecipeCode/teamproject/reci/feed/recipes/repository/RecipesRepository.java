@@ -4,6 +4,7 @@ import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -76,9 +77,11 @@ Optional<Recipes> findByIdWithTags(@Param("uuid") String uuid);
 
 
     // userId 기준, 각 유저의 가장 최신 public 레시피
+    @EntityGraph("member")
     @Query(value = " select r from Recipes r\n" +
+                   " join fetch r.member m\n" +
                    " where r.deleted = false and r.postStatus = 'PUBLIC'\n" +
-                   " and r.member.userId in :userIds\n" +
+                   " and m.userId in :userIds\n" +
                    " and r.insertTime = ( select max(r2.insertTime) from Recipes r2" +
                    " where r2.deleted = false and r2.postStatus = 'PUBLIC' and r2.member = r.member)" +
                    " order by r.insertTime desc")

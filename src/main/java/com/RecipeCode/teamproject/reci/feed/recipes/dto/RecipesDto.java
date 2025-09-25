@@ -19,6 +19,12 @@ public class RecipesDto {
     private String uuid;            // PK
     private String userEmail;       // member FK
     private String userId;
+
+    private String nickname;      // 조회용 추가
+    private String userLocation;  // 추가
+    private String profileImageUrl; // 추가
+
+
     private String recipeTitle;
     private String recipeIntro;
     private String recipeCategory;
@@ -41,6 +47,8 @@ public class RecipesDto {
 
     @JsonProperty("isLike")
     private boolean liked;
+    @JsonProperty("isFollowingOwner")
+    private boolean followingOwner;
 
     private LocalDateTime insertTime;
     private LocalDateTime updateTime;

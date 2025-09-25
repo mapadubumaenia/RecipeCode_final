@@ -9,6 +9,7 @@ import com.RecipeCode.teamproject.reci.auth.notisetting.entity.NotiSetting;
 import com.RecipeCode.teamproject.reci.auth.notisetting.repository.NotiSettingRepository;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.auth.service.MemberService;
+import com.RecipeCode.teamproject.reci.function.follow.service.FollowService;
 import com.RecipeCode.teamproject.reci.mypage.service.MyPageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +32,7 @@ import java.util.Map;
 public class MyPageViewController {
 
     private final NotiSettingRepository notiSettingRepository;
+    private final FollowService followService;
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final MemberTagService memberTagService;
@@ -48,11 +50,16 @@ public class MyPageViewController {
         String email = principal.getUsername(); // SecurityUserDto의 username = userEmail
         Member user = memberService.getByUserEmail(email);
         MemberDto memberDto = mapStruct.toDto(user);
+
         // 3) 화면에 뿌리기
         model.addAttribute("user", memberDto);
 
-        // 4) JS에서 필요하면 바로 씀 (예: mypage-feed.js)
+        long followingCount = followService.countFollowingOf(user);
+        long followersCount = followService.countFollowersOf(user);
+
          model.addAttribute("currentUserEmail", memberDto.getUserEmail());
+         model.addAttribute("followingCount", followingCount);
+         model.addAttribute("followersCount", followersCount);
         return "profile/mypage_all";
     }
 

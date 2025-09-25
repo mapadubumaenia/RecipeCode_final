@@ -41,7 +41,9 @@
 .channelInfo{display:flex;gap:6px}
 #btnLike.active { color: darkred; font-weight: bold; }
 .actions{display:flex;gap:10px;flex-wrap:wrap}
-
+.followbtn-sm { border:1px solid var(--text,#111); padding:6px 12px; border-radius:999px; cursor:pointer; }
+.followbtn-sm.is-following { background:var(--text,#111); color:var(--bg,#fff); }
+.followbtn-sm[aria-disabled="true"] { opacity:.6; cursor:not-allowed; }
 
 /* 접기 박스 & 댓글/대댓글 */
 .desc{background:var(--card); border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-top:12px}
