@@ -51,9 +51,6 @@
     <div class="topbar">
       <div class="row">
         <div class="grow">
-          <form action="<c:url value='/search'/>" method="get" style="display:flex;gap:8px">
-            <input name="q" class="search-input" placeholder="사이트 검색…" style="min-width:280px">
-          </form>
         </div>
         <sec:authorize access="isAuthenticated()">
           <span class="muted"><sec:authentication property="principal.nickname"/> 님</span>
