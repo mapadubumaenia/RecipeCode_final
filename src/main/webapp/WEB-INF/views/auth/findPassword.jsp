@@ -34,7 +34,7 @@
                     <input class="input" type="email" id="email" name="email" placeholder="you@example.com" required>
                 </div>
                 <div class="actions">
-                    <button class="btn primary" type="submit">인증코드 발송</button>
+                    <button class="btn primary" id="codebtn" type="submit">인증코드 발송</button>
                 </div>
             </form>
         </article>
@@ -46,20 +46,35 @@
                     <label for="code">인증코드</label>
                     <input class="input" type="text" id="code" name="code" required>
                 </div>
+                <!-- 비밀번호 -->
                 <div class="field">
-                    <label for="newPw">새 비밀번호</label>
-                    <input class="input" type="password" id="newPw" name="newPassword" required>
+                    <label for="pw">비밀번호</label>
+                    <div class="input-wrap">
+                        <input class="input" type="password" id="pw" name="password" placeholder="8자 이상, 대/소문자+숫자 조합 권장" minlength="8" required />
+                        <button class="toggle" type="button" aria-label="비밀번호 표시" data-target="#pw">👁️</button>
+                    </div>
+                    <div class="strength" aria-hidden="true"><span id="pwBar"></span></div>
                 </div>
+                <!-- 비밀번호 확인 -->
                 <div class="field">
-                    <label for="newPwConfirm">비밀번호 확인</label>
-                    <input class="input" type="password" id="newPwConfirm" name="newPasswordConfirm" required>
+                    <label for="pw2">비밀번호 확인</label>
+                    <div class="input-wrap">
+                        <input class="input" type="password" id="pw2" placeholder="다시 입력" required />
+                        <button class="toggle" type="button" aria-label="비밀번호 표시" data-target="#pw2">👁️</button>
+                    </div>
+                    <div class="hint" id="pwMatchHint"></div>
+                    <div class="error" id="formError" aria-live="polite"></div>
                 </div>
+
                 <div class="actions">
-                    <button class="btn primary" type="submit">비밀번호 재설정</button>
+                    <button class="btn primary" id="savebtn" type="submit">비밀번호 재설정</button>
                 </div>
             </form>
         </article>
     </section>
 </main>
+<%--  JS  --%>
+<script src="<c:url value='/js/auth/findPassword.js'/>"></script>
+<script src="<c:url value='/js/auth/password.js'/>"></script>
 </body>
 </html>
