@@ -7,6 +7,7 @@ import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.service.MemberService;
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.function.follow.dto.FollowDto;
+import com.RecipeCode.teamproject.reci.function.follow.repository.FollowRepository;
 import com.RecipeCode.teamproject.reci.function.follow.service.FollowService;
 import com.RecipeCode.teamproject.reci.function.follow.service.ProfileFeedService;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +22,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/follow")
 @RequiredArgsConstructor
 public class FollowViewController {
 
+    private final FollowRepository  followRepository;
     private final FollowService followService;
     private final MemberService memberService;
     private final ProfileFeedService profileFeedService;
@@ -103,18 +107,26 @@ public class FollowViewController {
             model.addAttribute("message", "존재하지 않는 사용자입니다.");
             return "error/404";
         }
+        long followingCount = followService.countFollowingOf(owner);
+        long followersCount = followService.countFollowersOf(owner);
+
+
+        // 오너-뷰어 관계
+        boolean isSelf = viewer.getUserEmail().equals(owner.getUserEmail());
+        boolean isFollowingOwner = !isSelf &&
+                followRepository.existsByFollowerAndFollowing(viewer, owner);
 
         MemberDto ownerDto = mapStruct.toDto(owner);
-//        var followers  = followService.getUserFollowerList(owner.getUserId(), pageable);
-//        var followings = followService.getUserFollowingList(owner.getUserId(), pageable);
 
         model.addAttribute("profileOwner", ownerDto);
-        model.addAttribute("profileOwnerEmail", owner.getUserEmail());
-        model.addAttribute("profileOwnerId", owner.getUserId());
-//        model.addAttribute("followers", followers.getContent());
-//        model.addAttribute("followersHasNext", followers.hasNext());
-//        model.addAttribute("followings", followings.getContent());
-//        model.addAttribute("followingsHasNext", followings.hasNext());
+        model.addAttribute("profileOwnerEmail", ownerDto.getUserEmail());
+        model.addAttribute("profileOwnerId", ownerDto.getUserId());
+
+        model.addAttribute("isSelf", isSelf);
+        model.addAttribute("isFollowingOwner", isFollowingOwner);
+
+        model.addAttribute("followingCount", followingCount);
+        model.addAttribute("followersCount", followersCount);
         return "function/Follow/follow_network";
     }
 

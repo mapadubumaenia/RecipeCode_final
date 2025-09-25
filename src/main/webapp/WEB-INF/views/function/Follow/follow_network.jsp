@@ -60,7 +60,7 @@
   </header>
 
   <!-- 프로필 카드 -->
-  <section class="card profile-card">
+  <section class="card profile-card flex-box">
     <div class="avatar-lg">
       <c:if test="${not empty profileOwner.profileImageUrl}">
         <img src="${profileOwner.profileImageUrl}" alt="${profileOwner.nickname}" class="avatar-lg"/>
@@ -68,23 +68,27 @@
     </div>
     <div class="profile-info">
       <div class="profile-top">
-        <h2 class="profile-name">${profileOwnerId}</h2>
-        <a href="/mypage/edit" class="edit-profile">✎ Edit</a>
+        <h3 class="profile-name">${profileOwnerId} ${profileOwner.userLocation}</h3>
       </div>
-<%--      <div class="profile-actions btn-none">--%>
-<%--        <a class="followbtn-md" href="/mypage/followers">--%>
-<%--          Followers &lt;%&ndash; ${profileOwner.followingCount} &ndash;%&gt;--%>
-<%--        </a>--%>
-<%--        <a class="followbtn-md" href="/mypage/following">--%>
-<%--          Following &lt;%&ndash; ${profileOwner.followingCount} &ndash;%&gt;--%>
-<%--        </a>--%>
-<%--      </div>--%>
+      <div class="profile-actions btn-none">
+          <span>Followers ${followersCount} </span>
+          <span>Following ${followingCount}</span>
+      </div>
+    </div>
+    <div class="rightBox">
+    <c:if test = "${!isSelf}">
+      <button class="follow-btn ${isFollowingOwner ? 'is-following' : ''}"
+              data-email="${profileOwnerEmail}"
+              data-following="${isFollowingOwner}"
+              data-uid="${profileOwnerId}"
+      >${isFollowingOwner ? 'UnFollow' : 'Follow'}</button>
+    </c:if>
     </div>
   </section>
 
   <!-- (옵션) 팔로잉 사용자 검색 -->
   <div class="search-bar search-following">
-    <input type="text" id="searchInput" placeholder="팔로잉한 사용자 아이디 검색 (@username)" >
+    <input type="text" id="searchInput" placeholder="유저 아이디 검색 (@username)" >
     <button id="searchBtn" class="btn">Search</button>
   </div>
   <div id="searchResult"></div>
@@ -120,14 +124,13 @@
 
 <!-- FAQ 플로팅 버튼 -->
 <a id="faq-btn" class="faq-btn" href="<c:url value="faq" />">FAQ</a>
+
 <script>
   const ctx = "${pageContext.request.contextPath}";
-</script>
-<%--<script src="${pageContext.request.contextPath}/js/notifs.js"></script>--%>
-<%--<script src="${pageContext.request.contextPath}/js/position-fixed.js"></script>--%>
-<script>
   const profileOwnerId = "${profileOwnerId}";
   const profileOwnerEmail = "${profileOwnerEmail}";
+  const viewerEmail = "${currentUserEmail}";
+  const isSelf = ${isSelf}; // true / false 그대로 출력
 </script>
 <script src="${pageContext.request.contextPath}/js/follow/network-searchResult.js"></script>
 <script src="${pageContext.request.contextPath}/js/follow/network-view.js"></script>
