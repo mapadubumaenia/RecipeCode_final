@@ -24,20 +24,20 @@
     function fmtDate(v) {
         if (!v) return '';
         try {
-            var d = new Date(v);
+            const d = new Date(v);
             if (isNaN(d.getTime())) return '';
-            var y = d.getFullYear();
-            var m = String(d.getMonth() + 1).padStart(2, '0');
-            var day = String(d.getDate()).padStart(2, '0');
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
             return y + '-' + m + '-' + day;
         } catch { return ''; }
     }
     function attachLightYouTube(container){
         if (!container) return;
-        var src = container.getAttribute('data-yt-src');
+        const src = container.getAttribute('data-yt-src');
         if (!src) return;
-        var iframe = document.createElement('iframe');
-        var finalSrc = src + (src.includes('?') ? '&' : '?') + 'autoplay=1&mute=0';
+        const iframe = document.createElement('iframe');
+        const finalSrc = src + (src.includes('?') ? '&' : '?') + 'autoplay=1&mute=0';
         iframe.src = finalSrc;
         iframe.title = 'YouTube video player';
         iframe.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
@@ -54,21 +54,21 @@
 
     ready(function(){
         // DOM refs
-        var $q        = document.getElementById('q');
-        var $sort     = document.getElementById('sortSelect');
-        var $btn      = document.getElementById('btnSearch');
-        var $list     = document.getElementById('results');
-        var $sentinel = document.getElementById('resultsSentinel');
-        var $trending = document.getElementById('trending'); // 없으면 무시
+        const $q        = document.getElementById('q');
+        const $sort     = document.getElementById('sortSelect');
+        const $btn      = document.getElementById('btnSearch');
+        const $list     = document.getElementById('results');
+        const $sentinel = document.getElementById('resultsSentinel');
+        const $trending = document.getElementById('trending'); // 없으면 무시
 
         // 상태
-        var state = { q: '', sort: 'new', next: null, loading: false, size: 5 };
+        const state = { q: '', sort: 'new', next: null, loading: false, size: 5 };
 
         // URL → 상태
         function seedFromUrl(){
-            var params = new URLSearchParams(window.location.search);
-            var qParam = params.get('q') || '';
-            var sortParam = params.get('sort') || 'new';
+            const params = new URLSearchParams(window.location.search);
+            const qParam = params.get('q') || '';
+            const sortParam = params.get('sort') || 'new';
             if ($q)    $q.value = qParam;
             if ($sort) $sort.value = sortParam;
             state.q = qParam.trim();
@@ -78,33 +78,39 @@
 
         // 상태 → URL
         function syncUrl(){
-            var params = new URLSearchParams();
+            const params = new URLSearchParams();
             if (state.q)    params.set('q', state.q);
             if (state.sort) params.set('sort', state.sort);
-            var qs = params.toString();
-            var url = CTX + '/search' + (qs ? ('?' + qs) : '');
+            const qs = params.toString();
+            const url = CTX + '/search' + (qs ? ('?' + qs) : '');
             history.replaceState(null, '', url);
         }
 
-        // 아이템 렌더 (영상/유튜브/이미지 + 태그)
+        // 아이템 렌더 (영상/유튜브/이미지 + 태그 + 작성자 링크)
         function renderItem(it){
             try {
-                var title = esc(it.title || '');
-                var nick  = esc(it.authorNick || '');
-                var date  = fmtDate(it.createdAt);
-                var likes = (it.likes != null) ? it.likes : 0;
-                var cmts  = (it.comments != null) ? it.comments : 0;
-                var views = (it.views != null) ? it.views : 0;
+                const title = esc(it.title || '');
+                const created = fmtDate(it.createdAt);
+                const likes = (it.likes != null) ? it.likes : 0;
+                const cmts  = (it.comments != null) ? it.comments : 0;
+                const views = (it.views != null) ? it.views : 0;
 
-                var idOk  = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(it.id || '');
-                var href  = idOk ? (CTX + '/recipes/' + encodeURIComponent(it.id)) : '#';
+                // 작성자 id → 클린 + 링크
+                const authorRaw = it.authorId || it.authorNick || '';
+                const cleanId = (authorRaw && authorRaw.startsWith('@')) ? authorRaw.substring(1) : (authorRaw || '');
+                const nick = esc(cleanId);
+                const profileHref = cleanId ? (CTX + '/follow/profile/' + encodeURIComponent(cleanId)) : '#';
+
+                // 상세 링크 유효성
+                const idOk  = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(it.id || '');
+                const href  = idOk ? (CTX + '/recipes/' + encodeURIComponent(it.id)) : '#';
 
                 // 미디어
-                var kind = it.mediaKind || 'image';
-                var mediaHtml = '';
+                const kind = it.mediaKind || 'image';
+                let mediaHtml = '';
                 if (kind === 'youtube') {
-                    var poster = it.poster || (it.thumbUrl || 'https://via.placeholder.com/1200x800?text=');
-                    var src    = it.mediaSrc || '';
+                    const poster = it.poster || (it.thumbUrl || 'https://via.placeholder.com/1200x800?text=');
+                    const src    = it.mediaSrc || '';
                     mediaHtml =
                         '<div class="media aspect light-yt" role="button" tabindex="0" ' +
                         'aria-label="' + title + ' 동영상 재생" data-yt-src="' + esc(src) + '">' +
@@ -112,14 +118,14 @@
                         '<div class="play-badge">▶</div>' +
                         '</div>';
                 } else if (kind === 'video') {
-                    var vsrc   = it.mediaSrc || '';
-                    var poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
+                    const vsrc   = it.mediaSrc || '';
+                    const poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
                     mediaHtml =
                         '<div class="media aspect">' +
                         '<video controls preload="metadata"' + poster + ' src="' + esc(vsrc) + '"></video>' +
                         '</div>';
                 } else {
-                    var img = (it.mediaSrc && it.mediaSrc.length > 0)
+                    const img = (it.mediaSrc && it.mediaSrc.length > 0)
                         ? it.mediaSrc
                         : ((it.thumbUrl && it.thumbUrl.length > 0) ? it.thumbUrl : 'https://via.placeholder.com/1200x800?text=');
                     mediaHtml =
@@ -129,29 +135,29 @@
                 }
 
                 // 태그
-                var tagsHtml = '';
+                let tagsHtml = '';
                 if (Array.isArray(it.tags) && it.tags.length > 0) {
-                    var chips = [];
-                    for (var i = 0; i < it.tags.length; i++) {
-                        var t = it.tags[i];
+                    const chips = [];
+                    for (let i = 0; i < it.tags.length; i++) {
+                        const t = it.tags[i];
                         if (t == null) continue;
-                        var txt = esc(String(t));
+                        const txt = esc(String(t));
                         if (!txt) continue;
                         chips.push('<span class="tag">#' + txt + '</span>');
                     }
                     if (chips.length) tagsHtml = '<div class="tags">' + chips.join('') + '</div>';
                 }
 
-                var el = document.createElement('article');
+                const el = document.createElement('article');
                 el.className = 'card p-16 post';
                 el.innerHTML =
                     '<div class="post-head">' +
                     '<div class="avatar-ss"><img src="" alt=""></div>' +
                     '<div class="post-info">' +
-                    '<div class="post-id">@' + nick + '</div>' +
-                    '<div class="muted">' + (date || '') + '</div>' +
+                    '<div class="post-id">' + (cleanId ? ('<a class="author-link" href="' + profileHref + '">@' + nick + '</a>') : '') + '</div>' +
+                    '<div class="muted">' + (created || '') + '</div>' +
                     '</div>' +
-                    '<button class="followbtn-sm" data-user-id="" data-following="false">Follow</button>' +
+                    '<button class="followbtn-sm" data-user-id="' + (cleanId ? ('@' + esc(cleanId)) : '') + '" data-following="false">Follow</button>' +
                     '</div>' +
                     mediaHtml +
                     (idOk ? ('<a class="post-link title" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">') +
@@ -176,15 +182,15 @@
 
         // 트렌딩 (있을 경우)
         function renderTrendingItem(it){
-            var wrap = document.createElement('article');
-            wrap.className = 'card p-12 trend-card';
+            const wrap = document.getElementById('trending');
+            if (!wrap) return;
 
-            var kind  = it.mediaKind || 'image';
-            var title = esc(it.title || '');
-            var mediaHtml = '';
+            const title = esc(it.title || '');
+            const kind  = it.mediaKind || 'image';
+            let mediaHtml = '';
             if (kind === 'youtube') {
-                var poster = it.poster || (it.thumbUrl || 'https://via.placeholder.com/1200x800?text=');
-                var src    = it.mediaSrc || '';
+                const poster = it.poster || (it.thumbUrl || 'https://via.placeholder.com/1200x800?text=');
+                const src    = it.mediaSrc || '';
                 mediaHtml =
                     '<div class="media aspect light-yt" role="button" tabindex="0" ' +
                     'aria-label="' + title + ' 동영상 재생" data-yt-src="' + esc(src) + '">' +
@@ -192,14 +198,14 @@
                     '<div class="play-badge">▶</div>' +
                     '</div>';
             } else if (kind === 'video') {
-                var vsrc   = it.mediaSrc || '';
-                var poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
+                const vsrc   = it.mediaSrc || '';
+                const poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
                 mediaHtml =
                     '<div class="media aspect">' +
                     '<video controls preload="metadata"' + poster + ' src="' + esc(vsrc) + '"></video>' +
                     '</div>';
             } else {
-                var img = (it.mediaSrc && it.mediaSrc.length > 0)
+                const img = (it.mediaSrc && it.mediaSrc.length > 0)
                     ? it.mediaSrc
                     : ((it.thumbUrl && it.thumbUrl.length > 0) ? it.thumbUrl : 'https://via.placeholder.com/1200x800?text=');
                 mediaHtml =
@@ -208,7 +214,9 @@
                     '</div>';
             }
 
-            wrap.innerHTML =
+            const el = document.createElement('article');
+            el.className = 'card p-12 trend-card';
+            el.innerHTML =
                 mediaHtml +
                 '<div><div class="trend-title">' + title + '</div></div>' +
                 '<div class="actions">' +
@@ -216,11 +224,11 @@
                 '<button class="act-btn">💬 ' + (it.comments || 0) + '</button>' +
                 '</div>';
 
-            $trending.appendChild(wrap);
+            wrap.appendChild(el);
         }
 
         function renderEmpty(q) {
-            var msg = q ? '“' + esc(q) + '” 에 대한 결과가 없어요.' : '검색어를 입력해 보세요.';
+            const msg = q ? '“' + esc(q) + '” 에 대한 결과가 없어요.' : '검색어를 입력해 보세요.';
             $list.innerHTML =
                 '<div class="empty">' +
                 '<div class="emoji">🔎</div>' +
@@ -233,10 +241,10 @@
         async function fetchTrending() {
             if (!$trending) return; // 섹션 없으면 스킵
             try {
-                var url = CTX + '/api/trending?size=8';
-                var res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                const url = CTX + '/api/trending?size=8';
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
                 if (!res.ok) return;
-                var data = await res.json();
+                const data = await res.json();
                 $trending.innerHTML = '';
                 (data.items || []).forEach(renderTrendingItem);
             } catch (e) {
@@ -248,15 +256,15 @@
             if (state.loading) return;
             state.loading = true;
 
-            var url = CTX + '/api/search?q=' + encodeURIComponent(state.q) +
+            let url = CTX + '/api/search?q=' + encodeURIComponent(state.q) +
                 '&sort=' + encodeURIComponent(state.sort) +
                 '&size=' + state.size;
             if (!initial && state.next) url += '&after=' + encodeURIComponent(state.next);
 
             try {
-                var res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
                 if (!res.ok) { state.loading = false; return; }
-                var data = await res.json();
+                const data = await res.json();
 
                 if (initial) $list.innerHTML = '';
                 (data.items || []).forEach(renderItem);
@@ -286,12 +294,12 @@
 
         // 라이트 유튜브 위임 이벤트
         document.addEventListener('click', function(e){
-            var el = e.target.closest('.light-yt[data-yt-src]');
+            const el = e.target.closest('.light-yt[data-yt-src]');
             if (el) attachLightYouTube(el);
         });
         document.addEventListener('keydown', function(e){
             if (e.key !== 'Enter' && e.key !== ' ') return;
-            var el = document.activeElement;
+            const el = document.activeElement;
             if (el && el.classList && el.classList.contains('light-yt') && el.hasAttribute('data-yt-src')) {
                 e.preventDefault();
                 attachLightYouTube(el);
@@ -300,7 +308,7 @@
 
         // 무한 스크롤
         if ($sentinel) {
-            var io = new IntersectionObserver(function(entries){
+            const io = new IntersectionObserver(function(entries){
                 entries.forEach(function(entry){
                     if (entry.isIntersecting && state.next) fetchOnce(false);
                 });

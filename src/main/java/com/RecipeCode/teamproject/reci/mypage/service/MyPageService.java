@@ -92,4 +92,25 @@ public class MyPageService {
         });
     }
 
+    // 나를 팔로우 하는 사용자들의 최신 레시피
+    @Transactional
+    public Slice<RecipesDto> getFollowersLatestFeed(String viewerEmail, Pageable pageable) {
+
+        List<String> userIds = followRepository.findFollowerUserIds(viewerEmail);
+        if(userIds.isEmpty()) return emptySlice(pageable);
+
+        Page<Recipes> page = recipesRepository.findLatestPublicPerUser(userIds, pageable);
+
+        // 좋아요 표시 동기화
+        List<String> uuids = page.getContent().stream().map(Recipes::getUuid).toList();
+        List<String> likedUuids = uuids.isEmpty() ? List.of()
+                : recipesLikesRepository.findLikedRecipesUuids(viewerEmail, uuids);
+
+        return page.map(r -> {
+            RecipesDto dto = recipeMapStruct.toRecipeDto(r);
+            dto.setLiked(likedUuids.contains(r.getUuid()));
+            return dto;
+        });
+    }
+
 }

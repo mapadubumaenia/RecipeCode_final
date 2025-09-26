@@ -1,89 +1,143 @@
-/* =========================
-   알림 (Notification)
-   ========================= */
+/* 10) 알림(Notif) 컴포넌트 */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
 .notif-wrap {
     position: relative;
-    display: inline-block;
 }
 
 .notif-btn {
-    background: none;
-    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 20px;
-    position: relative;
-    color: var(--text);
-    transition: transform 0.15s;
-}
-
-.notif-btn:hover {
-    transform: scale(1.1);
-}
-
-/* 알림 뱃지 (안 읽은 개수) */
-#noti-count {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background: var(--danger); /* 프로젝트 danger 컬러 사용 */
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 20px;
-    min-width: 18px;
-    text-align: center;
-    line-height: 1.2;
-}
-
-/* 알림 드롭다운 */
-.notif-dropdown {
-    position: absolute;
-    right: 0;
-    top: 36px;
-    width: 280px;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
     box-shadow: var(--shadow);
-    max-height: 320px;
-    overflow-y: auto;
+    position: relative;
+}
+.notif-btn:hover {
+    background: #f3f4f6;
+}
+
+/* 빨간 dot */
+.notif-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--danger);
+    box-shadow: 0 0 0 2px #fff;
+    display: none;
+}
+.notif-btn.has-new .notif-dot {
+    display: block;
+}
+
+/* 드롭다운 패널 */
+.notif-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(420px, 92vw);
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 8px;
     z-index: 1000;
     display: none;
 }
-
-.notif-dropdown ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+.notif-panel.open {
+    display: block;
 }
 
-.notif-dropdown li {
-    padding: 10px 12px;
-    font-size: 14px;
-    color: var(--text);
-    border-bottom: 1px solid var(--line);
-    cursor: pointer;
-    transition: background 0.2s;
+/* 헤더 & 푸터 */
+.notif-head,
+.notif-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+}
+.notif-foot {
+    border-bottom: none;
+    border-top: 1px solid var(--border);
 }
 
-.notif-dropdown li:hover {
-    background: var(--chip);
+/* 목록 */
+.notif-list {
+    display: grid;
+    gap: 8px;
+    max-height: 360px;
+    overflow: auto;
+    padding: 8px 0;
 }
-
-/* 안 읽은 알림 강조 */
-.notif-dropdown li.unread {
-    font-weight: 600;
-    background: #f9fafb;
-}
-
-/* 읽은 알림 */
-.notif-dropdown li.read {
-    font-weight: 400;
+.notif-empty {
     color: var(--muted);
+    text-align: center;
+    padding: 12px 0;
 }
 
-/* 숨김 처리 */
-.hidden {
-    display: none;
+/* 아이템 */
+.notif-item {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+    cursor: pointer;
+}
+.notif-item.unread {
+    background: rgba(96, 165, 250, 0.08);
+    border-color: var(--brand);
+}
+.notif-item.read {
+    opacity: 0.85;
+}
+
+.notif-item .ic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--tag);
+    font-size: 18px;
+    color: var(--brand);
+}
+.notif-item .msg {
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+}
+.notif-item .time {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.notif-item button {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.notif-item button:hover {
+    background: var(--brand);
+    color: var(--wtext);
 }

@@ -12,6 +12,8 @@ import com.RecipeCode.teamproject.reci.feed.commentslikes.repository.CommentsLik
 import com.RecipeCode.teamproject.reci.feed.recipes.entity.Recipes;
 import com.RecipeCode.teamproject.reci.feed.recipes.repository.RecipesRepository;
 import com.RecipeCode.teamproject.reci.function.commentsReport.repository.CommentReportRepository;
+import com.RecipeCode.teamproject.reci.function.notification.enums.NotificationEvent;
+import com.RecipeCode.teamproject.reci.function.notification.service.NotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -34,6 +36,7 @@ public class CommentsService {
     private final MapStruct mapStruct;
     private final ErrorMsg errorMsg;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
+    private final NotificationService notificationService;
 
 
     // 댓글 수 세기
@@ -110,6 +113,17 @@ public class CommentsService {
         recipesRepository.save(recipe);
 
         log.info("댓글 저장 완료, commentsId={}", saved.getCommentsId());
+
+        // 알림 생성
+        notificationService.createNotification(
+                comment.getMember().getUserEmail(),                 //댓글 작성자
+                comment.getRecipes().getMember().getUserEmail(),    //레시피 작성자
+                NotificationEvent.COMMENT,                          //이벤트 타입
+                "COMMENT",                                          //서비스 타입
+                String.valueOf(comment.getCommentsId())             //소스 ID
+        );
+
+
     }
 
 

@@ -44,7 +44,7 @@ function createFeedArticle(recipe, currentUserEmail) {
     <div class="post-head">
       <div class="avatar-ss"><img src="${recipe.profileImageUrl || ''}" alt=""></div>
       <div class="post-info">
-        <div class="post-id">${recipe.userId}</div>
+        <div class="post-id"><a href="/follow/network/${recipe.userId}">${recipe.userId}</a></div>
         <div class="muted">${timeAgo(recipe.insertTime)} • ${recipe.userLocation || '부산•대한민국'}</div>
       </div>
     </div>
@@ -103,7 +103,7 @@ function createFollowArticle(recipe) {
     <div class="avatar-ss"><img src="${avatar}" alt="${userId}"></div>
       <div class="leftBox">
         <div class="post-info">
-        <div class="post-id">${userId}</div>
+        <div class="post-id"><a href="/follow/network/${userId}">${userId}</a></div>
         <div class="muted">${stamp} • ${place}</div>
       </div>
       </div>

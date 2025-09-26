@@ -55,14 +55,14 @@ public class RecipesLikesService {
             recipes.setLikeCount(recipes.getLikeCount() + 1);
             liked = true;
 
-//            // 알림 생성
-//            notificationService.createNotification(
-//                    like.getMember().getUserEmail(),                 // 좋아요 누른 사람
-//                    like.getRecipes().getMember().getUserEmail(),    // 레시피 작성자
-//                    NotificationEvent.LIKE,                          // 이벤트 타입 (LIKE)
-//                    "LIKE",                                          // 소스 타입
-//                    String.valueOf(like.getLikeId())                 // 소스 ID
-//            );
+            // 알림 생성
+            notificationService.createNotification(
+                    like.getMember().getUserEmail(),                 // 좋아요 누른 사람
+                    like.getRecipes().getMember().getUserEmail(),    // 레시피 작성자
+                    NotificationEvent.LIKE,                          // 이벤트 타입 (LIKE)
+                    "LIKE",                                          // 소스 타입
+                    String.valueOf(like.getLikeId())                 // 소스 ID
+            );
 
         }
 

@@ -1,12 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
     const feedContainer = document.querySelector("#feedContainer");
-    const userId = feedContainer.dataset.user; // (변경됨) JSP에서 data-userid로 세팅
+    const userId = feedContainer.dataset.user;
     let page = 0;
     let isLast = false;
     let isLoading = false;
 
     function getApiUrl() {
-        // (변경됨) userEmail → userId
         return `/api/profile/${userId}/recipes?page=${page}&size=5`;
     }
 
@@ -42,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// 공유 버튼 이벤트 (재활용)
+// 공유 버튼 이벤트
 document.addEventListener("click", (e) => {
     if (e.target.classList.contains("share-btn")) {
         const uuid = e.target.dataset.uuid;
