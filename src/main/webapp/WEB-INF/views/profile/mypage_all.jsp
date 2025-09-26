@@ -32,7 +32,7 @@
         <div class="flex-box">
             <div class="flex-row">
                 <h1 class="page-title">Profile</h1>
-                <a href="${pageContext.request.contextPath}/feed/main" class="float-text">home</a>
+                <a href="${pageContext.request.contextPath}/" class="float-text">home</a>
             </div>
 
             <!-- ▶ 알림 + 로그아웃 -->
@@ -103,13 +103,6 @@
         </div>
     </section>
 
-    <!-- (옵션) 팔로잉 사용자 검색 -->
-<%--        <div class="search-bar search-following">--%>
-<%--            <input type="text" id="searchInput" placeholder="팔로잉한 사용자 아이디 검색 (@username)" >--%>
-<%--            <button id="searchBtn" class="btn">Search</button>--%>
-<%--        </div>--%>
-<%--        <div id="searchResult"></div>--%>
-
     <!-- 내 피드 -->
     <section class="container layout">
         <aside id="myposts" class="feed-list">
@@ -131,8 +124,27 @@
             </article>
         </aside>
 
+
         <!-- 팔로우/팔로잉 -->
         <aside id="myfollowing" class="feed-list sidebar">
+            <div class="panel mb-8" id="airBox" data-ctx="${ctx}" data-user-sido="${user.userLocation}">
+                <h3>🌫️오늘의 피크닉 지수</h3>
+                <div class="airview card p-12">
+                    <div class="air-row">
+                        <label for="sido">지역</label>
+                        <select id="sido" class="air-select">
+                            <option>서울</option><option>부산</option><option>대구</option>
+                            <option>인천</option><option>광주</option><option>대전</option>
+                            <option>울산</option><option>세종</option><option>경기</option>
+                            <option>강원</option><option>충북</option><option>충남</option>
+                            <option>전북</option><option>전남</option><option>경북</option>
+                            <option>경남</option><option>제주</option>
+                        </select>
+                    </div>
+                    <div id="airText" class="air-text">불러오는 중…</div>
+                </div>
+            </div>
+
             <h2 class="section-title m-0">New</h2>
             <!-- 팔로우 탭 -->
             <nav class="tabs">
@@ -149,15 +161,21 @@
 
 <!-- FAQ 플로팅 버튼 -->
 <a id="faq-btn" class="faq-btn" href="<c:url value="faq" />">FAQ</a>
+<div class="to-topbox">
+    <button id="backToTop" class="to-top" aria-label="맨 위로">Top</button>
+</div>
+
 <%--<script src="${pageContext.request.contextPath}/js/notifs.js"></script>--%>
-<%--<script src="${pageContext.request.contextPath}/js/position-fixed.js"></script>--%>
 <script>
     // 전역은 여기 한 번만
     window.ctx = "${pageContext.request.contextPath}";
     window.currentUserEmail = "${currentUserEmail}";
 </script>
+<script src="${pageContext.request.contextPath}/js/mypage/airpanle.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-feed.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-sidebar.js"></script>
+<script src="${pageContext.request.contextPath}/js/mypage/position-fixed.js"></script>
+
 </body>
 </html>
