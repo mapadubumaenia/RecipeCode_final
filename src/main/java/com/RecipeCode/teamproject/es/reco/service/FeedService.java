@@ -97,17 +97,13 @@ public class FeedService {
             items.add(new RecipeCardDto(
                     d.getId(),
                     nvl(d.getTitle()),
-                    nvl(d.getAuthorNick()),
+                    nvl(d.getAuthorId()),   // ✅ 여기!
                     nvlLong(d.getLikes()),
                     (d.getCreatedAt() == null) ? "" : d.getCreatedAt().toString(),
                     (d.getTags() == null) ? List.of() : d.getTags(),
                     it.getScore(),
-                    // 기존 thumbUrl(레거시/폴백) 유지
                     nvl(d.getThumbUrl()),
-                    // 👇 신규: 라이트 유튜브/비디오/이미지 메타
-                    media.kind,
-                    media.src,
-                    media.poster
+                    media.kind, media.src, media.poster
             ));
         }
 
@@ -116,7 +112,6 @@ public class FeedService {
         return new FeedPageDto(all.size(), items, next);
     }
 
-    // ---- HOT 매핑 util ----
     @SuppressWarnings("unchecked")
     private FeedPageDto mapHotToDto(Map<String, Object> hot) {
         List<Map<String, Object>> list =
@@ -126,7 +121,12 @@ public class FeedService {
         for (Map<String, Object> m : list) {
             String id = Objects.toString(m.get("id"), "");
             String title = Objects.toString(m.get("title"), "");
-            String authorNick = Objects.toString(m.get("authorNick"), "");
+
+            // ✅ authorId 우선, 없으면 authorNick
+            String authorId  = Objects.toString(m.getOrDefault("authorId", ""), "");
+            String authorNick = Objects.toString(m.getOrDefault("authorNick", ""), "");
+            String authorForDisplay = !authorId.isBlank() ? authorId : authorNick;
+
             long likes = coerceLong(m.get("likes"));
             String createdAt = (m.get("createdAt") == null) ? "" : m.get("createdAt").toString();
 
@@ -137,24 +137,18 @@ public class FeedService {
             }
 
             String thumbUrl = Objects.toString(m.getOrDefault("thumbUrl", ""), "");
-
-            // 🔥 검색 서비스 응답에 media*가 포함되어 있으면 사용, 없으면 로컬에서 유추 불가 → 이미지 폴백
             String mediaKind = Objects.toString(m.getOrDefault("mediaKind", "image"), "image");
             String mediaSrc  = Objects.toString(m.getOrDefault("mediaSrc", thumbUrl), thumbUrl);
             String poster    = Objects.toString(m.getOrDefault("poster", thumbUrl), thumbUrl);
 
+            // ✅ 표기 필드에 authorId(또는 대체) 주입
             items.add(new RecipeCardDto(
-                    id, title, authorNick, likes, createdAt, tags, 0.0, thumbUrl,
+                    id, title, authorForDisplay, likes, createdAt, tags, 0.0, thumbUrl,
                     mediaKind, mediaSrc, poster
             ));
         }
-
-        int total = (hot.get("total") instanceof Number)
-                ? ((Number) hot.get("total")).intValue()
-                : items.size();
-
+        int total = (hot.get("total") instanceof Number) ? ((Number) hot.get("total")).intValue() : items.size();
         String next = (hot.get("next") == null) ? null : Objects.toString(hot.get("next"), null);
-
         return new FeedPageDto(total, items, next);
     }
 

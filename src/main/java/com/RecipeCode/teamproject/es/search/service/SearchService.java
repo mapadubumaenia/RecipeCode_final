@@ -109,7 +109,6 @@ public class SearchService {
             m.put("title", d.getTitle() != null ? d.getTitle() : "");
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
             m.put("authorId",  d.getAuthorId()  != null ? d.getAuthorId()  : "");
-            m.put("authorNick", d.getAuthorNick() != null ? d.getAuthorNick() : "");
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("score", h.getScore());
@@ -222,19 +221,26 @@ public class SearchService {
         }
 
         if (qv.startsWith("@") && qv.length() > 1) {
-            String nick = qv.substring(1).trim();
-            return Query.of(b -> b.term(t -> t.field("authorNick").value(nick)));
+            String tokenRaw = qv.substring(1).trim(); // 사용자가 친 @제거한 코어
+            String tokenWithAt = "@" + tokenRaw;      // ES에 저장된 값(@ 포함)
+
+            // 둘 다 시도 (저장 규칙 바뀌더라도 안전)
+            return Query.of(b -> b.bool(bb -> bb
+                    .should(s -> s.term(t -> t.field("authorId").value(tokenWithAt))) // "@mafa"
+                    .should(s -> s.term(t -> t.field("authorId").value(tokenRaw)))    // "mafa"
+                    .minimumShouldMatch("1")
+            ));
         }
 
         // 일반 검색
         return Query.of(b -> b.bool(bb -> bb
                 .should(s -> s.multiMatch(mm -> mm
                         .query(qv)
-                        .fields("title^3", "body", "authorNick", "ingredients^2")
+                        .fields("title^3", "body", "ingredients^2")
                         .type(TextQueryType.BestFields)))
                 .should(s -> s.multiMatch(mm -> mm
                         .query(qv)
-                        .fields("title^3", "body", "authorNick")
+                        .fields("title^3", "body")
                         .type(TextQueryType.BoolPrefix)))
                 .minimumShouldMatch("1")));
     }
@@ -283,7 +289,6 @@ public class SearchService {
             m.put("id", h.getId());
             m.put("title", d.getTitle() != null ? d.getTitle() : "");
             m.put("authorId", d.getAuthorId() != null ? d.getAuthorId() : "");
-            m.put("authorNick", d.getAuthorNick() != null ? d.getAuthorNick() : "");
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
