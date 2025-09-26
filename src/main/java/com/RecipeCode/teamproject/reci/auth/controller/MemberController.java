@@ -68,10 +68,11 @@ public class MemberController {
             }
         } else {
             if (member.getProfileImageUrl() != null) {
-                if (member.getProfileImageUrl().endsWith(".png")) {
+                String url = member.getProfileImageUrl().toLowerCase();
+                if (url.endsWith(".png")) {
                     mediaType = MediaType.IMAGE_PNG;
-                } else if (member.getProfileImageUrl().endsWith(".jpg")) {
-                    mediaType = MediaType.IMAGE_JPEG;
+                } else if (url.endsWith(".gif")) {
+                    mediaType = MediaType.IMAGE_GIF;
                 }
             }
         }
