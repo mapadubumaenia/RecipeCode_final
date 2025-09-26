@@ -27,6 +27,9 @@ public class RecipeSearchDoc {
     @Field(type = FieldType.Keyword)
     private String authorId;
 
+    @Field(type = FieldType.Keyword)   // (Text여도 OK, Keyword 권장)
+    private String authorEmail;
+
     @Field(type = FieldType.Keyword)
     private String authorNick;
 

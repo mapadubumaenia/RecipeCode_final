@@ -103,7 +103,8 @@ public class FeedService {
                     (d.getTags() == null) ? List.of() : d.getTags(),
                     it.getScore(),
                     nvl(d.getThumbUrl()),
-                    media.kind, media.src, media.poster
+                    media.kind, media.src, media.poster,
+                    nvl(d.getAuthorEmail())
             ));
         }
 
@@ -136,6 +137,7 @@ public class FeedService {
                 for (Object o : (List<?>) tg) tags.add(Objects.toString(o, ""));
             }
 
+            String authorEmail = Objects.toString(m.getOrDefault("authorEmail",""), ""); // ★ 꺼내기
             String thumbUrl = Objects.toString(m.getOrDefault("thumbUrl", ""), "");
             String mediaKind = Objects.toString(m.getOrDefault("mediaKind", "image"), "image");
             String mediaSrc  = Objects.toString(m.getOrDefault("mediaSrc", thumbUrl), thumbUrl);
@@ -144,7 +146,7 @@ public class FeedService {
             // ✅ 표기 필드에 authorId(또는 대체) 주입
             items.add(new RecipeCardDto(
                     id, title, authorForDisplay, likes, createdAt, tags, 0.0, thumbUrl,
-                    mediaKind, mediaSrc, poster
+                    mediaKind, mediaSrc, poster,authorEmail
             ));
         }
         int total = (hot.get("total") instanceof Number) ? ((Number) hot.get("total")).intValue() : items.size();

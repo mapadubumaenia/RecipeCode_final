@@ -4,22 +4,17 @@
 (function () {
     "use strict";
 
-    // JSP가 내려준 컨텍스트
+    // JSP가 내려준 컨텍스트 & 로그인 이메일
     const CTX = (typeof window !== "undefined" && window.__CTX__) ? window.__CTX__ : "";
+    const USER_EMAIL = (typeof window !== "undefined" && window.__USER_EMAIL__) ? String(window.__USER_EMAIL__).trim().toLowerCase() : "";
 
-    // DOM ready (defer면 즉시 실행되지만 방어용)
-    function ready(fn){
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
-        else fn();
-    }
+    function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
 
     // 유틸
     function esc(s){
         if (s == null) return '';
-        return String(s)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-            .replace(/'/g,'&#39;');
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
     function fmtDate(v) {
         if (!v) return '';
@@ -50,6 +45,25 @@
         container.removeAttribute('role');
         container.removeAttribute('tabindex');
         container.removeAttribute('aria-label');
+    }
+
+    // ===== CSRF 유틸 =====
+    function readCookie(name){
+        const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g,'\\$1') + '=([^;]*)'));
+        return m ? decodeURIComponent(m[1]) : null;
+    }
+    function getCsrf() {
+        const metaTok = document.querySelector('meta[name="_csrf"]');
+        const metaHdr = document.querySelector('meta[name="_csrf_header"]');
+        let token = metaTok ? metaTok.getAttribute('content') : null;
+        let header = metaHdr ? metaHdr.getAttribute('content') : null;
+        if (!token) { const c = readCookie('XSRF-TOKEN'); if (c) { token = c; header = header || 'X-XSRF-TOKEN'; } }
+        return { token, header: header || 'X-CSRF-TOKEN' };
+    }
+    function setFollowBtnState(btn, following){
+        btn.dataset.following = following ? 'true' : 'false';
+        btn.classList.toggle('is-active', !!following);
+        btn.textContent = following ? 'Following' : 'Follow';
     }
 
     ready(function(){
@@ -86,7 +100,7 @@
             history.replaceState(null, '', url);
         }
 
-        // 아이템 렌더 (영상/유튜브/이미지 + 태그 + 작성자 링크)
+        // 아이템 렌더 (영상/유튜브/이미지 + 태그 + 작성자 링크 + follow)
         function renderItem(it){
             try {
                 const title = esc(it.title || '');
@@ -95,11 +109,13 @@
                 const cmts  = (it.comments != null) ? it.comments : 0;
                 const views = (it.views != null) ? it.views : 0;
 
-                // 작성자 id → 클린 + 링크
-                const authorRaw = it.authorId || it.authorNick || '';
-                const cleanId = (authorRaw && authorRaw.startsWith('@')) ? authorRaw.substring(1) : (authorRaw || '');
+                // 작성자 id / email
+                const authorRawId = it.authorId || it.authorNick || '';
+                const cleanId = (authorRawId && authorRawId.startsWith('@')) ? authorRawId.substring(1) : (authorRawId || '');
                 const nick = esc(cleanId);
                 const profileHref = cleanId ? (CTX + '/follow/profile/' + encodeURIComponent(cleanId)) : '#';
+                const authorEmail = (it.authorEmail || '').trim().toLowerCase();
+                const self = (USER_EMAIL && authorEmail && USER_EMAIL === authorEmail);
 
                 // 상세 링크 유효성
                 const idOk  = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(it.id || '');
@@ -157,7 +173,12 @@
                     '<div class="post-id">' + (cleanId ? ('<a class="author-link" href="' + profileHref + '">@' + nick + '</a>') : '') + '</div>' +
                     '<div class="muted">' + (created || '') + '</div>' +
                     '</div>' +
-                    '<button class="followbtn-sm" data-user-id="' + (cleanId ? ('@' + esc(cleanId)) : '') + '" data-following="false">Follow</button>' +
+                    '<button class="followbtn-sm' + (self ? ' is-self' : '') + '"'
+                    + ' data-user-email="' + esc(authorEmail) + '"'
+                    + ' data-following="false"'
+                    + (self ? ' disabled' : '') + '>'
+                    + (self ? 'Me' : 'Follow')
+                    + '</button>' +
                     '</div>' +
                     mediaHtml +
                     (idOk ? ('<a class="post-link title" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">') +
@@ -181,77 +202,61 @@
         }
 
         // 트렌딩 (있을 경우)
-        function renderTrendingItem(it){
-            const wrap = document.getElementById('trending');
-            if (!wrap) return;
-
-            const title = esc(it.title || '');
-            const kind  = it.mediaKind || 'image';
-            let mediaHtml = '';
-            if (kind === 'youtube') {
-                const poster = it.poster || (it.thumbUrl || 'https://via.placeholder.com/1200x800?text=');
-                const src    = it.mediaSrc || '';
-                mediaHtml =
-                    '<div class="media aspect light-yt" role="button" tabindex="0" ' +
-                    'aria-label="' + title + ' 동영상 재생" data-yt-src="' + esc(src) + '">' +
-                    '<img src="' + esc(poster) + '" alt="">' +
-                    '<div class="play-badge">▶</div>' +
-                    '</div>';
-            } else if (kind === 'video') {
-                const vsrc   = it.mediaSrc || '';
-                const poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
-                mediaHtml =
-                    '<div class="media aspect">' +
-                    '<video controls preload="metadata"' + poster + ' src="' + esc(vsrc) + '"></video>' +
-                    '</div>';
-            } else {
-                const img = (it.mediaSrc && it.mediaSrc.length > 0)
-                    ? it.mediaSrc
-                    : ((it.thumbUrl && it.thumbUrl.length > 0) ? it.thumbUrl : 'https://via.placeholder.com/1200x800?text=');
-                mediaHtml =
-                    '<div class="media aspect">' +
-                    '<img src="' + esc(img) + '" alt="">' +
-                    '</div>';
-            }
-
-            const el = document.createElement('article');
-            el.className = 'card p-12 trend-card';
-            el.innerHTML =
-                mediaHtml +
-                '<div><div class="trend-title">' + title + '</div></div>' +
-                '<div class="actions">' +
-                '<button class="act-btn">❤️ ' + (it.likes || 0) + '</button>' +
-                '<button class="act-btn">💬 ' + (it.comments || 0) + '</button>' +
-                '</div>';
-
-            wrap.appendChild(el);
-        }
-
-        function renderEmpty(q) {
-            const msg = q ? '“' + esc(q) + '” 에 대한 결과가 없어요.' : '검색어를 입력해 보세요.';
-            $list.innerHTML =
-                '<div class="empty">' +
-                '<div class="emoji">🔎</div>' +
-                '<p><strong>검색 내용이 없습니다.</strong></p>' +
-                '<p class="hint">' + msg + '</p>' +
-                '</div>';
-        }
-
-        // 데이터 호출
         async function fetchTrending() {
-            if (!$trending) return; // 섹션 없으면 스킵
+            if (!$trending) return;
             try {
                 const url = CTX + '/api/trending?size=8';
                 const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
                 if (!res.ok) return;
                 const data = await res.json();
                 $trending.innerHTML = '';
-                (data.items || []).forEach(renderTrendingItem);
+                (data.items || []).forEach(function(it){
+                    const title = esc(it.title || '');
+                    const kind  = it.mediaKind || 'image';
+                    let mediaHtml = '';
+                    if (kind === 'youtube') {
+                        const poster = it.poster || (it.thumbUrl || 'https://via.placeholder.com/1200x800?text=');
+                        const src    = it.mediaSrc || '';
+                        mediaHtml =
+                            '<div class="media aspect light-yt" role="button" tabindex="0" ' +
+                            'aria-label="' + title + ' 동영상 재생" data-yt-src="' + esc(src) + '">' +
+                            '<img src="' + esc(poster) + '" alt="">' +
+                            '<div class="play-badge">▶</div>' +
+                            '</div>';
+                    } else if (kind === 'video') {
+                        const vsrc   = it.mediaSrc || '';
+                        const poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
+                        mediaHtml =
+                            '<div class="media aspect">' +
+                            '<video controls preload="metadata"' + poster + ' src="' + esc(vsrc) + '"></video>' +
+                            '</div>';
+                    } else {
+                        const img = (it.mediaSrc && it.mediaSrc.length > 0)
+                            ? it.mediaSrc
+                            : ((it.thumbUrl && it.thumbUrl.length > 0) ? it.thumbUrl : 'https://via.placeholder.com/1200x800?text=');
+                        mediaHtml =
+                            '<div class="media aspect">' +
+                            '<img src="' + esc(img) + '" alt="">' +
+                            '</div>';
+                    }
+
+                    const el = document.createElement('article');
+                    el.className = 'card p-12 trend-card';
+                    el.innerHTML =
+                        mediaHtml +
+                        '<div><div class="trend-title">' + title + '</div></div>' +
+                        '<div class="actions">' +
+                        '<button class="act-btn">❤️ ' + (it.likes || 0) + '</button>' +
+                        '<button class="act-btn">💬 ' + (it.comments || 0) + '</button>' +
+                        '</div>';
+                    $trending.appendChild(el);
+                });
             } catch (e) {
                 console.warn('[trending] load failed', e);
             }
         }
 
+        // 데이터 호출
         async function fetchOnce(initial) {
             if (state.loading) return;
             state.loading = true;
@@ -272,7 +277,13 @@
 
                 if (initial && (!data.items || data.items.length === 0)) {
                     state.next = null;
-                    renderEmpty(state.q);
+                    const msg = state.q ? '“' + esc(state.q) + '” 에 대한 결과가 없어요.' : '검색어를 입력해 보세요.';
+                    $list.innerHTML =
+                        '<div class="empty">' +
+                        '<div class="emoji">🔎</div>' +
+                        '<p><strong>검색 내용이 없습니다.</strong></p>' +
+                        '<p class="hint">' + msg + '</p>' +
+                        '</div>';
                 }
             } finally {
                 state.loading = false;
@@ -315,6 +326,47 @@
             });
             io.observe($sentinel);
         }
+
+        // ===== 팔로우 토글 (공통 위임) =====
+        document.addEventListener('click', async function(e){
+            const btn = e.target.closest('.followbtn-sm[data-user-email]');
+            if (!btn) return;
+
+            if (!USER_EMAIL) { location.href = CTX + '/auth/login'; return; }
+            if (btn.disabled || btn.classList.contains('is-self')) return;
+
+            const email = btn.getAttribute('data-user-email');
+            if (!email) return;
+
+            const following = btn.dataset.following === 'true';
+            const csrf = getCsrf();
+            const headers = {};
+            if (csrf.token && csrf.header) headers[csrf.header] = csrf.token;
+
+            btn.disabled = true;
+            try {
+                const res = await fetch(CTX + '/api/follow/' + encodeURIComponent(email), {
+                    method: following ? 'DELETE' : 'POST',
+                    headers,
+                    credentials: 'same-origin',
+                    redirect: 'manual'
+                });
+
+                if (res.status === 401) { location.href = CTX + '/auth/login'; return; }
+                if (res.status === 403) { alert('보안 토큰이 만료되었어요. 새로고침 후 다시 시도해 주세요.'); return; }
+                if (!res.ok) {
+                    console.warn('follow error', res.status, await res.text().catch(()=>''));
+                    alert('처리에 실패했어요. 잠시 후 다시 시도해 주세요.');
+                    return;
+                }
+                setFollowBtnState(btn, !following);
+            } catch (err) {
+                console.error(err);
+                alert('네트워크 오류가 발생했어요.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
 
         // 초기 로드
         seedFromUrl();
