@@ -195,8 +195,18 @@
                 </div>
 
                 <div class="actions">
-                        <button class="btn-none ${recipe.liked ? 'active' : ''}" id="btnLike" data-liked = "${recipe.liked}">👍 좋아요 <span id="likeCnt"><c:out value="${recipe.likeCount}" /></span></button>
-                    <button class="btn-none" id="btnShare">🔗 공유</button>
+
+                    <button id="btnLike"
+                            class="like like-toggle btn-none ${recipe.liked ? 'active' : ''}"
+                            data-uuid="${recipe.uuid}"
+                            data-like="${recipe.liked ? 'true' : 'false'}"
+                            aria-pressed="${recipe.liked}"
+                    ${isOwner ? 'aria-disabled="true" title="본인 레시피에는 좋아요를 누를 수 없습니다."' : ''}>
+                        <span class="icon" aria-hidden="true"></span>
+                        <span class="cnt">${recipe.likeCount}</span>
+                    </button>
+
+                    <button class="btn-none share-btn float-text" data-uuid="${recipe.uuid}">🔗공유</button>
                     <button class="btn-none" id="btnReport">🚩 신고</button>
                 </div>
             </section>
