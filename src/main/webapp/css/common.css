@@ -100,7 +100,7 @@ footer{display:flex;align-items:center;justify-content:space-between;position:fi
 .authbar{flex:1;display:flex;gap:10px;align-items:center;max-width:var(--maxw);padding:10px 12px}
 
 /* 6-2) 하단 공통 : 플루팅 FAQ */
-.faq-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .2s,transform .2s}
+.faq-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .2s,transform .2s;line-height:56px; text-align:center;}
 .faq-btn:hover{background:#000;transform:translateY(-2px)}
 
 /* 6-3) 하단 공통 : 탑투 */
@@ -109,7 +109,7 @@ footer{display:flex;align-items:center;justify-content:space-between;position:fi
 
 /* 7) 탭 */
 .tabs{display:flex;gap:8px;overflow:auto;padding:6px 8px}
-.tab{white-space:nowrap;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);color: var(--text); font-weight:600;cursor:pointer;}
+.tab{white-space:nowrap;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);color: var(--text); font-weight:600;cursor:pointer;  align-self:flex-start;}
 .tab.is-active{background:var(--brand);color:var(--wtext);border-color:var(--brand)}
 
 /* 8) 썸네일(이미지 자리) */
@@ -168,10 +168,11 @@ footer{display:flex;align-items:center;justify-content:space-between;position:fi
 .cmt-more:hover{font-weight: 600; }
 
 /* 미세먼지 */
-#airBox .air-row { display:flex; gap:8px; align-items:center; margin:6px 0 10px; }
+#airBox .air-row { display:flex; gap:8px; align-items: center; margin:6px 0 10px; }
 #airBox .air-select { padding:4px 8px; }
-#airBox .air-text { font-weight:600; line-height:1.6; }
+#airBox .air-text { font-weight:600; line-height:1.4; }
 #airBox .air-text { white-space: pre-line; }
+.airview {display:flex;flex-direction:column;justify-content: center;}
 
 
 /* 다크모드 보정 */

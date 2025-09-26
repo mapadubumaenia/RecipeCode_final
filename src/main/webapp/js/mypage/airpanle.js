@@ -58,12 +58,23 @@
         txt.textContent = '불러오는 중…';
         txt.style.whiteSpace = 'pre-line'; // ← 줄바꿈 보이게!
         try {
-            const url = ctx + "/api/air/now?sido=" + encodeURIComponent(sido);
+            const url = ctx + "/api/air/now" + (sido ? ("?sido=" + encodeURIComponent(sido)) : "");
+            console.log('에어에어 [AIR] request', { sido, url });  // ← 요거!
+
             const resp = await fetch(url, { credentials: "include" });
             if (!resp.ok) throw new Error('fetch 실패: ' + resp.status);
 
             const data = await resp.json();
-            const items = (data && data.response && data.response.body && data.response.body.items) || [];
+            const resolved = (data && data.sido) ? data.sido : (sido ?? null);
+            if (resolved) {
+                const opt = [...sidoSel.options].find(o => o.text.trim() === resolved.trim());
+                if (opt) sidoSel.value = opt.text; // 셀렉트 표시를 서버 결정값과 동기화
+            }
+
+            // 공공API 결과 경로 변경: response.body.items
+            const items = data?.response?.response?.body?.items
+                || data?.response?.body?.items
+                || []; // 래핑 전/후 모두 대응
             if (!items.length) { txt.textContent = '데이터 없음'; return; }
 
             const pm10Avg = avg(items, "pm10Value"); // 시·도 평균
@@ -75,9 +86,10 @@
             const g25 = grade(pm25Avg);
             const tip = advice(pm10Avg, pm25Avg);     // ← 여기서 계산!
 
+            const displaySido = resolved || sidoSel.value || sido || '';
             txt.textContent =
-                sido + ' · ' + when + ' 기준\n' +
-                '측정소 ' + count + '곳\n' +
+                displaySido + ' · ' + when + ' 기준\n' +
+                count + '개 측정소\n' +
                 'PM10 ' + (pm10Avg ?? '-') + ' (' + g10 + ')' + '\n' +
                 ' PM2.5 ' + (pm25Avg ?? '-') + ' (' + g25 + ')\n' +
                 '➡ ' + tip.emoji + '  ' + tip.label;
@@ -87,7 +99,16 @@
             txt.textContent = '불러오기 실패';
         }
     }
+    // 유저로케이션으로 초기 선택
+    // const userSido = (box.dataset.userSido || '').trim();
+    // if (userSido) {
+    //     // option value와 텍스트가 동일하므로 text 비교 사용
+    //     const opt = Array.from(sidoSel.options).find(o => o.text.trim() === userSido);
+    //     if (opt) sidoSel.value = opt.text;
+    // }
 
-    loadAir(sidoSel.value);
+    // 초기 로드
+    loadAir();
+    // 재선택
     sidoSel.addEventListener('change', () => loadAir(sidoSel.value));
 })();

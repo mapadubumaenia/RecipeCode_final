@@ -126,7 +126,7 @@ function createFollowArticle(recipe) {
     </div>
     <div class="post-meta flex-box">
     <p>${title}</p>
-    <a class="btn-none" href="/recipes/${encodeURIComponent(recipe.uuid)}">더보기</a></div>`;
+    <a class="btn-none float-text" href="/recipes/${encodeURIComponent(recipe.uuid)}">더보기</a></div>`;
     return el;
 }
 

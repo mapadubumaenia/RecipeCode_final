@@ -22,7 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+        import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -57,9 +57,9 @@ public class MyPageViewController {
         long followingCount = followService.countFollowingOf(user);
         long followersCount = followService.countFollowersOf(user);
 
-         model.addAttribute("currentUserEmail", memberDto.getUserEmail());
-         model.addAttribute("followingCount", followingCount);
-         model.addAttribute("followersCount", followersCount);
+        model.addAttribute("currentUserEmail", memberDto.getUserEmail());
+        model.addAttribute("followingCount", followingCount);
+        model.addAttribute("followersCount", followersCount);
         return "profile/mypage_all";
     }
 
@@ -118,4 +118,3 @@ public class MyPageViewController {
         return ResponseEntity.ok("탈퇴 완료");
     }
 }
-
