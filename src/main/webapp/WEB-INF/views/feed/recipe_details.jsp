@@ -156,7 +156,7 @@
             <section class="channelBar">
                 <div class="channel mb-8">
                     <div class="channelInfo">
-                        <img class="avatar" src="${ctx}/images/avatar-placeholder.png" alt="" />
+                        <img class="avatar" src="<c:out value="${recipe.profileImageUrl}" />" alt="" />
                         <div>
                             <strong><c:out value="${recipe.userId}" /></strong>
                             <div class="meta">
@@ -254,8 +254,8 @@
 <script>
     const ctx = "${pageContext.request.contextPath}";
 </script>
-<script src="${ctx}/js/recipes/recipe-detail-common.js"></script>
 <script src="${ctx}/js/recipes/recipe-details.js"></script>
+<script src="${ctx}/js/recipes/recipe-detailside.js"></script>
 
 <div id="myReportModal" class="modal" hidden>
     <div class="modal-content">
@@ -316,8 +316,8 @@
     </div>
 </div>
 
-<script>
-    const ctx = "${pageContext.request.contextPath}";
-</script>
+<%--<script>--%>
+<%--    const ctx = "${pageContext.request.contextPath}";--%>
+<%--</script>--%>
 </body>
 </html>
