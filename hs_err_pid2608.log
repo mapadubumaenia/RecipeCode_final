@@ -1,0 +1,236 @@
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# Native memory allocation (mmap) failed to map 536870912 bytes. Error detail: G1 virtual space
+# Possible reasons:
+#   The system is out of physical RAM or swap space
+#   This process is running with CompressedOops enabled, and the Java Heap may be blocking the growth of the native heap
+# Possible solutions:
+#   Reduce memory load on the system
+#   Increase physical memory or swap space
+#   Check if swap backing store is full
+#   Decrease Java heap size (-Xmx/-Xms)
+#   Decrease number of Java threads
+#   Decrease Java thread stack sizes (-Xss)
+#   Set larger code cache with -XX:ReservedCodeCacheSize=
+#   JVM is running with Zero Based Compressed Oops mode in which the Java heap is
+#     placed in the first 32GB address space. The Java Heap base address is the
+#     maximum limit for the native heap growth. Please use -XX:HeapBaseMinAddress
+#     to set the Java Heap base and to place the Java Heap above 32GB virtual address.
+# This output file may be truncated or incomplete.
+#
+#  Out of Memory Error (os_windows.cpp:3618), pid=2608, tid=16904
+#
+# JRE version:  (17.0.16+8) (build )
+# Java VM: OpenJDK 64-Bit Server VM (17.0.16+8-LTS, mixed mode, emulated-client, sharing, tiered, compressed oops, compressed class ptrs, g1 gc, windows-amd64)
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -XX:TieredStopAtLevel=1 -Dspring.output.ansi.enabled=always -Dcom.sun.management.jmxremote -Dspring.jmx.enabled=true -Dspring.liveBeansView.mbeanDomain -Dspring.application.admin.enabled=true -Dmanagement.endpoints.jmx.exposure.include=* -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2025.1.3\lib\idea_rt.jar=49864 -Dfile.encoding=UTF-8 com.RecipeCode.teamproject.TeamprojectApplication
+
+Host: 13th Gen Intel(R) Core(TM) i5-13400, 16 cores, 31G,  Windows 11 , 64 bit Build 26100 (10.0.26100.4768)
+Time: Thu Sep 25 16:51:17 2025  Windows 11 , 64 bit Build 26100 (10.0.26100.4768) elapsed time: 1.095935 seconds (0d 0h 0m 1s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x000001dbf9485120):  JavaThread "Unknown thread" [_thread_in_vm, id=16904, stack(0x0000003f2d100000,0x0000003f2d200000)]
+
+Stack: [0x0000003f2d100000,0x0000003f2d200000]
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x685c99]
+V  [jvm.dll+0x83d9ba]
+V  [jvm.dll+0x83f47e]
+V  [jvm.dll+0x83fae3]
+V  [jvm.dll+0x24c67f]
+V  [jvm.dll+0x6829b9]
+V  [jvm.dll+0x67748a]
+V  [jvm.dll+0x30c61b]
+V  [jvm.dll+0x313b16]
+V  [jvm.dll+0x36469e]
+V  [jvm.dll+0x3648df]
+V  [jvm.dll+0x2e362c]
+V  [jvm.dll+0x2e4584]
+V  [jvm.dll+0x80f1db]
+V  [jvm.dll+0x372411]
+V  [jvm.dll+0x7edc85]
+V  [jvm.dll+0x3f60fe]
+V  [jvm.dll+0x3f7c81]
+C  [jli.dll+0x5347]
+C  [ucrtbase.dll+0x37b0]
+C  [KERNEL32.DLL+0x2e8d7]
+C  [ntdll.dll+0x3c34c]
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x00007ffa13c3ffd8, length=0, elements={
+}
+
+Java Threads: ( => current thread )
+
+Other Threads:
+  0x000001dbff9d0a00 GCTaskThread "GC Thread#0" [stack: 0x0000003f2d200000,0x0000003f2d300000] [id=17220]
+  0x000001dbf9502a60 ConcurrentGCThread "G1 Main Marker" [stack: 0x0000003f2d300000,0x0000003f2d400000] [id=19744]
+  0x000001dbf9505070 ConcurrentGCThread "G1 Conc#0" [stack: 0x0000003f2d400000,0x0000003f2d500000] [id=12660]
+
+[error occurred during error reporting (printing all threads), id 0xc0000005, EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ffa133f3d07]
+
+VM state: not at safepoint (not fully initialized)
+
+VM Mutex/Monitor currently owned by a thread:  ([mutex/lock_event])
+[0x000001dbf947f8e0] Heap_lock - owner thread: 0x000001dbf9485120
+
+Heap address: 0x0000000603800000, size: 8136 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
+
+CDS archive(s) mapped at: [0x0000000000000000-0x0000000000000000-0x0000000000000000), size 0, SharedBaseAddress: 0x0000000800000000, ArchiveRelocationMode: 1.
+Narrow klass base: 0x0000000000000000, Narrow klass shift: 0, Narrow klass range: 0x0
+
+GC Precious Log:
+<Empty>
+
+Heap:
+ garbage-first heap   total 0K, used 0K [0x0000000603800000, 0x0000000800000000)
+  region size 4096K, 0 young (0K), 0 survivors (0K)
+
+[error occurred during error reporting (printing heap information), id 0xc0000005, EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ffa137dee39]
+
+GC Heap History (0 events):
+No events
+
+Dll operation events (1 events):
+Event: 0.007 Loaded shared library C:\Program Files\Zulu\zulu-17\bin\java.dll
+
+Deoptimization events (0 events):
+No events
+
+Classes loaded (0 events):
+No events
+
+Classes unloaded (0 events):
+No events
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (0 events):
+No events
+
+VM Operations (0 events):
+No events
+
+Memory protections (0 events):
+No events
+
+Nmethod flushes (0 events):
+No events
+
+Events (0 events):
+No events
+
+
+Dynamic libraries:
+0x00007ff7ea670000 - 0x00007ff7ea67e000 	C:\Program Files\Zulu\zulu-17\bin\java.exe
+0x00007ffa8e7c0000 - 0x00007ffa8ea27000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ffa8c550000 - 0x00007ffa8c619000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ffa8b8f0000 - 0x00007ffa8bce0000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ffa8c1e0000 - 0x00007ffa8c32b000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ffa84f60000 - 0x00007ffa84f79000 	C:\Program Files\Zulu\zulu-17\bin\jli.dll
+0x00007ffa84f80000 - 0x00007ffa84f9e000 	C:\Program Files\Zulu\zulu-17\bin\VCRUNTIME140.dll
+0x00007ffa8caf0000 - 0x00007ffa8ccb5000 	C:\WINDOWS\System32\USER32.dll
+0x00007ffa8c0f0000 - 0x00007ffa8c117000 	C:\WINDOWS\System32\win32u.dll
+0x00007ffa8dcc0000 - 0x00007ffa8dceb000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ffa8bcf0000 - 0x00007ffa8be28000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ffa7d050000 - 0x00007ffa7d2ea000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.26100.4768_none_3e0c112ce331287c\COMCTL32.dll
+0x00007ffa8be30000 - 0x00007ffa8bed3000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ffa8e080000 - 0x00007ffa8e129000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ffa8e140000 - 0x00007ffa8e16f000 	C:\WINDOWS\System32\IMM32.DLL
+0x00007ffa84f50000 - 0x00007ffa84f5c000 	C:\Program Files\Zulu\zulu-17\bin\vcruntime140_1.dll
+0x00007ffa6caf0000 - 0x00007ffa6cb7d000 	C:\Program Files\Zulu\zulu-17\bin\msvcp140.dll
+0x00007ffa13100000 - 0x00007ffa13d75000 	C:\Program Files\Zulu\zulu-17\bin\server\jvm.dll
+0x00007ffa8dc00000 - 0x00007ffa8dcb4000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ffa8d980000 - 0x00007ffa8da26000 	C:\WINDOWS\System32\sechost.dll
+0x00007ffa8e660000 - 0x00007ffa8e778000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ffa8c620000 - 0x00007ffa8c694000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ffa8b750000 - 0x00007ffa8b7ae000 	C:\WINDOWS\SYSTEM32\POWRPROF.dll
+0x00007ffa82730000 - 0x00007ffa82765000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ffa795f0000 - 0x00007ffa795fb000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ffa8b730000 - 0x00007ffa8b744000 	C:\WINDOWS\SYSTEM32\UMPDC.dll
+0x00007ffa8a670000 - 0x00007ffa8a68b000 	C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+0x00007ffa83e70000 - 0x00007ffa83e7a000 	C:\Program Files\Zulu\zulu-17\bin\jimage.dll
+0x00007ffa78ee0000 - 0x00007ffa79121000 	C:\WINDOWS\SYSTEM32\DBGHELP.DLL
+0x00007ffa8dcf0000 - 0x00007ffa8e075000 	C:\WINDOWS\System32\combase.dll
+0x00007ffa8c6a0000 - 0x00007ffa8c780000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ffa83a20000 - 0x00007ffa83a63000 	C:\WINDOWS\SYSTEM32\dbgcore.DLL
+0x00007ffa8c4b0000 - 0x00007ffa8c549000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ffa83e60000 - 0x00007ffa83e6e000 	C:\Program Files\Zulu\zulu-17\bin\instrument.dll
+0x00007ffa81760000 - 0x00007ffa81785000 	C:\Program Files\Zulu\zulu-17\bin\java.dll
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Program Files\Zulu\zulu-17\bin;C:\WINDOWS\SYSTEM32;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.26100.4768_none_3e0c112ce331287c;C:\Program Files\Zulu\zulu-17\bin\server
+
+VM Arguments:
+jvm_args: -XX:TieredStopAtLevel=1 -Dspring.output.ansi.enabled=always -Dcom.sun.management.jmxremote -Dspring.jmx.enabled=true -Dspring.liveBeansView.mbeanDomain -Dspring.application.admin.enabled=true -Dmanagement.endpoints.jmx.exposure.include=* -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2025.1.3\lib\idea_rt.jar=49864 -Dfile.encoding=UTF-8 
+java_command: com.RecipeCode.teamproject.TeamprojectApplication
+java_class_path (initial): C:\work\RecipeCode_final\build\classes\java\main;C:\work\RecipeCode_final\build\resources\main;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.projectlombok\lombok\1.18.38\57f8f5e02e92a30fd21b80cbd426a4172b5f8e29\lombok-1.18.38.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.mapstruct\mapstruct-processor\1.5.5.Final\897f6f115930b936287bef552bf5fe28cc64717d\mapstruct-processor-1.5.5.Final.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\com.querydsl\querydsl-apt\5.0.0\d48657412f2b96d787bbe5ae393e33815c94b4d0\querydsl-apt-5.0.0-jakarta.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-data-jpa\3.4.9\bbccf50f79d7b42ca4b0031eb08184524efac39e\spring-boot-starter-data-jpa-3.4.9.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-web\3.4.9\7e119e6437d7e1ca51f8eee0bec14be54f663d40\spring-boot-starter-web-3.4.9.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-security\3.4.9\8b950c49b361c42c7ef023c8883ede55707591f8\spring-boot-starter-security-3.4.9.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-oauth2-client\3.4.9\532770f49d1f92886fd6d157a74f8c7e102b6ccf\spring-boot-starter-oauth2-client-3.4.9.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-data-elasticsearch\3.4.9\b85838966af0233c7a88078a0c00a3fc29f362d6\spring-boot-starter-data-elasticsearch-3.4.9.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\jakarta.annotation\jakarta.annotation-api\2.1.1\48b9bda22b091b1f48b13af03fe36db3be6e1ae3\jakarta.annotation-api-2.1.1.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\jakarta.persistence\jakarta.persistence-api\3.1.0\66901fa1c373c6aff65c13791cc11da72060a8d6\jakarta.persistence-api-3.1.0.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\co.elastic.clients\elasticsearch-java\8.14.3\b9061
+Launcher Type: SUN_STANDARD
+
+[Global flags]
+     intx CICompilerCount                          = 12                                        {product} {ergonomic}
+     uint ConcGCThreads                            = 3                                         {product} {ergonomic}
+     uint G1ConcRefinementThreads                  = 13                                        {product} {ergonomic}
+   size_t G1HeapRegionSize                         = 4194304                                   {product} {ergonomic}
+    uintx GCDrainStackTargetSize                   = 64                                        {product} {ergonomic}
+   size_t InitialHeapSize                          = 536870912                                 {product} {ergonomic}
+     bool ManagementServer                         = true                                      {product} {command line}
+   size_t MarkStackSize                            = 4194304                                   {product} {ergonomic}
+   size_t MaxHeapSize                              = 8531214336                                {product} {ergonomic}
+   size_t MinHeapDeltaBytes                        = 4194304                                   {product} {ergonomic}
+   size_t MinHeapSize                              = 8388608                                   {product} {ergonomic}
+    uintx NonProfiledCodeHeapSize                  = 0                                      {pd product} {ergonomic}
+     bool ProfileInterpreter                       = false                                  {pd product} {command line}
+    uintx ProfiledCodeHeapSize                     = 0                                      {pd product} {ergonomic}
+   size_t SoftMaxHeapSize                          = 8531214336                             {manageable} {ergonomic}
+     intx TieredStopAtLevel                        = 1                                         {product} {command line}
+     bool UseCompressedClassPointers               = true                           {product lp64_product} {ergonomic}
+     bool UseCompressedOops                        = true                           {product lp64_product} {ergonomic}
+     bool UseG1GC                                  = true                                      {product} {ergonomic}
+     bool UseLargePagesIndividualAllocation        = false                                  {pd product} {ergonomic}
+
+Logging:
+Log output configuration:
+ #0: stdout all=warning uptime,level,tags
+ #1: stderr all=off uptime,level,tags
+
+Environment Variables:
+PATH=C:\work\opt\logstash-8.14.3\bin;C:\app\user\product\21c\dbhomeXE\bin;C:\Program Files\Zulu\zulu-11\bin\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Bandizip\;C:\Program Files\Git\cmd;C:\Users\user\AppData\Local\Microsoft\WindowsApps;C:\Users\user\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\user\AppData\Local\GitHubDesktop\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2025.1.3\bin;;C:\Program Files\JetBrains\PyCharm 2025.2\bin
+USERNAME=user
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 183 Stepping 1, GenuineIntel
+TMP=C:\Users\user\AppData\Local\Temp
+TEMP=C:\Users\user\AppData\Local\Temp
+
+
+
+Periodic native trim disabled
+
+
+---------------  S Y S T E M  ---------------
+
+OS:
+ Windows 11 , 64 bit Build 26100 (10.0.26100.4768)
+OS uptime: 27 days 7:52 hours
+
+CPU: total 16 (initial active 16) (8 cores per cpu, 2 threads per core) family 6 model 183 stepping 1 microcode 0x120, cx8, cmov, fxsr, ht, mmx, 3dnowpref, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, lzcnt, tsc, tscinvbit, avx, avx2, aes, erms, clmul, bmi1, bmi2, adx, sha, fma, vzeroupper, clflush, clflushopt, clwb
+Processor Information for all 16 processors :
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+
+Memory: 4k page, system-wide physical 32537M (8793M free)
+TotalPageFile size 92041M (AvailPageFile size 345M)
+current process WorkingSet (physical memory assigned to process): 13M, peak: 13M
+current process commit charge ("private bytes"): 66M, peak: 578M
+
+vm_info: OpenJDK 64-Bit Server VM (17.0.16+8-LTS) for windows-amd64 JRE (17.0.16+8-LTS) (Zulu17.60+17-CA), built on Jun 30 2025 16:40:41 by "zulu_re" with MS VC++ 16.10 / 16.11 (VS2019)
+
+END.

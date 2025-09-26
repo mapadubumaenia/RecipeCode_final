@@ -43,14 +43,26 @@
                     <button type="submit" class="btn-logout">logout</button>
                 </form>
                 <div class="notif-wrap">
-                    <button id="btnNotif" class="notif-btn" aria-haspopup="dialog"
-                            aria-expanded="false" aria-controls="notifPanel" title="알림">
+                    <!-- 알림 버튼 -->
+                    <button
+                            id="btnNotif"
+                            class="notif-btn"
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                            aria-controls="notifPanel"
+                            title="알림"
+                    >
                         🔔
                         <span class="notif-dot" aria-hidden="true"></span>
                     </button>
 
                     <!-- 드롭다운 패널 -->
-                    <div id="notifPanel" class="notif-panel" role="dialog" aria-label="알림 목록">
+                    <div
+                            id="notifPanel"
+                            class="notif-panel"
+                            role="dialog"
+                            aria-label="알림 목록"
+                    >
                         <div class="notif-head">
                             <strong>알림</strong>
                             <div class="actions">
@@ -176,6 +188,9 @@
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-feed.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-sidebar.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/position-fixed.js"></script>
-
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<%--알림 js--%>
+<script src="${pageContext.request.contextPath}/js/notification.js"></script>
 </body>
 </html>
