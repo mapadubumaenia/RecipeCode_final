@@ -1,9 +1,13 @@
 package com.RecipeCode.teamproject.reci.function.notification.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
+import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
+import com.RecipeCode.teamproject.reci.feed.comments.repository.CommentsRepository;
+import com.RecipeCode.teamproject.reci.feed.recipeslikes.repository.RecipesLikesRepository;
 import com.RecipeCode.teamproject.reci.function.notification.entity.Notification;
 import com.RecipeCode.teamproject.reci.function.notification.enums.NotificationEvent;
 import com.RecipeCode.teamproject.reci.function.notification.repository.NotificationRepository;
+import com.RecipeCode.teamproject.reci.function.notificationDelivery.dto.NotificationDeliveryDto;
 import com.RecipeCode.teamproject.reci.function.notificationDelivery.entity.NotificationDelivery;
 import com.RecipeCode.teamproject.reci.function.notificationDelivery.repository.NotificationDeliveryRepository;
 import com.RecipeCode.teamproject.reci.function.notificationSetting.entity.NotificationSetting;
@@ -15,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +30,9 @@ public class NotificationService {
     private final NotificationDeliveryRepository deliveryRepository;
     private final NotificationSettingRepository settingRepository;
     private final ErrorMsg errorMsg;
+    private final CommentsRepository commentsRepository;
+    private final MemberRepository memberRepository;
+    private final RecipesLikesRepository recipesLikesRepository;
 
     // 알림 생성 + Delivery 전송
     public void createNotification(String actorEmail,
@@ -33,6 +41,10 @@ public class NotificationService {
                                    String sourceType,
                                    String sourceId) {
 
+        // 자기 자신에게는 알림 보내지 않음
+        if (actorEmail.equals(targetEmail)) {
+            return;
+        }
         // 1) 대상 유저의 알림 허용 여부 확인
         Optional<NotificationSetting> settingOptional = settingRepository.findByMember_UserEmailAndTypeCode(targetEmail, event.getCode());
         boolean isAllowed = settingOptional.map(setting -> setting.getAllow() == 1L).orElse(true);
@@ -62,8 +74,18 @@ public class NotificationService {
     }
 
     // 유저 알림 목록 조회
-    public List<NotificationDelivery> getUserNotifications(String userEmail) {
-        return deliveryRepository.findByReceiverEmailOrderByDeliveryIdDesc(userEmail);
+    public List<NotificationDeliveryDto> getUserNotifications(String userEmail) {
+        List<NotificationDelivery> deliveries =
+                deliveryRepository.findByReceiverEmailOrderByDeliveryIdDesc(userEmail);
+
+        return deliveries.stream()
+                .map(d -> NotificationDeliveryDto.fromEntity(
+                        d,
+                        memberRepository,
+                        commentsRepository,
+                        recipesLikesRepository
+                ))
+                .collect(Collectors.toList());
     }
 
     // 유저의 안 읽은 알림 개수

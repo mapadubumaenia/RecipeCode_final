@@ -63,6 +63,8 @@
                 <sec:authentication property="principal" var="loginUser"/>
                 ${loginUser.nickname}님
             </sec:authorize>
+
+            <!-- 알림 버튼 -->
             <button
                     id="btnNotif"
                     class="notif-btn"
@@ -85,9 +87,7 @@
                 <div class="notif-head">
                     <strong>알림</strong>
                     <div class="actions">
-                        <button class="btn small ghost" id="markAll">
-                            모두 읽음
-                        </button>
+                        <button class="btn small ghost" id="markAll">모두 읽음</button>
                     </div>
                 </div>
 
@@ -259,9 +259,14 @@
     </nav>
 </footer>
 
-<script src="notifs.js"></script>
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="feed-follow-btn.js"></script>
 <script src="feed-cmt.js"></script>
 <script src="footer.js"></script>
+<%--시간 js--%>
+<script src="<c:url value='/js/mypage/utils.js'/>"></script>
+<%--알림 js--%>
+<script src="${pageContext.request.contextPath}/js/notification.js"></script>
 </body>
 </html>

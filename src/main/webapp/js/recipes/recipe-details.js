@@ -192,6 +192,9 @@ document.addEventListener("DOMContentLoaded", () => {
             div.className = "comment";
             div.dataset.commentsId = c.commentsId;
 
+            // 알림 링크 이동용 id 추가
+            div.id = `comment-${c.commentsId}`;
+
             // 댓글창
             const header = document.createElement("div");
             header.className = "comment-header";

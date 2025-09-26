@@ -3,12 +3,10 @@ package com.RecipeCode.teamproject.reci.function.notification.controller;
 import com.RecipeCode.teamproject.common.SecurityUtil;
 import com.RecipeCode.teamproject.reci.function.notification.service.NotificationService;
 import com.RecipeCode.teamproject.reci.function.notificationDelivery.dto.NotificationDeliveryDto;
-import com.RecipeCode.teamproject.reci.function.notificationDelivery.entity.NotificationDelivery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notification")
@@ -24,11 +22,7 @@ public class NotificationController {
     @GetMapping
     public List<NotificationDeliveryDto> getUserNotifications() {
         String userEmail = securityUtil.getLoginUser().getUsername();
-        List<NotificationDelivery> deliveries = notificationService.getUserNotifications(userEmail);
-
-        return deliveries.stream()
-                .map(NotificationDeliveryDto::fromEntity)
-                .collect(Collectors.toList());
+        return notificationService.getUserNotifications(userEmail);
     }
 
     // 안 읽은 알림 개수

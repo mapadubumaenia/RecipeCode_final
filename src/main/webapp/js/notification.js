@@ -30,6 +30,8 @@ $(function () {
             }
 
             list.forEach(item => {
+                const targetUrl = linkOf(item.notification); // 알림별 이동 링크
+
                 const el = $(`
                     <div class="notif-item ${item.read ? '' : 'unread'}" data-id="${item.deliveryId}">
                         <div class="ic">${iconOf(item.notification.event)}</div>
@@ -38,7 +40,10 @@ $(function () {
                             <div class="time">${timeAgo(item.notification.insertTime)}</div>
                         </div>
                         <div>
-                            <button class="btn small ghost" data-read="${item.deliveryId}">
+                            <button type = "button"
+                                    class="btn small ghost" 
+                                    data-read="${item.deliveryId}" 
+                                    data-link="${targetUrl}">
                                 ${item.read ? "열기" : "읽음"}
                             </button>
                         </div>
@@ -50,6 +55,18 @@ $(function () {
             const hasUnread = list.some(n => !n.read);
             updateDot(hasUnread);
         });
+    }
+
+    function linkOf(notification) {
+        switch (notification.sourceType) {
+            case "COMMENT":
+            case "LIKE":
+                return `/recipes/${notification.recipeUuid}`;
+            case "FOLLOW":
+                return `/profile/${notification.actorUserId}`;
+            default:
+                return "/";
+        }
     }
 
     // 이벤트 → 아이콘 매핑
@@ -94,18 +111,29 @@ $(function () {
         if (e.key === "Escape") closePanel();
     });
 
-    // 개별 알림 읽음 처리
-    notifList.on("click", "button[data-read]", function () {
-        const deliveryId = $(this).data("read");
+    // 개별 알림 읽음 처리 + 이동
+    notifList.on("click", ".notif-item", function (e) {
+        const button = $(this).find("button[data-read]");
+        const deliveryId = button.data("read");
+        const link = button.data("link");
         $.ajax({
             url: `/api/notification/${deliveryId}/read`,
             type: "PATCH",
             success: function () {
-                loadNotifications();
-                loadUnreadCount();
+                console.log("PATCH 성공, 이동 시도:", link);
+                if (link) {
+                    window.location.href = link;  // 정상 이동
+                } else {
+                    loadNotifications();
+                    loadUnreadCount();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("PATCH 실패:", status, error);
             }
         });
     });
+
 
     // 전체 읽음 처리
     markAllBtn.on("click", function () {

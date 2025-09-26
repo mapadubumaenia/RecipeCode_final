@@ -1,6 +1,5 @@
 package com.RecipeCode.teamproject.reci.function.follow.controller;
 
-import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.MapStruct;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;

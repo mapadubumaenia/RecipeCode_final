@@ -90,8 +90,12 @@
 
             <!-- 팔로워 / 팔로잉 -->
             <div class="profile-stats">
-                <span>팔로워 <b id="followerCount">0</b></span>
-                <span>팔로잉 <b id="followingCount">0</b></span>
+                <a href="/follow/network/${user.userId}" class="stat-link">
+                    팔로워 <b id="followerCount">0</b>
+                </a>
+                <a href="/follow/network/${user.userId}" class="stat-link">
+                    팔로잉 <b id="followingCount">0</b>
+                </a>
             </div>
 
             <!-- 짧은 소개 -->
