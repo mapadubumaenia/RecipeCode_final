@@ -26,7 +26,7 @@
 
             <!-- ▶ 추가: 알림 + 로그아웃 -->
             <div class="header-actions">
-                <form action="${pageContext.request.contextPath}/logout" method="post">
+                <form action="${pageContext.request.contextPath}/auth/logout" method="post">
                     <button type="submit" class="btn-logout">logout</button>
                 </form>
 

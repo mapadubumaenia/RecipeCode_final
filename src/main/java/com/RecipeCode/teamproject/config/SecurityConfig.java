@@ -54,7 +54,8 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login")
-                        .permitAll())
+                        .invalidateHttpSession(true)           // 세션 무효화
+                        .deleteCookies("JSESSIONID"))
                 .httpBasic(basic -> basic.disable())
                 .build();
     }

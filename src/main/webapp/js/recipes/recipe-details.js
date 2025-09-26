@@ -46,66 +46,176 @@
     snapTo(0);
 })();
 
-// 좋아요/댓글 AJAX는 추후 여기서 fetch 붙이면 됨 (data-recipe-uuid 이용)
+// 좋아요
+(() => {
+    const btn = document.getElementById("btnLike");
+    if (!btn) return;
 
-(function () {
-    const btnLike = document.getElementById("btnLike");
-    const likeCnt = document.getElementById("likeCnt");
-    const recipeBox = document.querySelector(".container[data-recipe-uuid]");
-    if (!btnLike || !likeCnt || !recipeBox) return;
+    const ctx  = window.ctx || "";
+    const uuid = btn.dataset.uuid || document.querySelector(".container[data-recipe-uuid]")?.dataset.recipeUuid;
+    const cntEl = btn.querySelector(".cnt");
 
-    const initiallyLiked = btnLike.dataset.liked === "true";
-    btnLike.classList.toggle("active", initiallyLiked);
+    const toBool = (v) => String(v).trim().toLowerCase() === "true";
+    const getCount = () => Number(cntEl?.textContent || 0);
 
-    const recipeUuid = recipeBox.dataset.recipeUuid;
+    const setUI = (liked, count) => {
+        btn.classList.toggle("active", liked);
+        btn.dataset.like = String(liked);
+        btn.setAttribute("aria-pressed", String(liked));
+        if (typeof count === "number" && !Number.isNaN(count) && cntEl) {
+            cntEl.textContent = String(count);
+        }
+    };
 
-    btnLike.addEventListener("click", async () => {
+    // 초기 상태 반영
+    const initialLiked = btn.classList.contains("active") || toBool(btn.dataset.like);
+    setUI(initialLiked, getCount());
+
+    btn.addEventListener("click", async () => {
+        if (btn.getAttribute("aria-disabled") === "true") {
+            alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
+            return;
+        }
+        if (btn.dataset.busy === "true") return;
+        btn.dataset.busy = "true";
+
+        const liked = toBool(btn.dataset.like);
+        // 서버가 POST/DELETE 분기면 아래 사용, 토글 POST만 있으면 method = "POST"로 고정
+        let method = liked ? "DELETE" : "POST";
+        let url    = `${ctx}/api/recipes/${encodeURIComponent(uuid)}/like`;
+
+        // CSRF (운영 시 권장)
+        const t = document.querySelector('meta[name="_csrf"]');
+        const h = document.querySelector('meta[name="_csrf_header"]');
+        const headers = {"Accept":"application/json"};
+        if (t && h) headers[h.content] = t.content;
+
         try {
-            const resp = await fetch(`${ctx}/api/recipes/${recipeUuid}/like`, {
-                method: "POST",
-                credentials: "include",
-                headers: {"Content-Type": "application/json"}
-                // 👉 [운영 시 다시 활성화]
-                // const csrfMeta = document.querySelector('meta[name="_csrf"]');
-                // const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-                // const headers = { "Content-Type": "application/json" };
-                // if (csrfMeta && csrfHeaderMeta) {
-                //     headers[csrfHeaderMeta.content] = csrfMeta.content;
-                // }
-                // const resp = await fetch(`${ctx}/api/recipes/${recipeUuid}/like`, {
-                //     method: "POST",
-                //     headers
-            });
-            if (!resp.ok) {
-                const msg = await resp.text();
-                if (resp.status === 401) {
-                    if (confirm(msg + "\n로그인 페이지로 이동할까요?")) {
-                        window.location.href = `${ctx}/auth/login`;
-                    }
-                } else if (resp.status === 400) {
-                    alert(msg); // "본인 레시피에는 좋아요를 누를 수 없습니다!"
-                } else {
-                    alert("알 수 없는 오류 발생. 관리자에게 문의하세요!")
-                }
-                return;
+            let res = await fetch(url, { method, credentials: "same-origin", headers });
+
+            // 서버가 DELETE 미지원(405)인데 토글 POST만 지원하는 경우 폴백
+            if (res.status === 405 && method === "DELETE") {
+                res = await fetch(url, { method: "POST", credentials: "same-origin", headers });
             }
-            const data = await resp.json();
-            // 서버에서 내려준 dto 값 반영
-            likeCnt.textContent = data.likesCount;
-            const now = (data.isLike ?? data.liked ?? false) === true;
-            btnLike.classList.toggle("active", now);
-            btnLike.dataset.liked = String(now);
-            // if (data.liked) {
-            //     btnLike.classList.add("active"); // CSS로 하트 색 변환
-            // } else {
-            //     btnLike.classList.remove("active");
-            // }
-        } catch (err) {
-            console.error(err);
-            alert("좋아요 처리 중 오류 발생 😢");
+
+            const ctype = res.headers.get("content-type") || "";
+            const body  = ctype.includes("application/json") ? await res.json() : { message: await res.text() };
+
+
+            if (!res.ok) {
+                if (res.status === 401) { alert("로그인 후 이용해주세요."); return; }
+                if (res.status === 400 && /본인|자기|self/i.test(body?.message || "")) {
+                    alert("본인 레시피에는 좋아요를 누를 수 없습니다."); return;
+                }
+                alert(body?.message || "좋아요 처리 중 오류가 발생했어요."); return;
+            }
+
+            // 표준 응답 가정: { isLike | liked, likesCount }
+            const nowLiked = (body?.isLike ?? body?.liked ?? !liked) === true;
+            const newCnt   = Number(body?.likesCount ?? (cntEl ? cntEl.textContent : 0));
+            setUI(nowLiked, newCnt);
+
+        } catch (e) {
+            console.error(e);
+            alert("네트워크 오류가 발생했어요.");
+        } finally {
+            delete btn.dataset.busy;
         }
     });
 })();
+
+// TODO: 좋아요
+
+(() => {
+    const btn = document.getElementById("btnFollow");
+    if (!btn) return;
+
+    // 게스트면 클릭 시 로그인 유도
+    if (btn.getAttribute("aria-disabled") === "true") {
+        btn.addEventListener("click", () => {
+            alert("팔로우 기능은 로그인 후 이용할 수 있습니다.");
+            location.href = `${ctx}/auth/login`; // 원하면 리다이렉트
+        });
+        return; // 더 이상 로직 진행하지 않음
+    }
+
+    const owner = btn.dataset.owner;
+    const ctx = window.ctx || "";
+
+    const setUI = (following) => {
+        btn.dataset.following = String(following);
+        btn.textContent = following ? "Unfollow" : "Follow";
+        btn.classList.toggle("is-following", following);
+        btn.setAttribute("aria-pressed", String(following));
+    };
+    setUI(btn.dataset.following === "true");
+
+    btn.addEventListener("click", async () => {
+        // 요청 중 중복클릭 방지
+        if (btn.dataset.busy === "true") return;
+        btn.dataset.busy = "true";
+
+        const following = btn.dataset.following === "true";
+        const method = following ? "DELETE" : "POST";
+        const url = `${ctx}/api/follow/${encodeURIComponent(owner)}`;
+
+        //나중에
+        const t = document.querySelector('meta[name="_csrf"]');
+        const h = document.querySelector('meta[name="_csrf_header"]');
+        const headers = {"Accept": "application/json"};
+        if (t && h) headers[h.content] = t.content;
+
+        try {
+            const res = await fetch(url, { method, credentials: "same-origin", headers });
+
+            // 🔎 디버그
+            console.log("[follow] status:", res.status, res.statusText);
+
+            let body = null;
+            const ctype = res.headers.get("content-type") || "";
+            if (ctype.includes("application/json")) {
+                try { body = await res.json(); } catch {}
+            } else {
+                // text/plain 같은 경우
+                try { body = { message: await res.text() }; } catch {}
+            }
+
+            if (!res.ok) {
+                if (res.status === 401) { alert("로그인 후 이용해주세요."); return; }
+                if (res.status === 403 && body && (body.code === "SELF_FOLLOW_FORBIDDEN" || /본인/.test(body.message||""))) {
+                    alert("본인 계정은 팔로우할 수 없습니다.");
+                    return;
+                }
+                alert(body?.message || "처리 중 오류가 발생했어요.");
+                return;
+            }
+
+            // 표준 응답: { following: boolean } 를 기대
+            const now = (body && typeof body.following === "boolean")
+                ? body.following
+                : !following; // 혹시 바디가 비었으면 토글 추정
+
+            setUI(now);
+
+        } catch (e) {
+            console.error(e);
+            alert("네트워크 오류가 발생했어요.");
+        } finally {
+            delete btn.dataset.busy;
+        }
+    });
+})();
+
+// 공유 버튼 이벤트
+document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("share-btn")) {
+        const uuid = e.target.dataset.uuid;
+        const url = window.location.origin + "/recipes/" + uuid;
+        navigator.clipboard.writeText(url)
+            .then(() => alert("링크가 복사되었습니다!"))
+            .catch(() => alert("복사 실패 😢"));
+    }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
         // TODO: 댓글 디버깅 코드 추가 -- 여기서 시작

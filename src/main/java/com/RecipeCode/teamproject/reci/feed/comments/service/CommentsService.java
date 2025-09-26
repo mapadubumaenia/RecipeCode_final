@@ -68,7 +68,7 @@ public class CommentsService {
                     dto.setLikeCount(likeCount);
 
                     boolean liked = false;
-                    if (memberFinal != null){
+                    if (memberFinal != null) {
                         liked = commentsLikesRepository.existsByMemberAndComments(memberFinal, comments);
                     }
                     dto.setLiked(liked);
@@ -108,6 +108,10 @@ public class CommentsService {
         comment.setCommentsCount(maxCount + 1);
 
         Comments saved = commentsRepository.save(comment);
+
+        recipe.setCommentCount(recipe.getCommentCount() + 1);
+        recipesRepository.save(recipe);
+
         log.info("댓글 저장 완료, commentsId={}", saved.getCommentsId());
 
         // 알림 생성
@@ -141,7 +145,7 @@ public class CommentsService {
                     dto.setLikeCount(likeCount);
 
                     boolean liked = false;
-                    if (memberFinal != null){
+                    if (memberFinal != null) {
                         liked = commentsLikesRepository.existsByMemberAndComments(memberFinal, comments);
                     }
                     dto.setLiked(liked);
@@ -160,6 +164,7 @@ public class CommentsService {
     }
 
     // 대댓글 작성
+    @Transactional
     public void saveReply(CommentsDto commentsDto, Long parentId, String userEmail) {
         Comments reply = mapStruct.toEntity(commentsDto);
 
@@ -176,6 +181,10 @@ public class CommentsService {
         reply.setCommentsCount(maxCount + 1);
 
         commentsRepository.save(reply);
+
+        Recipes recipe = parent.getRecipes();
+        recipe.setCommentCount(recipe.getCommentCount() + 1);
+        recipesRepository.save(recipe);
     }
 
     // 댓글 수정

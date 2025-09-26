@@ -28,4 +28,15 @@ public interface CommentsRepository extends JpaRepository<Comments, Long> {
     List<Comments> findByRecipesUuidAndParentIdIsNullAndDeletedAtIsNull(String recipeUuid, Pageable pageable);
     List<Comments> findByParentIdCommentsIdAndDeletedAtIsNull(Long parentId);
     List<Comments> findByDeletedAtIsNull();
+
+    @Query(value = "select c.recipes.uuid as uuid, count(c.commentsId) as cnt\n" +
+                   "from Comments c\n" +
+                   "where c.recipes.uuid in :uuids\n" +
+                   "group by c.recipes.uuid")
+    List<CommentCountView> countByRecipeUuids(@Param("uuids") List<String> uuids);
+
+    interface CommentCountView {
+        String getUuid();
+        long getCnt();
+    }
 }

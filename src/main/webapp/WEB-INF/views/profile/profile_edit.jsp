@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="<c:url value='/css/profile-edit.css'/>">
 </head>
 <body>
+<%-- TODO: csrf 인증 토큰(중요): 안하면 로그인페이지로 redirect 됨 --%>
+<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 <form action="<c:url value='/mypage/updateProfile'/>" method="post" enctype="multipart/form-data">
 <main class="container">
     <!-- 헤더: 기존 마이페이지/팔로우 리스트와 동일한 구조 -->
@@ -203,5 +205,6 @@
 </form>
 <%--  JS  --%>
 <script src="<c:url value='/js/mypage/mypage-edit.js'/>"></script>
+<script src="<c:url value='/js/auth/password.js'/>"></script>
 </body>
 </html>
