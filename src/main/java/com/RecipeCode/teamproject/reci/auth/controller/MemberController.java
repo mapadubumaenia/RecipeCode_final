@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
-
     //    로그인 함수
     @GetMapping("/auth/login")
     public String login() {
         return "auth/login";
     }
+
 
     // 비밀번호 찾기
     @GetMapping("/auth/findPassword")
@@ -34,12 +34,13 @@ public class MemberController {
         return "auth/findPassword";
     }
 
-//    회원가입 페이지 이동
+    //    회원가입 페이지 이동
     @GetMapping("/auth/register")
     public String register() {
         return "auth/register";
     }
-//    회원가입
+
+    //    회원가입
     @PostMapping("/auth/register/addition")
     public String register(Model model, @ModelAttribute MemberDto memberDto) {
         memberService.save(memberDto);
