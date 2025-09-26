@@ -82,10 +82,13 @@
     </header>
     <!-- 프로필 카드 -->
     <section class="card profile-card">
+        <div class="profile-img">
         <div class="avatar-lg">
             <c:if test="${not empty user.profileImageUrl}">
                 <img src="${user.profileImageUrl}" alt="${user.nickname}" class="avatar-lg"/>
             </c:if>
+        </div>
+            <a class="upload text-center" href="<c:url value='/recipes/add'/>">Upload</a>
         </div>
         <div class="profile-info flex-box">
             <div class="profile-top">

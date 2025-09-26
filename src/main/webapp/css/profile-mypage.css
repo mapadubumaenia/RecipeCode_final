@@ -9,9 +9,12 @@
 .edit-profile {font-size:.85rem; color:#666;}
 .edit-feed {font-size:.85rem; color:#666;}
 .profile-right {display:flex; flex-direction: column; gap:8px;}
-.chip {padding:6px; border:1px solid var(--border); color: var(--text); background: var(#ccc); box-shadow: var(--shadow);
-      border-radius: 12px; font-size: 14px;}
+.chip, .upload {display: inline-block; background: #eef2f7; color: var(--text); font-size: 12px;  padding: 4px 10px;
+  border-radius: 16px; margin: 2px; box-shadow: var(--shadow)}
+.upload {background: var(--btn); color: var(--wtext);}
 .follow-count {margin: 4px;}
+.profile-img {display: flex; flex-direction: column; align-items: center; gap:8px;}
+
 
 
 /* 서치 */
