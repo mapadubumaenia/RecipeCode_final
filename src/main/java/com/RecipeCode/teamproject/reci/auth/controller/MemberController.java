@@ -81,14 +81,4 @@ public class MemberController {
                 .body(image);
     }
 
-    @GetMapping("/oauth2/reauth")
-    public String reauth(OAuth2AuthenticationToken auth) {
-        String provider = auth.getAuthorizedClientRegistrationId(); // google, kakao 등
-        if ("google".equals(provider)) {
-            return "redirect:/oauth2/authorization/google?prompt=login";
-        } else if ("kakao".equals(provider)) {
-            return "redirect:/oauth2/authorization/kakao?prompt=login";
-        }
-        return "redirect:/";
-    }
 }
