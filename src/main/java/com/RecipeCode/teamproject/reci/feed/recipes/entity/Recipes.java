@@ -67,6 +67,10 @@ public class Recipes extends BaseTimeEntity {
 
     private LocalDateTime deleteDate;
 
+    public void incrementCommentCount() {
+        this.commentCount = (this.commentCount == 0) ? 1 : this.commentCount + 1;
+    }
+
 
     /*
      *   단방향 매핑
