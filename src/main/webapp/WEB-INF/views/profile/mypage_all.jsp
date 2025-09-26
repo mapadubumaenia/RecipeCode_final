@@ -37,9 +37,9 @@
 
             <!-- ▶ 알림 + 로그아웃 -->
             <div class="header-actions">
-                <form action="${pageContext.request.contextPath}/logout" method="post">
-                    <%-- TODO: CSRF hidden input (나중에 적용 시 주석 해제) --%>
-                    <%-- <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/> --%>
+                <form action="${pageContext.request.contextPath}/auth/logout" method="post">
+                    <%-- TODO: CSRF hidden input --%>
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <button type="submit" class="btn-logout">logout</button>
                 </form>
                 <div class="notif-wrap">
@@ -68,7 +68,6 @@
             </div>
         </div>
     </header>
-
     <!-- 프로필 카드 -->
     <section class="card profile-card">
         <div class="avatar-lg">
