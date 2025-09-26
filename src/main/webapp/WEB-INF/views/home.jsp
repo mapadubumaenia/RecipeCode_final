@@ -3,8 +3,8 @@
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>쉐프리드 — 레시피 피드</title>
     <link rel="preconnect" href="https://www.youtube.com">
     <link rel="preconnect" href="https://i.ytimg.com">
@@ -15,8 +15,15 @@
     <script src="<c:url value='/js/home.js'/>" defer></script>
     <style>
         /* 링크가 카드 영역을 블록으로 덮도록 */
-        .post-link { display:block; text-decoration:none; color:inherit; }
-        .post-link.disabled { cursor:default; }
+        .post-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .post-link.disabled {
+            cursor: default;
+        }
 
         /* ▶ 미디어 공통 스타일 */
         .media {
@@ -26,7 +33,11 @@
             background: #000;
             position: relative;
         }
-        .media.aspect { aspect-ratio: 16 / 9; }
+
+        .media.aspect {
+            aspect-ratio: 16 / 9;
+        }
+
         .media > iframe,
         .media > video,
         .media > img {
@@ -37,20 +48,34 @@
         }
 
         /* ▶ 라이트 유튜브: 플레이스홀더 버튼 */
-        .light-yt { cursor: pointer; }
-        .light-yt:focus { outline: 3px solid #8ac4ff; outline-offset: 2px; }
+        .light-yt {
+            cursor: pointer;
+        }
+
+        .light-yt:focus {
+            outline: 3px solid #8ac4ff;
+            outline-offset: 2px;
+        }
+
         .light-yt .play-badge {
             position: absolute;
-            left: 50%; top: 50%;
+            left: 50%;
+            top: 50%;
             transform: translate(-50%, -50%);
-            width: 72px; height: 72px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.85);
-            display: grid; place-items: center;
-            font-size: 28px; line-height: 1;
+            background: rgba(255, 255, 255, 0.85);
+            display: grid;
+            place-items: center;
+            font-size: 28px;
+            line-height: 1;
             user-select: none;
         }
-        .light-yt:hover .play-badge { background: rgba(255,255,255,0.95); }
+
+        .light-yt:hover .play-badge {
+            background: rgba(255, 255, 255, 0.95);
+        }
     </style>
 </head>
 <body>
@@ -130,7 +155,9 @@
                 <div class="thumb badge">
                     <img src="https://picsum.photos/seed/pasta/800/500" alt="Spaghetti Aglio e Olio"/>
                 </div>
-                <div><div class="trend-title">Spaghetti Aglio e Olio</div></div>
+                <div>
+                    <div class="trend-title">Spaghetti Aglio e Olio</div>
+                </div>
                 <div class="actions">
                     <div>
                         <button class="btn-none">❤️ Like</button>
@@ -141,7 +168,9 @@
             </article>
             <article class="card p-12 trend-card">
                 <div class="thumb"><img src="https://picsum.photos/seed/pancake/800/500" alt="Fluffy Pancakes"/></div>
-                <div><div class="trend-title">Fluffy Pancakes</div></div>
+                <div>
+                    <div class="trend-title">Fluffy Pancakes</div>
+                </div>
                 <div class="actions">
                     <button class="btn-none">❤️ Like</button>
                     <button class="btn-none">💬 12</button>
@@ -150,7 +179,9 @@
             </article>
             <article class="card p-12 trend-card">
                 <div class="thumb"><img src="https://picsum.photos/seed/salad/800/500" alt="Caprese Salad"/></div>
-                <div><div class="trend-title">Caprese Salad</div></div>
+                <div>
+                    <div class="trend-title">Caprese Salad</div>
+                </div>
                 <div class="actions">
                     <button class="btn-none">❤️ Like</button>
                     <button class="btn-none">💬 12</button>
@@ -159,7 +190,9 @@
             </article>
             <article class="card p-12 trend-card">
                 <div class="thumb"><img src="https://picsum.photos/seed/risotto/800/500" alt="Mushroom Risotto"/></div>
-                <div><div class="trend-title">Mushroom Risotto</div></div>
+                <div>
+                    <div class="trend-title">Mushroom Risotto</div>
+                </div>
                 <div class="actions">
                     <button class="btn-none">❤️ Like</button>
                     <button class="btn-none">💬 12</button>
@@ -185,7 +218,7 @@
 
         <!-- === For You 추천 피드 (동적 로딩) === -->
         <section id="forYouFeed" class="post-list"></section>
-        <!-- ✅ 무한스크롤 센티넬 -->
+        <!--  무한스크롤 센티넬 -->
         <div id="forYouSentinel" style="height:1px"></div>
 
         <div style="display:flex; justify-content:center; margin:12px 0;">
@@ -195,14 +228,14 @@
 
     </section>
 
-    <!-- ✅ JSP가 가진 값만 전역으로 전파 -->
+    <!--  JSP가 가진 값만 전역으로 전파 -->
     <script>
-        window.__CTX__='${pageContext.request.contextPath}';
-        window.__USER_EMAIL__='';
+        window.__CTX__ = '${pageContext.request.contextPath}';
+        window.__USER_EMAIL__ = '';
     </script>
     <sec:authorize access="isAuthenticated()">
         <script>
-            (function(){
+            (function () {
                 var a = '<sec:authentication property="principal.userEmail"/>' || '';
                 var b = '<sec:authentication property="principal.username"/>' || '';
                 var v = (a && a.trim().length) ? a : (b && b.trim().length ? b : '');
@@ -224,24 +257,15 @@
             <a class="btn primary text-center"
                href="<c:url value='/recipes/add'/>">Upload Recipe</a>
         </div>
-        <!-- 팔로우 피드: -->
-        <div class="followingfeed">
+        <!-- 사이드바: Following 피드 -->
+        <aside id="myfollowing" class="sidebar">
             <h2 class="section-title">Following</h2>
-            <section id="following" class="card p-16 feature" style="margin-top: 12px">
-                <div class="post-head">
-                    <div class="avatar-ss"><img src="" alt=""></div>
-                    <div class="post-info mb-8">
-                        <div class="post-id">John Do</div>
-                        <div class="muted">Food Enthusiast</div>
-                    </div>
-                    <button class="followbtn-sm is-active" data-user-id="u_987" data-following="true"></button>
-                </div>
-                <div class="thumb">
-                    <img src="https://picsum.photos/seed/smoothie/1200/800" alt="Smoothie Bowl photo"/>
-                </div>
-                <p class="muted">Hand-picked favorites from our creators.</p>
-            </section>
-        </div>
+
+            <!-- 팔로잉 피드 컨테이너 -->
+            <div id="followContainer" class="follow-feed">
+            </div>
+        </aside>
+
     </aside>
 </main>
 <div class="to-topbox">
@@ -264,6 +288,9 @@
 <script src="feed-follow-btn.js"></script>
 <script src="feed-cmt.js"></script>
 <script src="footer.js"></script>
+<!-- 사이드바 팔로잉 JS -->
+<script src="${pageContext.request.contextPath}/js/mypage/mypage-sidebar.js"></script>
+<script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
 <%--시간 js--%>
 <script src="<c:url value='/js/mypage/utils.js'/>"></script>
 <%--알림 js--%>

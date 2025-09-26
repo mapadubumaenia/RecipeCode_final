@@ -16,30 +16,50 @@ document.addEventListener("DOMContentLoaded", () => {
         fetch(getApiUrl())
             .then(res => res.json())
             .then(data => {
-                data.content.forEach(recipe => {
-                    const article = createFeedArticle(recipe, currentUserEmail);
-                    feedContainer.appendChild(article);
-                });
+                if (!data.content || data.content.length === 0) {
+                    // 게시글이 없으면 안내 메시지 카드 추가 (중복 방지)
+                    if (!feedContainer.querySelector(".no-feed")) {
+                        const emptyCard = document.createElement("article");
+                        emptyCard.className = "card post no-feed"; // card 모양 재사용
+                        emptyCard.innerHTML = `
+            <div class="post-body">
+                <p class="muted">아직 작성한 글이 없습니다.</p>
+            </div>
+        `;
+                        feedContainer.appendChild(emptyCard);
+                    }
+                } else {
+                    // 기존 "없습니다" 메시지가 있으면 제거
+                    const oldMsg = feedContainer.querySelector(".no-feed");
+                    if (oldMsg) oldMsg.remove();
+
+                    // 실제 게시글 렌더링
+                    data.content.forEach(recipe => {
+                        const article = createFeedArticle(recipe, currentUserEmail);
+                        feedContainer.appendChild(article);
+                    });
+                }
+
                 isLast = data.last;
                 page++;
-                isLoading = false;
             })
-            .catch(err => {
-                console.error("Error:", err);
+            .catch(err => console.error("Error:", err))
+            .finally(() => {
                 isLoading = false;
             });
     }
 
-    // 첫 로딩
+    //  첫 로딩
     loadFeeds();
 
-    // 무한 스크롤
+    //  무한 스크롤
     window.addEventListener("scroll", () => {
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
             loadFeeds();
         }
     });
 });
+
 
 // 공유 버튼 이벤트
 document.addEventListener("click", (e) => {
@@ -87,13 +107,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const followerEl = card.querySelector(".mini-stats .f-count:nth-child(1) b");
         const followingEl = card.querySelector(".mini-stats .f-count:nth-child(2) b");
 
-        fetch(`/api/follow/${userId}/follower/count`) // (변경됨)
+        // 팔로워 리스트 일부만 출력
+        fetch(`/api/follow/${profileUserId}/follower?page=0&size=5`)
             .then(res => res.json())
-            .then(count => { if (followerEl) followerEl.textContent = count; });
+            .then(data => {
+                renderMiniCards(data.content, "followersList");
+            });
 
-        fetch(`/api/follow/${userId}/following/count`) // (변경됨)
+        // 팔로잉 리스트 일부만 출력
+        fetch(`/api/follow/${profileUserId}/following?page=0&size=5`)
             .then(res => res.json())
-            .then(count => { if (followingEl) followingEl.textContent = count; });
+            .then(data => {
+                renderMiniCards(data.content, "followingList");
+            });
     });
 });
 

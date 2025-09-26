@@ -127,7 +127,7 @@
    피드 카드
    ========================= */
 .feed-list {
-    display: grid;
+    /*display: grid;*/
     gap: 12px;
 }
 
@@ -169,6 +169,43 @@
     border-radius: var(--radius);
     object-fit: cover;
 }
+
+/* 게시글 없음 카드 */
+.post.no-feed {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 120px;   /* 일반 카드와 비슷한 높이 */
+    text-align: center;
+}
+
+.post.no-feed .muted {
+    font-size: 15px;
+    color: var(--muted);
+}
+
+.feed-list .no-feed {
+    margin-top: 1px;   /* 버튼과 거의 붙게 */
+}
+
+.tabs {
+    display: flex;
+    align-items: center;   /* 버튼 세로 정렬 */
+    gap: 6px;
+    padding: 0;
+    margin: 0 0 6px 0;     /* 밑에 약간만 여백 */
+    height: auto;          /* 높이 강제로 auto */
+    line-height: normal;   /* line-height 초기화 */
+}
+.tabs .tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    margin: 1rem;
+    line-height: 1;   /* 버튼 자체 높이만 사용 */
+}
+
 
 /* =========================
    사이드바 (팔로워/팔로잉)

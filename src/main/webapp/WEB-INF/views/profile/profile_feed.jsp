@@ -153,8 +153,8 @@
 
             <!-- 탭 버튼 -->
             <div class="follow-tabs">
-                <button class="tab-btn is-active" data-tab="follower">Follower</button>
-                <button class="tab-btn" data-tab="followers">Following</button>
+                <button class="tab-btn is-active" data-tab="followers">Follower</button>
+                <button class="tab-btn" data-tab="following">Following</button>
             </div>
 
             <!-- Followers 목록 -->
@@ -163,7 +163,12 @@
                     <c:if test="${st.index < 10}">
                         <div class="mini-card" data-userid="${f.member.userId}">
                             <!-- 왼쪽: 프로필 이미지 -->
-                            <img src="${f.member.profileImageUrl}" alt="">
+                            <c:if test="${empty f.member.profileImageUrl}">
+                                <img src="/img/default-profile.png" alt="기본 이미지">
+                            </c:if>
+                            <c:if test="${not empty f.member.profileImageUrl}">
+                                <img src="${f.member.profileImageUrl}" alt="${f.member.nickname}">
+                            </c:if>
 
                             <!-- 중앙: 유저 정보 -->
                             <div class="mini-info">
@@ -185,9 +190,9 @@
                         </div>
                     </c:if>
                 </c:forEach>
-                <c:if test="${followersHasNext}">
-                    <button class="btn small ghost">더보기</button>
-                </c:if>
+
+                    <a href="/follow/profile/${user.userId}" class="btn small ghost">더보기</a>
+
             </div>
 
             <!-- Following 목록 -->
@@ -218,9 +223,9 @@
                         </div>
                     </c:if>
                 </c:forEach>
-                <c:if test="${followingsHasNext}">
-                    <button class="btn small ghost">더보기</button>
-                </c:if>
+
+                    <a href="/follow/profile/${user.userId}" class="btn small ghost">더보기</a>
+
             </div>
 
         </aside>
