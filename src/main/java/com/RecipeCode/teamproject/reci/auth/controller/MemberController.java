@@ -6,14 +6,15 @@ import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.auth.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @Log4j2
 @Controller
@@ -55,19 +56,39 @@ public class MemberController {
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
         byte[] image = member.getProfileImage();
+        MediaType mediaType = MediaType.IMAGE_JPEG;
+
         if (image == null) {
-            return ResponseEntity.notFound().build();
+            try {
+                ClassPathResource defaultImg = new ClassPathResource("static/images/default_profile.jpg");
+                image = defaultImg.getInputStream().readAllBytes();
+                mediaType = MediaType.IMAGE_JPEG; // 기본 이미지가 jpg라면
+            } catch (IOException e) {
+                throw new RuntimeException("기본 프로필 이미지를 불러오는 데 실패했습니다.", e);
+            }
+        } else {
+            if (member.getProfileImageUrl() != null) {
+                if (member.getProfileImageUrl().endsWith(".png")) {
+                    mediaType = MediaType.IMAGE_PNG;
+                } else if (member.getProfileImageUrl().endsWith(".jpg")) {
+                    mediaType = MediaType.IMAGE_JPEG;
+                }
+            }
         }
 
-        MediaType mediaType = MediaType.IMAGE_JPEG; // 기본값
-        if (member.getProfileImageUrl() != null && member.getProfileImageUrl().endsWith(".png")) {
-            mediaType = MediaType.IMAGE_PNG;
-        }
-
-        // MIME 타입 추측 (JPG 기준, PNG면 IMAGE_PNG)
         return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
+                .contentType(mediaType)
                 .body(image);
     }
 
+    @GetMapping("/oauth2/reauth")
+    public String reauth(OAuth2AuthenticationToken auth) {
+        String provider = auth.getAuthorizedClientRegistrationId(); // google, kakao 등
+        if ("google".equals(provider)) {
+            return "redirect:/oauth2/authorization/google?prompt=login";
+        } else if ("kakao".equals(provider)) {
+            return "redirect:/oauth2/authorization/kakao?prompt=login";
+        }
+        return "redirect:/";
+    }
 }
