@@ -1,5 +1,5 @@
 // =========================
-// home.js (외부 파일)
+// home.js (홈 메인 피드)
 // =========================
 (function () {
     "use strict";
@@ -27,22 +27,22 @@
     }
     function detailUrl(id){ return CTX + '/recipes/' + encodeURIComponent(id); }
 
-    // 썸네일 선택
+    // 썸네일 선택 폴백
     function pickThumb(it){
         if (it.thumbUrl && typeof it.thumbUrl === 'string' && it.thumbUrl.trim().length > 0){
             return it.thumbUrl;
         }
-        var seed = (it.id || 'recipe').toString().slice(0,12).replace(/[^a-zA-Z0-9]/g,'');
+        const seed = (it.id || 'recipe').toString().slice(0,12).replace(/[^a-zA-Z0-9]/g,'');
         return 'https://picsum.photos/seed/' + encodeURIComponent(seed || 'rc') + '/1200/800';
     }
 
     // 라이트 유튜브 attach
     function attachLightYouTube(container){
         if (!container) return;
-        var src = container.getAttribute('data-yt-src');
+        const src = container.getAttribute('data-yt-src');
         if (!src) return;
-        var iframe = document.createElement('iframe');
-        var finalSrc = src + (src.includes('?') ? '&' : '?') + 'autoplay=1&mute=0';
+        const iframe = document.createElement('iframe');
+        const finalSrc = src + (src.includes('?') ? '&' : '?') + 'autoplay=1&mute=0';
         iframe.src = finalSrc;
         iframe.title = 'YouTube video player';
         iframe.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
@@ -83,7 +83,6 @@
 
                 const node = document.createElement('div');
                 node.className = 'tag-item';
-                // 요청대로 해시태그(#) 붙임
                 node.innerHTML = '<span>#' + esc(tag) + '</span><span class="chip">' + esc(fmt.format(cnt)) + '</span>';
                 frag.appendChild(node);
             });
@@ -114,9 +113,9 @@
         function buildUrl() {
             let url;
             if (USER_EMAIL && USER_EMAIL.length > 0) {
-                url = '/api/feed/personal?userEmail=' + encodeURIComponent(USER_EMAIL);
+                url = CTX + '/api/feed/personal?userEmail=' + encodeURIComponent(USER_EMAIL);
             } else {
-                url = '/api/feed/hot?';
+                url = CTX + '/api/feed/hot?';
             }
             if (url.indexOf('?') === -1) url += '?'; else if (!/[&?]$/.test(url)) url += '&';
             if (nextCursor) url += 'after=' + encodeURIComponent(nextCursor) + '&';
@@ -125,10 +124,10 @@
         }
 
         function renderMediaHtml(it){
-            var kind = it.mediaKind || 'image';
+            const kind = it.mediaKind || 'image';
             if (kind === 'youtube') {
-                var poster = it.poster || pickThumb(it);
-                var src = it.mediaSrc || '';
+                const poster = it.poster || pickThumb(it);
+                const src = it.mediaSrc || '';
                 return ''
                     + '<div class="media aspect light-yt" role="button" tabindex="0" '
                     + 'aria-label="' + esc(it.title || '') + ' 동영상 재생" data-yt-src="' + esc(src) + '">'
@@ -136,14 +135,14 @@
                     +   '<div class="play-badge">▶</div>'
                     + '</div>';
             } else if (kind === 'video') {
-                var vsrc = it.mediaSrc || '';
-                var poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
+                const vsrc = it.mediaSrc || '';
+                const poster = it.poster ? (' poster="' + esc(it.poster) + '"') : '';
                 return ''
                     + '<div class="media aspect">'
                     +   '<video controls preload="metadata"' + poster + ' src="' + esc(vsrc) + '"></video>'
                     + '</div>';
             } else {
-                var img = (it.mediaSrc && it.mediaSrc.length > 0) ? it.mediaSrc : pickThumb(it);
+                const img = (it.mediaSrc && it.mediaSrc.length > 0) ? it.mediaSrc : pickThumb(it);
                 return ''
                     + '<div class="media aspect">'
                     +   '<img src="' + esc(img) + '" alt="">'
@@ -156,32 +155,39 @@
         }
 
         function cardHtml(it){
-            var tagsHtml = '';
+            // 작성자 id/nick → 링크용 데이터 준비
+            const displayIdRaw = it.authorId || it.authorNick || it.author || '';
+            const cleanId = (displayIdRaw.startsWith('@') ? displayIdRaw.slice(1) : displayIdRaw).trim();
+            const profileHref = CTX + '/profile/' + encodeURIComponent(cleanId);
+
+            let tagsHtml = '';
             if (it.tags && it.tags.length) {
-                var parts = [];
-                for (var i=0;i<it.tags.length;i++){
+                const parts = [];
+                for (let i=0;i<it.tags.length;i++){
                     parts.push('<span class="tag">#' + esc(it.tags[i]) + '</span>');
                 }
                 tagsHtml = parts.join(' ');
             }
-            var score = (typeof it.recScore === 'number' && it.recScore > 0) ? (' · score ' + it.recScore) : '';
-            var likes = (typeof it.likes === 'number') ? it.likes : (it.likes || 0);
+            const score = (typeof it.recScore === 'number' && it.recScore > 0) ? (' · score ' + it.recScore) : '';
+            const likes = (typeof it.likes === 'number') ? it.likes : (it.likes || 0);
 
-            var rid = safeId(it);
-            var hasUuid = isUuid36(rid);
-            var href = hasUuid ? detailUrl(rid) : '#';
+            const rid = safeId(it);
+            const hasUuid = isUuid36(rid);
+            const href = hasUuid ? detailUrl(rid) : '#';
 
-            var mediaBlock = renderMediaHtml(it);
+            const mediaBlock = renderMediaHtml(it);
 
-            var html = ''
+            const html = ''
                 + '<article class="card p-16 post" data-id="' + esc(rid) + '">'
                 +   '<div class="post-head">'
                 +     '<div class="avatar-ss"><img src="" alt=""></div>'
                 +     '<div class="post-info">'
-                +       '<div class="post-id">@' + esc(it.authorNick || it.author || '') + '</div>'
+                +       '<div class="post-id">'
+                +         (cleanId ? '<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>' : '')
+                +       '</div>'
                 +       '<div class="muted">' + esc(it.createdAt || '') + '</div>'
                 +     '</div>'
-                +     '<button class="followbtn-sm" data-user-id="' + esc(it.authorNick || it.author || '') + '" data-following="false"></button>'
+                +     '<button class="followbtn-sm" data-user-id="' + (cleanId ? '@' + esc(cleanId) : '') + '" data-following="false"></button>'
                 +   '</div>'
                 +   mediaBlock
                 +   (hasUuid ? ('<a class="post-link" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">')
@@ -206,17 +212,17 @@
             }
 
             try{
-                var url = buildUrl();
-                var res = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                const url = buildUrl();
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                var data = await res.json();
+                const data = await res.json();
 
                 if (data && data.items && data.items.length) {
-                    var html = '';
-                    for (var i=0;i<data.items.length;i++){
+                    let html = '';
+                    for (let i=0;i<data.items.length;i++){
                         html += cardHtml(data.items[i]);
                     }
-                    var temp = document.createElement('div');
+                    const temp = document.createElement('div');
                     temp.innerHTML = html;
                     while (temp.firstChild) $list.appendChild(temp.firstChild);
                 }
@@ -242,52 +248,51 @@
         loadMore();
         if ($btn) $btn.addEventListener('click', loadMore);
 
-         if ('IntersectionObserver' in window && $sentinel) {
-               const io = new IntersectionObserver((entries) => {
-                     entries.forEach((entry) => {
-                           if (entry.isIntersecting && nextCursor && !busy) {
-                                 loadMore();
-                               }
-                         });
-                   }, { root: null, rootMargin: '600px 0px' }); // 여유 있게 미리 로드
-               io.observe($sentinel);
-             } else {
-               // Fallback: 스크롤 바닥 근처에서 로드
-                   let ticking = false;
-               window.addEventListener('scroll', () => {
-                     if (ticking) return;
-                     ticking = true;
-                     requestAnimationFrame(() => {
-                           const nearBottom =
-                                 window.innerHeight + window.scrollY >= (document.body.offsetHeight - 600);
-                           if (nearBottom && nextCursor && !busy) loadMore();
-                           ticking = false;
-                         });
-                   });
-             }
+        // 무한 스크롤
+        if ('IntersectionObserver' in window && $sentinel) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && nextCursor && !busy) {
+                        loadMore();
+                    }
+                });
+            }, { root: null, rootMargin: '600px 0px' });
+            io.observe($sentinel);
+        } else {
+            // Fallback: 스크롤 바닥 근처에서 로드
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(() => {
+                    const nearBottom = window.innerHeight + window.scrollY >= (document.body.offsetHeight - 600);
+                    if (nearBottom && nextCursor && !busy) loadMore();
+                    ticking = false;
+                });
+            });
+        }
 
-        // 카드 빈공간 클릭 시 상세 이동 (버튼은 이동 막기)
+        // 카드 빈공간 클릭 시 상세 이동 (버튼은 이동 막기) + 라이트 유튜브
         document.addEventListener('click', function(e){
-            if (e.target.closest('.js-like, .js-cmt, .js-share, .followbtn-sm')) {
-                e.stopPropagation();
+            if (e.target.closest('.js-like, .js-cmt, .js-share, .followbtn-sm, .author-link')) {
+                // 버튼/작성자링크 자체는 기본 동작 유지
                 return;
             }
             if (e.target.closest('a.post-link')) return;
 
-            // 라이트 유튜브 클릭 처리
-            var lyt = e.target.closest('.light-yt[data-yt-src]');
+            const lyt = e.target.closest('.light-yt[data-yt-src]');
             if (lyt) { attachLightYouTube(lyt); return; }
 
-            var card = e.target.closest('article.post[data-id]');
+            const card = e.target.closest('article.post[data-id]');
             if (!card) return;
-            var rid = card.getAttribute('data-id');
+            const rid = card.getAttribute('data-id');
             if (isUuid36(rid)) window.location.href = detailUrl(rid);
         });
 
         // 키보드 접근성: Enter/Space 시 라이트 유튜브 재생
         document.addEventListener('keydown', function(e){
             if (e.key !== 'Enter' && e.key !== ' ') return;
-            var el = document.activeElement;
+            const el = document.activeElement;
             if (el && el.classList && el.classList.contains('light-yt') && el.hasAttribute('data-yt-src')) {
                 e.preventDefault();
                 attachLightYouTube(el);
@@ -295,10 +300,9 @@
         });
     }
 
-
     // =========================
-//  C) Trending (최근 7일 좋아요 Top-4)
-// =========================
+    //  C) Trending (최근 7일 좋아요 Top-4)
+    // =========================
     function setupTrending(){
         const wrap = document.getElementById('trending');
         if (!wrap) return;
@@ -368,7 +372,6 @@
                 const data = await res.json();
                 wrap.innerHTML = ''; // 하드코딩 초기 내용 비움
                 (data.items || []).forEach(renderCard);
-                // 없으면 기존 하드코딩 유지하고 싶다면 위 2줄을 조건부로 처리하면 됨
             } catch (e) {
                 console.warn('[home:trending] load failed', e);
             }
@@ -382,5 +385,3 @@
         setupTrending();
     });
 })();
-
-
