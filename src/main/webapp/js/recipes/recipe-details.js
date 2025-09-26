@@ -2,7 +2,12 @@
 (function () {
     const box = document.getElementById('postDesc');
     const btn = document.getElementById('btnToggleDesc');
-    btn?.addEventListener('click', () => box.classList.toggle('expanded'));
+    btn?.addEventListener('click', () => {
+        const box = btn.closest('.desc, .collapsible');
+        if (!box) return;
+        box.classList.toggle('expanded');
+        btn.textContent = box.classList.contains('expanded') ? '접기' : '더보기';
+    });
 })();
 
 // 이미지/텍스트 슬라이더
