@@ -20,6 +20,8 @@ public class RecipeCardDto {
 
     private String thumbUrl;   // 레거시/폴백용 이미지
 
+    private String authorEmail;
+
     // 👇 신규: 라이트 유튜브/비디오/이미지 메타
     private String mediaKind;  // "youtube" | "video" | "image"
     private String mediaSrc;   // youtube: embed URL, video: 파일 URL, image: 이미지 URL
