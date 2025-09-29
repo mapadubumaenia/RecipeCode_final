@@ -103,8 +103,6 @@
             remember: $('#remember').checked
         };
         e.target.submit();
-        console.log('LOGIN PAYLOAD', payload);
-        alert('로그인 요청! (백엔드 연동 지점)');
     });
 </script>
 </body>

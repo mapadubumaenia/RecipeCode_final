@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const feedContainer = document.querySelector("#feedContainer");
     const userId = feedContainer.dataset.user;
+
     let page = 0;
     let isLast = false;
     let isLoading = false;

@@ -15,6 +15,8 @@ const followerListEl  = document.getElementById("followerList");
 const btnMoreFollowing = document.getElementById("btnMoreFollowing");
 const btnMoreFollower  = document.getElementById("btnMoreFollower");
 const tabs = document.querySelectorAll('[data-follow-tab]');
+// 기본이미지
+const defaultProfile = `${ctx}/images/default_profile.jpg`;
 
 // 상태
 const state = {
@@ -72,11 +74,15 @@ function renderItem(row) {
     const followCls  = d.followingStatus ? "is-following" : "";
     const hideBtn = email === viewerEmail;
 
+    const profileImg = (d.profileImageUrl && d.profileImageUrl.trim().length > 0)
+        ? d.profileImageUrl
+        : defaultProfile;
+
     el.innerHTML = `
     <div class="post-head flex-row">
       <div class="leftBox jump flex-box" data-uid="${d.userId}">
       <div class="avatar-ss">
-        <img src="${d.profileImageUrl || ""}" alt="${d.userId}">
+        <img src="${profileImg}" alt="${d.userId}" class="avatar-ss"/>
       </div>
       <div class="post-info ml-8">
         <div class="post-id">${d.userId}</div>

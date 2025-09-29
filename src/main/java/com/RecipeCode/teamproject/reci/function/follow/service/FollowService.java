@@ -93,6 +93,9 @@ public class FollowService {
     // 특정 유저의 팔로잉 목록
     public Slice<FollowDto> getUserFollowingList(String userId, Pageable pageable) {
         Member user = findByUserIdOrThrow(userId, "errors.not.found");
+        if (user.getProfileImageUrl() == null || user.getProfileImageUrl().isBlank()) {
+            user.setProfileImageUrl("/member/" + user.getUserId() + "/profile-image");
+        }
         return followRepository.findByFollower(user, pageable)
                 .map(mapStruct::toFollowingDto);
     }
@@ -100,6 +103,9 @@ public class FollowService {
     // 특정 유저의 팔로워 목록
     public Slice<FollowDto> getUserFollowerList(String userId, Pageable pageable) {
         Member user = findByUserIdOrThrow(userId, "errors.not.found");
+        if (user.getProfileImageUrl() == null || user.getProfileImageUrl().isBlank()) {
+            user.setProfileImageUrl("/member/" + user.getUserId() + "/profile-image");
+        }
         return followRepository.findByFollowing(user, pageable)
                 .map(mapStruct::toFollowerDto);
     }

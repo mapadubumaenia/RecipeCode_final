@@ -67,6 +67,11 @@ public class FollowViewController {
 
         MemberDto ownerDto = mapStruct.toDto(owner);
 
+        // 프로필 이미지 URL 기본값 세팅
+        if (ownerDto.getProfileImageUrl() == null || ownerDto.getProfileImageUrl().isBlank()) {
+            ownerDto.setProfileImageUrl("/member/" + owner.getUserId() + "/profile-image");
+        }
+
         model.addAttribute("profileOwner", ownerDto);
         model.addAttribute("profileOwnerEmail", ownerDto.getUserEmail());
         model.addAttribute("profileOwnerId", ownerDto.getUserId());

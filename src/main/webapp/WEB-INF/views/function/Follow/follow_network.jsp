@@ -7,6 +7,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <html>
 <head>
     <title>Follow Network</title>
@@ -25,15 +26,16 @@
         <a href="/" class="float-text">home</a>
       </div>
 
-      <!-- ▶ 알림 + 로그아웃 -->
+      <!-- ▶ 알림 + 마이페이지 -->
       <div class="header-actions">
-        <form action="${pageContext.request.contextPath}/logout" method="post">
           <%-- TODO: CSRF hidden input (나중에 적용 시 주석 해제) --%>
           <%-- <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/> --%>
-          <button type="submit" class="btn-logout">logout</button>
-        </form>
         <div class="notif-wrap">
           <!-- 알림 버튼 -->
+          <sec:authorize access="isAuthenticated()">
+            <sec:authentication property="principal" var="loginUser"/>
+            <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+          </sec:authorize>
           <button
                   id="btnNotif"
                   class="notif-btn"

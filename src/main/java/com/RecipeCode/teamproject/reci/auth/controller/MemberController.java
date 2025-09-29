@@ -22,7 +22,7 @@ import java.io.IOException;
 public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
-    //    로그인 함수
+    //    로그인 페이지
     @GetMapping("/auth/login")
     public String login() {
         return "auth/login";
@@ -55,15 +55,13 @@ public class MemberController {
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
-
         byte[] image = member.getProfileImage();
         MediaType mediaType = MediaType.IMAGE_JPEG;
+
 
         if (image == null || image.length == 0) {
             try {
                 ClassPathResource defaultImg = new ClassPathResource("static/images/default_profile.jpg");
-                log.info("리소스 존재 여부: {}", defaultImg.exists());
-                log.info("리소스 경로: {}", defaultImg.getPath());
                 image = defaultImg.getInputStream().readAllBytes();
                 mediaType = MediaType.IMAGE_JPEG; // 기본 이미지가 jpg라면
             } catch (IOException e) {

@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -26,9 +27,10 @@
 
             <!-- ▶ 추가: 알림 + 로그아웃 -->
             <div class="header-actions">
-                <form action="${pageContext.request.contextPath}/auth/logout" method="post">
-                    <button type="submit" class="btn-logout">logout</button>
-                </form>
+                <sec:authorize access="isAuthenticated()">
+                    <sec:authentication property="principal" var="loginUser"/>
+                    <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+                </sec:authorize>
 
                 <div class="notif-wrap">
                     <!-- 알림 버튼 -->
