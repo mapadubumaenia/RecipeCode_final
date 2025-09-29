@@ -55,12 +55,15 @@ public class MemberController {
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
+
         byte[] image = member.getProfileImage();
         MediaType mediaType = MediaType.IMAGE_JPEG;
 
-        if (image == null) {
+        if (image == null || image.length == 0) {
             try {
                 ClassPathResource defaultImg = new ClassPathResource("static/images/default_profile.jpg");
+                log.info("리소스 존재 여부: {}", defaultImg.exists());
+                log.info("리소스 경로: {}", defaultImg.getPath());
                 image = defaultImg.getInputStream().readAllBytes();
                 mediaType = MediaType.IMAGE_JPEG; // 기본 이미지가 jpg라면
             } catch (IOException e) {
@@ -73,6 +76,8 @@ public class MemberController {
                     mediaType = MediaType.IMAGE_PNG;
                 } else if (url.endsWith(".gif")) {
                     mediaType = MediaType.IMAGE_GIF;
+                } else {
+                mediaType = MediaType.IMAGE_JPEG;
                 }
             }
         }

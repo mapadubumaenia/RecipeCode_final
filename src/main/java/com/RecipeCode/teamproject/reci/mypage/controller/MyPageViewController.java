@@ -46,9 +46,15 @@ public class MyPageViewController {
             return "redirect:/auth/login";
         }
 
+
         // 2) 로그인 이메일로 Member 조회
         String email = principal.getUsername(); // SecurityUserDto의 username = userEmail
         Member user = memberService.getByUserEmail(email);
+        // 프로필 이미지 URL 기본값 세팅
+        if (user.getProfileImageUrl() == null || user.getProfileImageUrl().isBlank()) {
+            user.setProfileImageUrl("/member/" + user.getUserId() + "/profile-image");
+        }
+
         MemberDto memberDto = mapStruct.toDto(user);
 
         // 3) 화면에 뿌리기
