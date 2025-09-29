@@ -14,6 +14,7 @@
 /* 푸터/버튼 (검색 페이지 none) */
 footer{display:flex;justify-content:flex-end;}
 
+.like.active {color:darkred; font-weight: bold;}
 /* 커뮤니티 피드 카드 */
 .post{display:flex;flex-direction:column;gap:10px;margin-bottom: 8px;}
 .post-head{display:flex;flex-direction: row; align-items:center;gap:10px}

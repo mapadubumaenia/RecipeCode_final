@@ -30,6 +30,7 @@
 .followbtn-sm.is-active{background: var(--brand); color:var(--wtext);border-color: var(--brand);}
 .post-cta{display:flex;gap:14px}
 
+.like.active {color:darkred; font-weight: bold;}
 
 /* 커뮤니티 피드 카드 */
 .post{display:flex;flex-direction:column;gap:10px;margin-bottom: 8px;}
