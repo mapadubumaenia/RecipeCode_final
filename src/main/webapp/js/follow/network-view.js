@@ -187,6 +187,23 @@ async function load(kind) {
         const list = (data && Array.isArray(data.content)) ? data.content : [];
 
         const targetEl = (kind === "following") ? followingListEl : followerListEl;
+
+        if (S.page === 0 && list.length === 0) {
+            targetEl.innerHTML = `
+        <article class="card empty-full">
+          <div class="post-body">
+            <p class="muted">${
+                              kind === "following" ? "팔로잉한 사용자가 없습니다." : "아직 팔로워가 없습니다."
+                                }</p>
+          </div>
+        </article>`;
+                  S.last = true;
+                  if (kind === "following") btnMoreFollowing.style.display = "none";
+                  else btnMoreFollower.style.display = "none";
+                  return; // 더 이상 진행 X
+                }
+
+
         list.forEach(u => targetEl.appendChild(renderItem(u)));
 
         S.last = !!data.last;

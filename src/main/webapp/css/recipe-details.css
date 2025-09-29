@@ -24,7 +24,12 @@
 #imgSlides .slide img{width:100%;height:100%;object-fit:cover}
 .text-viewport{overflow:hidden;width:100%}
 #textSlides{display:grid;grid-auto-flow:column;grid-auto-columns:100%;transition:transform .35s cubic-bezier(.22,.61,.36,1);will-change:transform}
-#textSlides .slide{box-sizing:border-box;padding:20px;text-align:center}
+/*#textSlides .slide{box-sizing:border-box;padding:20px;text-align:center}*/
+#textSlides .slide{
+  box-sizing:border-box; padding:20px; text-align:center; display:flex; align-items:center; justify-content:center;
+}
+#textSlides .slide p{margin:0; line-height:1.6; word-break:keep-all; overflow-wrap:anywhere;}
+
 .no-trans{transition:none !important}
 .prev,.next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;padding:8px 12px;cursor:pointer;border-radius:6px;z-index:10}
 .prev{left:10px}.next{right:10px}

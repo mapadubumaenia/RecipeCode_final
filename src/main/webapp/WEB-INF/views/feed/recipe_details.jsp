@@ -24,6 +24,7 @@
     <c:set var="ctx" value="${pageContext.request.contextPath}" />
     <link rel="stylesheet" href="${ctx}/css/common.css" />
     <link rel="stylesheet" href="${ctx}/css/recipe-details.css" />
+    <link rel="stylesheet" href="${ctx}/css/notification.css">
 </head>
 <body>
 <div class="container" data-recipe-uuid="<c:out value='${recipe.uuid}'/>">
