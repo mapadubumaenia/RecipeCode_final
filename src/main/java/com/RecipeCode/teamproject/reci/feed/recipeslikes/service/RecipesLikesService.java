@@ -38,13 +38,19 @@ public class RecipesLikesService {
         Recipes recipes = recipesRepository.findByUuid(recipeUuid)
                 .orElseThrow(()->new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
+        if (recipes.getLikeCount() == null) recipes.setLikeCount(0L);
+
         boolean liked;
         RecipesLikesDto recipesLikesDto = new RecipesLikesDto();
 
         // 이미 좋아요 되어 있으면 취소
         if (recipesLikesRepository.existsByMemberAndRecipes(member,recipes)){
             recipesLikesRepository.deleteByMemberAndRecipes(member,recipes);
-            recipes.setLikeCount(recipes.getLikeCount() - 1);
+
+        // 음수 방지
+            long curr = recipes.getLikeCount() == null ? 0L : recipes.getLikeCount();
+            recipes.setLikeCount(Math.max(0L, curr - 1));
+
             liked = false;
         } else {
             if(userEmail.equalsIgnoreCase(recipes.getMember().getUserEmail())){
@@ -70,11 +76,14 @@ public class RecipesLikesService {
 
         }
 
+        // 최종 동기화 (최소 수정 포인트 ②) — DB 집계로 맞춤
+        long count = recipesLikesRepository.countVisibleLikes(recipeUuid);
+        recipes.setLikeCount(count);
+
         // 결과 DTO 채우기
         recipesLikesDto.setUserEmail(userEmail);
         recipesLikesDto.setUuid(recipeUuid);
         recipesLikesDto.setLiked(liked);
-        long count = recipesLikesRepository.countVisibleLikes(recipeUuid);
         recipesLikesDto.setLikesCount(count);
 
         return recipesLikesDto;

@@ -107,7 +107,7 @@ document.addEventListener("click", (e) => {
     const uid = jump.dataset.uid;
     if(!uid) return;
         // TODO: 여기여기 url 수정
-        window.location.href = `${ctx}/follow/profile/${encodeURIComponent(uid).replace(/%40/g, '@')}`;
+        window.location.href = `${ctx}/profile/${encodeURIComponent(uid).replace(/%40/g, '@')}`;
     });
 
 function resetAndReload(kind) {

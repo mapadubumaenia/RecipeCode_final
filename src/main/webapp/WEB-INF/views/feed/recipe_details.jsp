@@ -61,14 +61,14 @@
                         <div class="notif-head">
                             <strong>알림</strong>
                             <div class="actions">
-                                <button class="btn small ghost" id="markAll">모두 읽음</button>
+                                <button class="btn small" id="markAll">모두 읽음</button>
                             </div>
                         </div>
 
                         <div class="notif-list" id="notifList"><!-- JS 렌더 --></div>
 
                         <div class="notif-foot">
-                            <button class="btn small ghost" id="closeNotif">닫기</button>
+                            <button class="btn small" id="closeNotif">닫기</button>
                         </div>
                     </div>
                 </div>

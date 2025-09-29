@@ -33,7 +33,7 @@ $(function () {
                 const targetUrl = linkOf(item.notification); // 알림별 이동 링크
 
                 const el = $(`
-                    <div class="notif-item ${item.read ? '' : 'unread'}" data-id="${item.deliveryId}">
+                    <div class="notif-item ${item.read ? 'read' : 'unread'}" data-id="${item.deliveryId}">
                         <div class="ic">${iconOf(item.notification.event)}</div>
                         <div>
                             <div class="msg">${item.notification.message}</div>
@@ -41,7 +41,7 @@ $(function () {
                         </div>
                         <div>
                             <button type = "button"
-                                    class="btn small ghost" 
+                                    class="small" 
                                     data-read="${item.deliveryId}" 
                                     data-link="${targetUrl}">
                                 ${item.read ? "열기" : "읽음"}
@@ -112,28 +112,59 @@ $(function () {
     });
 
     // 개별 알림 읽음 처리 + 이동
-    notifList.on("click", ".notif-item", function (e) {
-        const button = $(this).find("button[data-read]");
-        const deliveryId = button.data("read");
-        const link = button.data("link");
-        $.ajax({
-            url: `/api/notification/${deliveryId}/read`,
-            type: "PATCH",
-            success: function () {
-                console.log("PATCH 성공, 이동 시도:", link);
-                if (link) {
-                    window.location.href = link;  // 정상 이동
-                } else {
-                    loadNotifications();
-                    loadUnreadCount();
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("PATCH 실패:", status, error);
-            }
-        });
-    });
+    // notifList.on("click", ".notif-item", function (e) {
+    //     const button = $(this).find("button[data-read]");
+    //     const deliveryId = button.data("read");
+    //     const link = button.data("link");
+    //     $.ajax({
+    //         url: `/api/notification/${deliveryId}/read`,
+    //         type: "PATCH",
+    //         success: function () {
+    //             console.log("PATCH 성공, 이동 시도:", link);
+    //             if (link) {
+    //                 window.location.href = link;  // 정상 이동
+    //             } else {
+    //                 loadNotifications();
+    //                 loadUnreadCount();
+    //             }
+    //         },
+    //         error: function (xhr, status, error) {
+    //             console.error("PATCH 실패:", status, error);
+    //         }
+    //     });
+    // });
 
+     // 개별 버튼 동작: "읽음"이면 읽음 처리만, "열기"면 링크 이동
+         notifList.on("click", "button[data-read]", function (e) {
+                 e.stopPropagation(); // 부모 클릭 방지
+                 const $btn = $(this);
+                 const deliveryId = $btn.data("read");
+                 const link = $btn.data("link");
+                 const $item = $btn.closest(".notif-item");
+                 const label = ($btn.text() || "").trim();
+
+                     if (label === "읽음") {
+                         // 읽음 PATCH만 하고, UI만 업데이트
+                             $.ajax({
+                                     url: `/api/notification/${deliveryId}/read`,
+                                 type: "PATCH",
+                                 success: function () {
+                                     // 버튼 라벨 교체
+                                         $btn.text("열기");
+                                     // 스타일 전환: unread -> read
+                                         $item.removeClass("unread").addClass("read");
+                                     // 빨간 점 갱신
+                                         loadUnreadCount();
+                                 },
+                             error: function (xhr, status, error) {
+                                     console.error("PATCH 실패:", status, error);
+                                 }
+                         });
+                     } else {
+                         // "열기"면 이동만
+                             if (link) window.location.href = link;
+                     }
+             });
 
     // 전체 읽음 처리
     markAllBtn.on("click", function () {
