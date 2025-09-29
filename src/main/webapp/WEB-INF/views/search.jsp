@@ -104,7 +104,8 @@
   <aside class="sidebar">
     <div class="card p-16 stack-btns">
       <a class="btn pc-register text-center" href="<c:url value='/auth/login'/>">login</a>
-      <button class="btn text-center" type="button" disabled aria-disabled="true" title="준비중">Profile</button>
+      <a class="btn text-center" href="<c:url value='/mypage'/>"
+      >Profile</a>
       <a class="btn primary text-center" href="<c:url value='/recipes/add'/>">Upload Recipe</a>
     </div>
 
