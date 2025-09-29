@@ -32,7 +32,7 @@
 
             <div class="actions">
                 <button type="submit" class="btn primary">저장</button>
-                <button type="button" class="btn primary" onclick="location.href='/faq'">목록</button>
+                <button type="button" class="btn primary" onclick="location.href='/admin/faq'">목록</button>
             </div>
         </form>
     </div>

@@ -62,7 +62,7 @@ public class FaqController {
         log.info("저장 로그 :" + faqDto);
 //		서비스의 insert 실행
         faqService.save(faqDto);
-        return "redirect:/faq/addition";
+        return "redirect:/admin/faq";
     }
 
     //	수정페이지 열기(상세조회)
@@ -79,7 +79,7 @@ public class FaqController {
     public String update(@ModelAttribute FaqDto faqDto) {
 //		서비스의 수정 실행
         faqService.save(faqDto);
-        return "redirect:/faq/edition?faqNum=" + faqDto.getFaqNum();
+        return "redirect:/admin/faq";
     }
 
     //	삭제
@@ -87,7 +87,7 @@ public class FaqController {
     public String deleteById(@RequestParam long faqNum) {
 //		서비스의 삭제 실행
         faqService.deleteById(faqNum);
-        return "redirect:/faq";
+        return "redirect:/admin/faq";
     }
 
 }

@@ -1,6 +1,5 @@
 package com.RecipeCode.teamproject.reci.feed.comments.dto;
 
-import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -24,11 +23,8 @@ public class CommentsDto {
 
     private LocalDateTime insertTime;
     private LocalDateTime updateTime;
-    private LocalDateTime deletedAt;
+    private LocalDateTime deletedAt; // 소프트 삭제
 
     private Long commentsCount;
     private int replyCount;
-
-
-
 }
