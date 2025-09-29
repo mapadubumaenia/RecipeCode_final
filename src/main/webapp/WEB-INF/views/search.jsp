@@ -43,18 +43,35 @@
         <sec:authorize access="isAuthenticated()">
           <sec:authentication property="principal.nickname"/>님
         </sec:authorize>
-        <button id="btnNotif" class="notif-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="notifPanel" title="알림">
+        <!-- 알림 버튼 -->
+        <button
+                id="btnNotif"
+                class="notif-btn"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+                aria-controls="notifPanel"
+                title="알림"
+        >
           🔔
           <span class="notif-dot" aria-hidden="true"></span>
         </button>
-        <div id="notifPanel" class="notif-panel" role="dialog" aria-label="알림 목록">
+
+        <!-- 드롭다운 패널 -->
+        <div
+                id="notifPanel"
+                class="notif-panel"
+                role="dialog"
+                aria-label="알림 목록"
+        >
           <div class="notif-head">
             <strong>알림</strong>
             <div class="actions">
               <button class="btn small ghost" id="markAll">모두 읽음</button>
             </div>
           </div>
-          <div class="notif-list" id="notifList"></div>
+
+          <div class="notif-list" id="notifList"><!-- JS 렌더 --></div>
+
           <div class="notif-foot">
             <button class="btn small ghost" id="closeNotif">닫기</button>
           </div>
@@ -142,6 +159,10 @@
     })();
   </script>
 </sec:authorize>
-
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<%--알림 js--%>
+<script src="<c:url value='/js/mypage/utils.js'/>"></script>
+<script src="${pageContext.request.contextPath}/js/notification.js"></script>
 </body>
 </html>
