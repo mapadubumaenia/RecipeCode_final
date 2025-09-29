@@ -120,7 +120,7 @@ public class RecipesService {
 
         // 단계 저장: VIDEO일 땐 이미지 리스트 비워서 넘기면 됨
         List<byte[]> imgBytes = "VIDEO".equalsIgnoreCase(recipesDto.getRecipeType()) ? List.of() : images;
-        recipeContentService.saveRecipeContent(contentDtos, imgBytes, recipe);
+        recipeContentService.saveRecipeContent(contentDtos, recipe);
 
         // 3) 연관 엔티티 저장
         ingredientService.saveAll(ingredientDtos, recipe);
