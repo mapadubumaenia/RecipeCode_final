@@ -19,7 +19,7 @@ public class CommentReportDto {
     private Long reportStatus = 1L; // 신고 상태 (대기중 = 0, 처리중 = 1, 답변완료 = 2)
     private LocalDateTime insertTime;
     private LocalDateTime updateTime;
-    private Long reportType;   // 신고 유형 (0=욕설, 1=스팸)\
+    private Long reportType;   // 신고 유형 (0=욕설, 1=스팸)
     private Long duplicateCount;    // 동일 댓글 신고 건수
 
 }

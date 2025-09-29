@@ -60,20 +60,20 @@ public class CommentReportController {
     }
 
     @PostMapping("/updateStatus")
-    @ResponseBody
-    public void updateStatus(@RequestParam Long reportId,
+    public String updateStatus(@RequestParam Long reportId,
                              @RequestParam Long newReportStatus,
                              @RequestParam String adminEmail) {
         commentReportService.updateStatus(reportId, newReportStatus, adminEmail);
+        return "redirect:/admin/moderation/reports";
     }
 
     @PostMapping("/delete")
-    @ResponseBody
-    public void deleteReport(@RequestParam Long reportId) {
+    public String deleteReport(@RequestParam Long reportId) {
         CommentReport report = commentReportRepository.findById(reportId)
                 .orElseThrow(()->new RuntimeException("신고를 찾을 수 없습니다."));
 
         commentReportService.deleteById(reportId);
+        return "redirect:/admin/moderation/reports";
     }
 
     @GetMapping("/list")

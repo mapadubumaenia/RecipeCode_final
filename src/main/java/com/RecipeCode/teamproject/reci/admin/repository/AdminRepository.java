@@ -1,10 +1,8 @@
 package com.RecipeCode.teamproject.reci.admin.repository;
 
 import com.RecipeCode.teamproject.reci.admin.entity.Admin;
-import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 
 @Repository

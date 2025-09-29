@@ -53,7 +53,7 @@ public class RecipeReportController {
         model.addAttribute("status", status);
         model.addAttribute("reportType", reportType);
 
-        return "recipeReport/report_all";
+        return "function/recipeReport/report_all";
     }
 
     // 신고 저장 (사용자가 게시글 신고 버튼 눌렀을 때)
@@ -94,13 +94,13 @@ public class RecipeReportController {
             recipesService.softDeleteRecipe(uuid); // 게시글 소프트 삭제
         }
 
-        return "redirect:/report";
+        return "redirect:/admin/moderation/reports";
     }
 
     // 신고 삭제
     @PostMapping("/report/delete")
     public String deleteById(@RequestParam Long reportId) {
         recipeReportService.deleteById(reportId);
-        return "redirect:/report";
+        return "redirect:/admin/moderation/reports";
     }
 }
