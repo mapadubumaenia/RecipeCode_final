@@ -201,9 +201,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 4px 10px;
+    padding: 7px 15px;   /* 크기 확대 */
     margin: 1rem;
-    line-height: 1;   /* 버튼 자체 높이만 사용 */
+    font-size: 14px;     /* 글자 크기 키움 */
+    font-weight: 500;    /* 글자 두께 */
+    line-height: 1.2;    /* 글자 여유 */
+    border-radius: 20px;
 }
 
 

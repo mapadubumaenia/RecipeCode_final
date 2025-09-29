@@ -41,9 +41,9 @@ class FaqServiceTest {
     @Test
     void findById() {
         //		1) 테스트 조건:
-        long faq_num = 2;
+        long faqNum = 2;
 //		2) 실제 메소드실행
-        FaqDto faqDto = faqService.findById(faq_num);
+        FaqDto faqDto = faqService.findById(faqNum);
 //		3) 검증(확인): 로그 , DB 확인, assert~ (DB확인)
         log.info(faqDto);
     }

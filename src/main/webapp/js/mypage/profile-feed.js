@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     // 게시글이 없으면 안내 메시지 카드 추가 (중복 방지)
                     if (!feedContainer.querySelector(".no-feed")) {
                         const emptyCard = document.createElement("article");
-                        emptyCard.className = "card post no-feed"; // card 모양 재사용
+                        emptyCard.className = "card post no-feed";
                         emptyCard.innerHTML = `
             <div class="post-body">
                 <p class="muted">아직 작성한 글이 없습니다.</p>
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileUserId = document.querySelector("#feedContainer").dataset.user; // (변경됨)
 
     // follower count
-    fetch(`/api/follow/${profileUserId}/follower/count`) // (변경됨)
+    fetch(`/api/follow/${profileUserId}/follower/count`)
         .then(res => res.json())
         .then(count => {
             const el = document.getElementById("followerCount");
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(err => console.error("팔로워 수 가져오기 실패:", err));
 
     // following count
-    fetch(`/api/follow/${profileUserId}/following/count`) // (변경됨)
+    fetch(`/api/follow/${profileUserId}/following/count`)
         .then(res => res.json())
         .then(count => {
             const el = document.getElementById("followingCount");

@@ -32,7 +32,7 @@ public class ProfileFeedViewController {
     @GetMapping("/profile/{userId:.+}")
     public String profilePage(@PathVariable String userId,
                               @AuthenticationPrincipal SecurityUserDto principal,
-                              @PageableDefault(size = 10) Pageable pageable,
+                              @PageableDefault(size = 5) Pageable pageable,
                               Model model) {
 
         // 1) 로그인 체크

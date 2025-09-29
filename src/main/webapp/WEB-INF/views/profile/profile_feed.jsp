@@ -21,7 +21,7 @@
         <div class="flex-box">
             <div class="flex-row">
                 <h1 class="page-title">Profile</h1>
-                <a href="${pageContext.request.contextPath}/feed/main" class="float-text">home</a>
+                <a href="${pageContext.request.contextPath}/" class="float-text">home</a>
             </div>
 
             <!-- ▶ 추가: 알림 + 로그아웃 -->
@@ -158,9 +158,9 @@
             </div>
 
             <!-- Followers 목록 -->
-            <div id="followersList" class="follow-list hidden">
+            <div id="followersList" class="follow-list">
                 <c:forEach var="f" items="${followers}" varStatus="st">
-                    <c:if test="${st.index < 10}">
+                    <c:if test="${st.index < 5}">
                         <div class="mini-card" data-userid="${f.member.userId}">
                             <!-- 왼쪽: 프로필 이미지 -->
                             <c:if test="${empty f.member.profileImageUrl}">
@@ -190,15 +190,15 @@
                         </div>
                     </c:if>
                 </c:forEach>
-
-                    <a href="/follow/profile/${user.userId}" class="btn small ghost">더보기</a>
-
+                <c:if test="${followersHasNext}">
+                    <a href="/follow/network/${user.userId}" class="btn small ghost">더보기</a>
+                </c:if>
             </div>
 
             <!-- Following 목록 -->
-            <div id="followingList" class="follow-list">
+            <div id="followingList" class="follow-list hidden">
                 <c:forEach var="f" items="${followings}" varStatus="st">
-                    <c:if test="${st.index < 10}">
+                    <c:if test="${st.index < 5}">
                         <div class="mini-card" data-userid="${f.member.userId}">
                             <!-- 왼쪽: 프로필 이미지 -->
                             <img src="${f.member.profileImageUrl}" alt="">
@@ -223,9 +223,9 @@
                         </div>
                     </c:if>
                 </c:forEach>
-
-                    <a href="/follow/profile/${user.userId}" class="btn small ghost">더보기</a>
-
+                <c:if test="${followingsHasNext}">
+                    <a href="/follow/network/${user.userId}" class="btn small ghost">더보기</a>
+                </c:if>
             </div>
 
         </aside>
