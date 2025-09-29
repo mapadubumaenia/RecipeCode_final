@@ -127,4 +127,22 @@ public class FollowViewController {
         return "function/Follow/follow_network";
     }
 
+    // 내 팔로잉/팔로워로 바로 이동
+    @GetMapping("/network/me")
+    public String myNetwork(@AuthenticationPrincipal SecurityUserDto principal) {
+        if (principal == null) return "redirect:/auth/login";
+        Member me = memberService.getByUserEmail(principal.getUsername());
+        if (me == null) return "redirect:/auth/login";
+
+        // userId는 DB에 "@userid" 형태일 수 있으니 앞의 @ 제거
+        String uid = me.getUserId();
+        if (uid != null && uid.startsWith("@")) uid = uid.substring(1);
+
+        // /follow/network/{userId} 로 리다이렉트
+        return "redirect:/follow/network/" + java.net.URLEncoder.encode(uid, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+
+
+
 }

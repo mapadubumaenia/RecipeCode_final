@@ -8,19 +8,85 @@
     const USER_EMAIL = (typeof window !== "undefined" && window.__USER_EMAIL__) ? String(window.__USER_EMAIL__).trim().toLowerCase() : "";
 
     function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
-    function esc(s){ if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function esc(s){ if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&quot;').replace(/'/g,'&#39;'); }
     function fmtDate(v) {
         if (!v) return '';
         try { const d = new Date(v); if (isNaN(d.getTime())) return ''; return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); } catch { return ''; }
     }
+    function isUuid36(s){ return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || ''); }
+    function pickUuid(it){
+        const a = (it && typeof it.uuid === 'string') ? it.uuid : '';
+        const b = (it && typeof it.id === 'string')   ? it.id   : '';
+        if (isUuid36(a)) return a;
+        if (isUuid36(b)) return b;
+        return null;
+    }
 
-    // ★ @userId → 프로필 이미지 URL
+    // ===== 좋아요 UI 헬퍼 =====
+    function applyLikeVisual(btn, liked){
+        btn.dataset.liked = liked ? 'true' : 'false';
+        btn.classList.toggle('is-liked', !!liked);
+        btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+    }
+    function getLikeCount(btn){
+        const s = btn.querySelector('.like-count');
+        const n = Number(s ? s.textContent : 0);
+        return Number.isFinite(n) ? n : 0;
+    }
+    function setLikeCount(btn, n){
+        const s = btn.querySelector('.like-count');
+        const v = Math.max(0, n|0);
+        if (s) s.textContent = String(v);
+        else btn.innerHTML = `❤️ <span class="like-count">${v}</span>`;
+    }
+    async function hydrateMyLikesIn(container){
+        const btns = Array.from(container.querySelectorAll('.js-like[data-uuid]'))
+            .filter(b => !b.hasAttribute('disabled'));
+        if (btns.length === 0 || !USER_EMAIL) return;
+        const ids = Array.from(new Set(btns.map(b => b.getAttribute('data-uuid')).filter(Boolean)));
+        if (ids.length === 0) return;
+
+        const CHUNK = 50;
+        for (let i=0;i<ids.length;i+=CHUNK){
+            const chunk = ids.slice(i, i+CHUNK);
+            try{
+                const res = await fetch(CTX + '/api/recipes/likes/mine?ids=' + encodeURIComponent(chunk.join(',')), {
+                    headers: { 'Accept':'application/json' }, credentials:'same-origin'
+                });
+                if (!res.ok) throw new Error('batch http '+res.status);
+                const body = await res.json();
+                const map = (body && body.map) || {};
+                chunk.forEach(id=>{
+                    const liked = !!map[id];
+                    container.querySelectorAll(`.js-like[data-uuid="${CSS.escape(id)}"]`).forEach(btn=>{
+                        applyLikeVisual(btn, liked);
+                    });
+                });
+            }catch{
+                // 폴백: 단건 조회
+                await Promise.all(chunk.map(async (id)=>{
+                    try{
+                        const r = await fetch(`${CTX}/api/recipes/${encodeURIComponent(id)}/like/status`, {
+                            headers:{'Accept':'application/json'}, credentials:'same-origin'
+                        });
+                        if (!r.ok) return;
+                        const b = await r.json();
+                        const liked = !!b?.liked;
+                        container.querySelectorAll(`.js-like[data-uuid="${CSS.escape(id)}"]`).forEach(btn=>{
+                            applyLikeVisual(btn, liked);
+                        });
+                    }catch{}
+                }));
+            }
+        }
+    }
+
+    // @userId → 프로필 이미지 URL
     function profileImgUrlFromAtUserId(atUserId){
         if (!atUserId || !atUserId.trim()) return null;
         return CTX + '/member/' + encodeURIComponent(atUserId) + '/profile-image';
     }
-
-// ★ 컨테이너 내부 아바타 하이드레이션 (404면 빈 상태 유지)
+    // 컨테이너 내부 아바타 하이드레이션 (404면 빈 상태 유지)
     function hydrateAvatarsIn(container){
         const imgs = container.querySelectorAll('.avatar-ss img[data-user-id]');
         imgs.forEach(img=>{
@@ -28,11 +94,12 @@
             if (!atId) return;
             const url = profileImgUrlFromAtUserId(atId);
             if (!url) return;
-            img.onerror = function(){ this.removeAttribute('src'); }; // 404 → 비우기
+            img.onerror = function(){ this.removeAttribute('src'); };
             img.src = url;
         });
     }
 
+    // 라이트 유튜브
     function attachLightYouTube(container){
         if (!container) return;
         const src = container.getAttribute('data-yt-src');
@@ -138,14 +205,15 @@
             // 작성자 id/email
             const authorRawId = it.authorId || it.authorNick || '';
             const cleanId = (authorRawId && authorRawId.startsWith('@')) ? authorRawId.substring(1) : (authorRawId || '');
-            const userIdAttr = cleanId ? ('@' + cleanId) : ''; // ★ FOLLOWING_SET 용
+            const userIdAttr = cleanId ? ('@' + cleanId) : '';
             const profileHref = cleanId ? (CTX + '/follow/profile/' + encodeURIComponent(cleanId)) : '#';
             const authorEmail = (it.authorEmail || '').trim().toLowerCase();
             const self = (USER_EMAIL && authorEmail && USER_EMAIL === authorEmail);
 
-            // 상세
-            const idOk  = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(it.id || '');
-            const href  = idOk ? (CTX + '/recipes/' + encodeURIComponent(it.id)) : '#';
+            // 상세/링크용 uuid
+            const uuid = pickUuid(it);
+            const idOk = !!uuid;
+            const href = idOk ? (CTX + '/recipes/' + encodeURIComponent(uuid)) : '#';
 
             // 미디어
             const kind = it.mediaKind || 'image';
@@ -193,7 +261,7 @@
                 '    <div class="muted">' + (created || '') + '</div>' +
                 '  </div>' +
                 '  <button class="followbtn-sm' + (self ? ' is-self' : '') + '"' +
-                '     data-user-id="' + esc(userIdAttr) + '"' +                // ★ 추가
+                '     data-user-id="' + esc(userIdAttr) + '"' +
                 '     data-user-email="' + esc(authorEmail) + '"' +
                 '     data-following="false"' +
                 (self ? ' disabled' : '') + '>' +
@@ -206,13 +274,19 @@
                 tagsHtml +
                 (idOk ? '</a>' : '</div>') +
                 '<div class="post-cta">' +
-                '  <button class="btn-none">❤️ ' + likes + '</button>' +
+                '  <button class="btn-none js-like" ' +
+                (idOk && !self
+                    ? ('data-uuid="' + esc(uuid) + '" ')
+                    : 'disabled aria-disabled="true" title="' + (self ? '내 게시물은 좋아요를 누를 수 없어요' : '이 카드엔 uuid가 없어요') + '" ') +
+                '      data-liked="false" aria-pressed="false">' +
+                '    ❤️ <span class="like-count">' + likes + '</span>' +
+                '  </button>' +
                 '  <button class="btn-none">💬 ' + cmts + '</button>' +
                 '  <button class="btn-none" title="views">👁 ' + views + '</button>' +
                 '</div>';
 
             if (!idOk) el.querySelector('.post-link.disabled')?.addEventListener('click', function(e){ e.preventDefault(); });
-            $list.appendChild(el);
+            document.getElementById('results').appendChild(el);
         }
 
         // 트렌딩 (있을 경우)
@@ -287,9 +361,10 @@
                 if (initial) $list.innerHTML = '';
                 (data.items || []).forEach(renderItem);
 
-                // ★ 렌더 후 팔로우 상태 하이드레이션
+                // 렌더 후 팔로우/아바타/내 좋아요 하이드레이션
                 await hydrateFollowButtonsIn($list);
-                 hydrateAvatarsIn($list);
+                hydrateAvatarsIn($list);
+                await hydrateMyLikesIn($list);
 
                 state.next = data.next || null;
 
@@ -342,6 +417,69 @@
             io.observe($sentinel);
         }
 
+        // =========================
+        //  좋아요 토글 (낙관적 UI)
+        // =========================
+        document.addEventListener('click', function(e){
+            const btn = e.target.closest('.js-like');
+            if (!btn) return;
+
+            if (btn.hasAttribute('disabled')) return;
+            const uuid = btn.getAttribute('data-uuid');
+            if (!uuid) return;
+
+            if (!USER_EMAIL) { location.href = CTX + '/auth/login'; return; }
+
+            if (btn.dataset.pending === '1') return;
+            btn.dataset.pending = '1';
+
+            const prevLiked = (btn.dataset.liked === 'true');
+            const prevCnt   = getLikeCount(btn);
+
+            const nextLiked = !prevLiked;
+            const nextCnt   = Math.max(0, prevCnt + (nextLiked ? +1 : -1));
+            applyLikeVisual(btn, nextLiked);
+            setLikeCount(btn, nextCnt);
+
+            (async () => {
+                try {
+                    const { token, header } = getCsrf();
+                    const headers = { 'Accept':'application/json' };
+                    if (token && header) headers[header] = token;
+
+                    const res = await fetch(`${CTX}/api/recipes/${encodeURIComponent(uuid)}/like`, {
+                        method: 'POST',
+                        headers,
+                        credentials: 'same-origin',
+                        keepalive: true
+                    });
+
+                    const ct = res.headers.get('content-type') || '';
+                    if (ct.includes('text/html') || res.status === 401) {
+                        applyLikeVisual(btn, prevLiked);
+                        setLikeCount(btn, prevCnt);
+                        location.href = CTX + '/auth/login';
+                        return;
+                    }
+                    if (!res.ok) { throw new Error('HTTP ' + res.status); }
+
+                    const dto = await res.json();
+                    const serverLiked = !!(dto && dto.liked);
+                    const serverCnt   = (dto && typeof dto.likesCount === 'number') ? dto.likesCount : nextCnt;
+
+                    applyLikeVisual(btn, serverLiked);
+                    setLikeCount(btn, serverCnt);
+
+                } catch (err){
+                    console.error('[like] failed, rollback:', err);
+                    applyLikeVisual(btn, prevLiked);
+                    setLikeCount(btn, prevCnt);
+                } finally {
+                    delete btn.dataset.pending;
+                }
+            })();
+        });
+
         // ===== 팔로우 클릭 (언팔 금지) =====
         document.addEventListener('click', async function(e){
             const btn = e.target.closest('.followbtn-sm[data-user-email]');
@@ -353,7 +491,6 @@
             const email = btn.getAttribute('data-user-email') || "";
             if (!email) return;
 
-            // 이미 Following이면 클릭 무시
             if (btn.dataset.following === "true") return;
 
             const { token, header } = getCsrf();

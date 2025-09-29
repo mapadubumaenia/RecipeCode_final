@@ -15,6 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class RecipesLikesService {
@@ -74,6 +78,28 @@ public class RecipesLikesService {
         recipesLikesDto.setLikesCount(count);
 
         return recipesLikesDto;
+    }
+
+
+    // [NEW] 단건 상태 조회
+    @Transactional(readOnly = true)
+    public boolean isLiked(String recipeUuid, String userEmail) {
+        return recipesLikesRepository.existsByMember_UserEmailAndRecipes_Uuid(userEmail, recipeUuid);
+    }
+
+    // [NEW] 배치 상태 조회
+    @Transactional(readOnly = true)
+    public Map<String, Boolean> likedMapFor(String userEmail, List<String> uuids) {
+        if (uuids == null || uuids.isEmpty()) return Map.of();
+
+        // repo에 맞는 쿼리 메서드가 없다면 exists 루프/커스텀 쿼리 둘 중 한가지:
+        // 간단 루프(개수 적을 때 충분히 빠름)
+        Map<String, Boolean> out = new HashMap<>();
+        for (String id : uuids) {
+            boolean liked = recipesLikesRepository.existsByMember_UserEmailAndRecipes_Uuid(userEmail, id);
+            out.put(id, liked);
+        }
+        return out;
     }
 
 

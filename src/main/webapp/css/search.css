@@ -24,6 +24,14 @@ footer{display:flex;justify-content:flex-end;}
 .followbtn-sm.is-active{background: var(--brand); color:var(--wtext);border-color: var(--brand);}
 .post-cta{display:flex;gap:14px}
 
+/* 커뮤니티 피드 카드 */
+.post{display:flex;flex-direction:column;gap:10px;margin-bottom: 8px;}
+.post-head{display:flex;flex-direction: row; justify-content: flex-start; align-items:center;gap:10px}
+.leftBox{flex:1;}
+.post-id{font-weight: 700;}
+.post-cta{display:flex;gap:14px}
+
+
 /* 댓글 박스 */
 .cmt-box{margin-top:10px;border:1px solid var(--border);border-radius:12px;background:#fff}
 .cmt-head{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border)}
@@ -63,6 +71,7 @@ footer{display:flex;justify-content:flex-end;}
 .brand{font-weight:800;font-size:18px;letter-spacing:.2px}
 .search{flex:1;border:1px solid var(--border);border-radius:12px;padding:6px;outline:none;width:100%}
 
+.js-like.is-liked { color: #e0245e; font-weight: 700; }
 
 /* 반응형(PC 전용 정리) */
 @media (min-width:768px){
