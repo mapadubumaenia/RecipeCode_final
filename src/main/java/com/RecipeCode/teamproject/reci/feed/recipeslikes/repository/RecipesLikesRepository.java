@@ -20,6 +20,8 @@ public interface RecipesLikesRepository extends JpaRepository<RecipesLikes, Long
 //    눌렀는지 확인하기
     boolean existsByMemberAndRecipes(Member member, Recipes recipes);
 
+    boolean existsByMember_UserEmailAndRecipes_Uuid(String userEmail, String uuid);
+
 //    지우기
     void deleteByMemberAndRecipes(Member member, Recipes recipes);
 
@@ -50,3 +52,5 @@ public interface RecipesLikesRepository extends JpaRepository<RecipesLikes, Long
                                        @Param("uuids") List<String> uuids);
 
 }
+
+

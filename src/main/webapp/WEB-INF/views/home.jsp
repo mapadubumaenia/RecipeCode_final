@@ -265,9 +265,20 @@
         <aside id="myfollowing" class="sidebar">
             <h2 class="section-title">Following</h2>
 
-            <!-- 팔로잉 피드 컨테이너 -->
-            <div id="followContainer" class="follow-feed">
-            </div>
+            <!-- 비로그인: 안내 카드 -->
+            <sec:authorize access="!isAuthenticated()">
+                <div class="card p-16 empty-follow" style="text-align:center; padding:24px;">
+                    <div style="font-size:32px; line-height:1.2; margin-bottom:8px;">🔒</div>
+                    <p style="margin:4px 0;"><strong>로그인 후 사용 가능합니다</strong></p>
+                    <p class="muted" style="margin:8px 0 16px;">관심 있는 셰프를 팔로우하면 새 레시피가 여기 표시됩니다.</p>
+                    <a class="btn primary" href="<c:url value='/auth/login'/>">Login</a>
+                </div>
+            </sec:authorize>
+
+            <!-- 로그인: 실제 팔로잉 피드 컨테이너 -->
+            <sec:authorize access="isAuthenticated()">
+                <div id="followContainer" class="follow-feed"></div>
+            </sec:authorize>
         </aside>
 
     </aside>
@@ -293,11 +304,12 @@
 <script src="feed-cmt.js"></script>
 <script src="footer.js"></script>
 <!-- 사이드바 팔로잉 JS -->
-<script src="${pageContext.request.contextPath}/js/mypage/mypage-sidebar.js"></script>
+<script src="${pageContext.request.contextPath}/js/mainpage-sidebar.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
 <%--시간 js--%>
 <script src="<c:url value='/js/mypage/utils.js'/>"></script>
 <%--알림 js--%>
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>
+<script src="<c:url value='/js/login-to-follow.js'/>" defer></script>
 </body>
 </html>

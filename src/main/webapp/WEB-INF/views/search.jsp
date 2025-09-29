@@ -108,23 +108,25 @@
       <a class="btn primary text-center" href="<c:url value='/recipes/add'/>">Upload Recipe</a>
     </div>
 
-    <div class="followingfeed">
-      <h2 class="section-title">For you</h2>
-      <section id="following" class="card p-16 feature" style="margin-top: 12px">
-        <div class="post-head">
-          <div class="avatar-ss"><img src="" alt=""></div>
-          <div class="post-info mb-8">
-            <div class="post-id">John Do</div>
-            <div class="muted">Food Enthusiast</div>
-          </div>
-          <button class="followbtn-sm is-active" data-user-id="u_987" data-following="true"></button>
+    <!-- 사이드바: Following -->
+    <aside id="myfollowing" class="sidebar">
+      <h2 class="section-title">Following</h2>
+
+      <!-- 비로그인: 안내 카드 -->
+      <sec:authorize access="!isAuthenticated()">
+        <div class="card p-16 empty-follow" style="text-align:center; padding:24px;">
+          <div style="font-size:32px; line-height:1.2; margin-bottom:8px;">🔒</div>
+          <p style="margin:4px 0;"><strong>로그인 후 사용 가능합니다</strong></p>
+          <p class="muted" style="margin:8px 0 16px;">관심 있는 셰프를 팔로우하면 새 레시피가 여기 표시됩니다.</p>
+          <a class="btn primary" href="<c:url value='/auth/login'/>">Login</a>
         </div>
-        <div class="media aspect">
-          <img src="https://picsum.photos/seed/smoothie/1200/800" alt="Smoothie Bowl photo" />
-        </div>
-        <p class="muted">Hand-picked favorites from our creators.</p>
-      </section>
-    </div>
+      </sec:authorize>
+
+      <!-- 로그인: 실제 팔로잉 피드 컨테이너 (JS가 채움) -->
+      <sec:authorize access="isAuthenticated()">
+        <div id="followContainer" class="follow-feed"></div>
+      </sec:authorize>
+    </aside>
   </aside>
 </main>
 
@@ -164,5 +166,7 @@
 <%--알림 js--%>
 <script src="<c:url value='/js/mypage/utils.js'/>"></script>
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>
+<script src="<c:url value='/js/login-to-follow.js'/>" defer></script>
+<script src="${pageContext.request.contextPath}/js/mainpage-sidebar.js"></script>
 </body>
 </html>
