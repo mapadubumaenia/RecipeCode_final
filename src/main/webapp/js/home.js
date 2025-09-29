@@ -1,32 +1,39 @@
 (function () {
     "use strict";
 
-    // ------- 공통 전역 -------
     const CTX = (typeof window !== "undefined" && window.__CTX__) ? window.__CTX__ : "";
     const USER_EMAIL = (typeof window !== "undefined" && window.__USER_EMAIL__) ? String(window.__USER_EMAIL__).trim().toLowerCase() : "";
 
-    // DOM ready 보장
     function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
-
-    // HTML escape
-    function esc(s){
-        return (s==null?'':String(s))
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    }
-
-    // UUID 판별 & 상세 URL
+    function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
     function isUuid36(s){ return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || ''); }
     function detailUrl(id){ return CTX + '/recipes/' + encodeURIComponent(id); }
 
-    // 썸네일 폴백
     function pickThumb(it){
         if (it.thumbUrl && typeof it.thumbUrl === 'string' && it.thumbUrl.trim().length > 0){ return it.thumbUrl; }
         const seed = (it.id || 'recipe').toString().slice(0,12).replace(/[^a-zA-Z0-9]/g,'');
         return 'https://picsum.photos/seed/' + encodeURIComponent(seed || 'rc') + '/1200/800';
     }
 
-    // 라이트 유튜브 attach
+    // ★ @userId → 프로필 이미지 URL
+    function profileImgUrlFromAtUserId(atUserId){
+        if (!atUserId || !atUserId.trim()) return null;
+        return CTX + '/member/' + encodeURIComponent(atUserId) + '/profile-image';
+    }
+
+// ★ 컨테이너 내부 아바타 하이드레이션 (404면 빈 상태 유지)
+    function hydrateAvatarsIn(container){
+        const imgs = container.querySelectorAll('.avatar-ss img[data-user-id]');
+        imgs.forEach(img=>{
+            const atId = img.getAttribute('data-user-id');
+            if (!atId) return;
+            const url = profileImgUrlFromAtUserId(atId);
+            if (!url) return;
+            img.onerror = function(){ this.removeAttribute('src'); }; // 404 → 비우기
+            img.src = url;
+        });
+    }
+
     function attachLightYouTube(container){
         if (!container) return;
         const src = container.getAttribute('data-yt-src');
@@ -47,7 +54,7 @@
         container.removeAttribute('aria-label');
     }
 
-    // ===== CSRF 유틸 =====
+    // ===== CSRF =====
     function readCookie(name){
         const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g,'\\$1') + '=([^;]*)'));
         return m ? decodeURIComponent(m[1]) : null;
@@ -57,20 +64,42 @@
         const metaHdr = document.querySelector('meta[name="_csrf_header"]');
         let token = metaTok ? metaTok.getAttribute('content') : null;
         let header = metaHdr ? metaHdr.getAttribute('content') : null;
-        if (!token) { // 쿠키 폴백 (예: XSRF-TOKEN)
-            const c = readCookie('XSRF-TOKEN');
-            if (c) { token = c; header = header || 'X-XSRF-TOKEN'; }
-        }
+        if (!token) { const c = readCookie('XSRF-TOKEN'); if (c) { token = c; header = header || 'X-XSRF-TOKEN'; } }
         return { token, header: header || 'X-CSRF-TOKEN' };
     }
-    function setFollowBtnState(btn, following){
-        btn.dataset.following = following ? 'true' : 'false';
-        btn.classList.toggle('is-active', !!following);
-        btn.textContent = following ? 'Following' : 'Follow';
+
+    // ===== 팔로잉 세트 로딩/하이드레이션 =====
+    let FOLLOWING_SET = null; // Set<"@userId">
+    async function loadMyFollowingSetOnce() {
+        if (FOLLOWING_SET || !USER_EMAIL) return FOLLOWING_SET || new Set();
+        try {
+            const res = await fetch(CTX + "/api/follow/mine/following-ids", {
+                credentials: "same-origin",
+                headers: { "Accept": "application/json" }
+            });
+            const arr = res.ok ? await res.json() : [];
+            FOLLOWING_SET = new Set(Array.isArray(arr) ? arr : []);
+        } catch { FOLLOWING_SET = new Set(); }
+        return FOLLOWING_SET;
+    }
+    function applyFollowVisual(btn, isFollowing){
+        if (!btn) return;
+        btn.dataset.following = isFollowing ? "true" : "false";
+        btn.classList.toggle("is-active", !!isFollowing);
+        btn.textContent = isFollowing ? "Following" : "Follow";
+        btn.disabled = !!isFollowing; // 이 화면에선 언팔 금지
+        if (isFollowing) btn.title = "이미 팔로우 중";
+    }
+    async function hydrateFollowButtonsIn(container){
+        const set = await loadMyFollowingSetOnce();
+        container.querySelectorAll('.followbtn-sm[data-user-id]').forEach(btn => {
+            const uid = btn.getAttribute('data-user-id') || "";
+            applyFollowVisual(btn, set.has(uid));
+        });
     }
 
     // =========================
-    //  A) Popular Tags
+    //  Popular Tags
     // =========================
     function setupPopularTags(){
         const $wrap = document.getElementById('popularTagsWrap');
@@ -104,7 +133,7 @@
     }
 
     // =========================
-    //  B) For You Feed
+    //  For You Feed
     // =========================
     function setupForYou(){
         const $list = document.getElementById('forYouFeed');
@@ -159,6 +188,7 @@
             // 작성자 id/nick/email
             const displayIdRaw = it.authorId || it.authorNick || it.author || '';
             const cleanId = (displayIdRaw.startsWith('@') ? displayIdRaw.slice(1) : displayIdRaw).trim();
+            const userIdAttr = cleanId ? ('@' + cleanId) : ''; // ★ FOLLOWING_SET 용
             const profileHref = CTX + '/follow/profile/' + encodeURIComponent(cleanId);
             const authorEmail = (it.authorEmail || '').trim().toLowerCase();
 
@@ -174,38 +204,36 @@
             const rid = safeId(it);
             const hasUuid = isUuid36(rid);
             const href = hasUuid ? detailUrl(rid) : '#';
-
             const mediaBlock = renderMediaHtml(it);
-
             const self = (USER_EMAIL && authorEmail && USER_EMAIL === authorEmail);
 
-            const html = ''
-                + '<article class="card p-16 post" data-id="' + esc(rid) + '">'
-                +   '<div class="post-head">'
-                +     '<div class="avatar-ss"><img src="" alt=""></div>'
-                +     '<div class="post-info">'
-                +       '<div class="post-id">' + (cleanId ? '<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>' : '') + '</div>'
-                +       '<div class="muted">' + esc(it.createdAt || '') + '</div>'
-                +     '</div>'
-                +     '<button class="followbtn-sm' + (self ? ' is-self' : '') + '"'
-                +       ' data-user-email="' + esc(authorEmail) + '"'
-                +       ' data-following="false"'
-                +       (self ? ' disabled' : '') + '>'
-                +       (self ? 'Me' : 'Follow')
-                +     '</button>'
-                +   '</div>'
-                +   mediaBlock
-                +   (hasUuid ? ('<a class="post-link" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">')
-                +     '<p class="muted" style="margin-top:8px">' + esc(it.title || '') + score + '</p>'
-                +     (tagsHtml ? ('<p class="muted">' + tagsHtml + '</p>') : '')
-                +   (hasUuid ? '</a>' : '</div>')
-                +   '<div class="post-cta">'
-                +     '<button class="btn-none js-like">❤️ ' + likes + '</button>'
-                +     '<button class="btn-none post-cmt js-cmt" data-post-id="' + esc(rid) + '">💬</button>'
-                +     '<button class="btn-none js-share">↗ Share</button>'
-                +   '</div>'
-                + '</article>';
-            return html;
+            return '' +
+                '<article class="card p-16 post" data-id="' + esc(rid) + '">' +
+                '  <div class="post-head">' +
+                '    <div class="avatar-ss"><img src="" alt="" data-user-id="' + esc(userIdAttr) + '"></div>' +
+                '    <div class="post-info">' +
+                '      <div class="post-id">' + (cleanId ? '<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>' : '') + '</div>' +
+                '      <div class="muted">' + esc(it.createdAt || '') + '</div>' +
+                '    </div>' +
+                '    <button class="followbtn-sm' + (self ? ' is-self' : '') + '"' +
+                '       data-user-id="' + esc(userIdAttr) + '"' +            // ★ 추가
+                '       data-user-email="' + esc(authorEmail) + '"' +
+                '       data-following="false"' +
+                (self ? ' disabled' : '') + '>' +
+                (self ? 'Me' : 'Follow') +
+                '    </button>' +
+                '  </div>' +
+                mediaBlock +
+                (hasUuid ? ('<a class="post-link" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">') +
+                '  <p class="muted" style="margin-top:8px">' + esc(it.title || '') + score + '</p>' +
+                (tagsHtml ? ('<p class="muted">' + tagsHtml + '</p>') : '') +
+                (hasUuid ? '</a>' : '</div>') +
+                '  <div class="post-cta">' +
+                '    <button class="btn-none js-like">❤️ ' + likes + '</button>' +
+                '    <button class="btn-none post-cmt js-cmt" data-post-id="' + esc(rid) + '">💬</button>' +
+                '    <button class="btn-none js-share">↗ Share</button>' +
+                '  </div>' +
+                '</article>';
         }
 
         async function loadMore(){
@@ -225,6 +253,10 @@
                     const temp = document.createElement('div');
                     temp.innerHTML = html;
                     while (temp.firstChild) $list.appendChild(temp.firstChild);
+
+                    // ★ 렌더 후 팔로우 상태 하이드레이션
+                     await hydrateFollowButtonsIn($list);
+                     hydrateAvatarsIn($list);
                 }
                 nextCursor = (data && data.next) ? data.next : null;
             }catch(e){
@@ -273,7 +305,6 @@
             const rid = card.getAttribute('data-id');
             if (isUuid36(rid)) window.location.href = detailUrl(rid);
         });
-
         document.addEventListener('keydown', function(e){
             if (e.key !== 'Enter' && e.key !== ' ') return;
             const el = document.activeElement;
@@ -285,7 +316,7 @@
     }
 
     // =========================
-    //  C) Trending
+    //  Trending (선택)
     // =========================
     function setupTrending(){
         const wrap = document.getElementById('trending');
@@ -357,7 +388,7 @@
         })();
     }
 
-    // ===== 팔로우 토글 (공통 위임) =====
+    // ===== 팔로우 클릭 (언팔 금지) =====
     document.addEventListener('click', async function(e){
         const btn = e.target.closest('.followbtn-sm[data-user-email]');
         if (!btn) return;
@@ -365,40 +396,42 @@
         if (!USER_EMAIL) { location.href = CTX + '/auth/login'; return; }
         if (btn.disabled || btn.classList.contains('is-self')) return;
 
-        const email = btn.getAttribute('data-user-email');
+        const email = btn.getAttribute('data-user-email') || "";
         if (!email) return;
 
-        const following = btn.dataset.following === 'true';
-        const csrf = getCsrf();
-        const headers = {};
-        if (csrf.token && csrf.header) headers[csrf.header] = csrf.token;
+        // 이미 Following이면 이 화면에서는 클릭 무시
+        if (btn.dataset.following === "true") return;
+
+        const { token, header } = getCsrf();
+        const headers = { "Accept": "text/plain" };
+        if (token && header) headers[header] = token;
 
         btn.disabled = true;
         try {
             const res = await fetch(CTX + '/api/follow/' + encodeURIComponent(email), {
-                method: following ? 'DELETE' : 'POST',
+                method: 'POST',
                 headers,
-                credentials: 'same-origin',
-                redirect: 'manual'
+                credentials: 'same-origin'
             });
-
             if (res.status === 401) { location.href = CTX + '/auth/login'; return; }
-            if (res.status === 403) { alert('보안 토큰이 만료되었어요. 새로고침 후 다시 시도해 주세요.'); return; }
-            if (!res.ok) {
-                console.warn('follow error', res.status, await res.text().catch(()=>''));
-                alert('처리에 실패했어요. 잠시 후 다시 시도해 주세요.');
-                return;
+            if (!res.ok) { alert('팔로우에 실패했습니다.'); return; }
+
+            // 성공 → 버튼 전환 + 캐시 업데이트
+            applyFollowVisual(btn, true);
+            const uid = btn.getAttribute('data-user-id') || "";
+            if (uid) {
+                const set = await loadMyFollowingSetOnce();
+                set.add(uid);
             }
-            setFollowBtnState(btn, !following);
         } catch (err) {
             console.error(err);
             alert('네트워크 오류가 발생했어요.');
         } finally {
-            btn.disabled = false;
+            // Following이면 이미 disabled 상태
         }
     });
 
-    // 초기화
+    // init
     ready(function(){
         setupPopularTags();
         setupForYou();
