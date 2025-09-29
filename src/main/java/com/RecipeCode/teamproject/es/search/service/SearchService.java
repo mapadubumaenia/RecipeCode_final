@@ -109,6 +109,7 @@ public class SearchService {
             m.put("title", d.getTitle() != null ? d.getTitle() : "");
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
             m.put("authorId",  d.getAuthorId()  != null ? d.getAuthorId()  : "");
+            m.put("authorEmail", d.getAuthorEmail() != null ? d.getAuthorEmail() : "");  // ★ 추가
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("score", h.getScore());
@@ -289,6 +290,7 @@ public class SearchService {
             m.put("id", h.getId());
             m.put("title", d.getTitle() != null ? d.getTitle() : "");
             m.put("authorId", d.getAuthorId() != null ? d.getAuthorId() : "");
+            m.put("authorEmail", d.getAuthorEmail() != null ? d.getAuthorEmail() : "");  // ★ 추가
             m.put("likes", d.getLikes() != null ? d.getLikes() : 0L);
             m.put("createdAt", d.getCreatedAt());
             m.put("tags", d.getTags() != null ? d.getTags() : List.of());
