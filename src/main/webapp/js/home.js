@@ -29,6 +29,34 @@
         return 0;
     }
 
+    // ISO 문자열/epoch 숫자 → "YYYY-MM-DD HH:mm" (로컬시간)
+    function fmtYmdHm(input){
+        if (input == null) return '';
+        let d;
+        if (typeof input === 'number') {
+            // epoch(초) 혹은 ms 구분
+            d = new Date(input > 1e12 ? input : input * 1000);
+        } else {
+            const s = String(input).trim();
+            // 숫자 형태면 epoch로 처리
+            if (/^\d+$/.test(s)) {
+                const n = Number(s);
+                d = new Date(n > 1e12 ? n : n * 1000);
+            } else {
+                // 일반 ISO 포함 어떤 날짜 문자열도 Date가 파싱
+                d = new Date(s);
+            }
+        }
+        if (isNaN(d.getTime())) return ''; // 파싱 실패시 빈 문자열
+
+        const y  = d.getFullYear();
+        const m  = String(d.getMonth()+1).padStart(2,'0');
+        const dd = String(d.getDate()).padStart(2,'0');
+        const hh = String(d.getHours()).padStart(2,'0');
+        const mm = String(d.getMinutes()).padStart(2,'0');
+        return `${y}-${m}-${dd} ${hh}:${mm}`;
+    }
+
     // ===== 좋아요 UI 헬퍼 =====
     function applyLikeVisual(btn, liked){
         btn.dataset.liked = liked ? 'true' : 'false';
@@ -326,7 +354,7 @@
                     '    <div class="avatar-ss"><img src="" alt="" data-user-id="' + esc(userIdAttr) + '"></div>' +
                     '    <div class="post-info">' +
                     '      <div class="post-id">' + (cleanId ? '<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>' : '') + '</div>' +
-                    '      <div class="muted">' + esc(it.createdAt || '') + '</div>' +
+                    '      <div class="muted"><time datetime="' + esc(it.createdAt || '') + '">' + esc(fmtYmdHm(it.createdAt)) + '</time></div>' +
                     '    </div>' +
                     '    <button class="followbtn-sm' + (self ? ' is-self' : '') + '"' +
                     '       data-user-id="' + esc(userIdAttr) + '"' +
@@ -494,7 +522,7 @@
                     'data-liked="false" aria-pressed="false">' +
                     '❤️ <span class="like-count">' + likes + '</span>' +
                     '</button>' +
-                    '<button class="btn-none">💬 ' + cmts  + '</button>' +
+
                     '<button class="btn-none" title="views">👁 ' + views + '</button>' +
                     '</div>';
 
