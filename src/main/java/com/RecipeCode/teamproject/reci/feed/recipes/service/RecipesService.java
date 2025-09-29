@@ -120,7 +120,7 @@ public class RecipesService {
 
         // 단계 저장: VIDEO일 땐 이미지 리스트 비워서 넘기면 됨
         List<byte[]> imgBytes = "VIDEO".equalsIgnoreCase(recipesDto.getRecipeType()) ? List.of() : images;
-        recipeContentService.saveRecipeContent(contentDtos, imgBytes, recipe);
+        recipeContentService.saveRecipeContent(contentDtos, recipe);
 
         // 3) 연관 엔티티 저장
         ingredientService.saveAll(ingredientDtos, recipe);
@@ -192,9 +192,9 @@ public class RecipesService {
         // 2-1) 재료
         ingredientService.replaceAll(ingredientDtos, recipe);
         // 2-2) 조리 단계
-        recipeContentService.updateRecipeContents(recipe, contentDtos, images);
+        recipeContentService.updateRecipeContents(recipe, contentDtos);
 
-        // 🔥 기존 태그 삭제 후 새로 추가
+        // 기존 태그 삭제 후 새로 추가
         recipeTagService.syncTagsForRecipe(recipe, tagDtos);
     }
 

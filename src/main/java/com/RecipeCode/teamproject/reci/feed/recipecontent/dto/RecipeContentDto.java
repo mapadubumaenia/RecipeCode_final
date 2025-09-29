@@ -1,6 +1,7 @@
 package com.RecipeCode.teamproject.reci.feed.recipecontent.dto;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -13,6 +14,8 @@ public class RecipeContentDto {
     private String stepExplain;
     private Long stepOrder;
     private String recipes;             // FK
+
+    private MultipartFile recipeImage;
 
 
 //    상세조회용 생성자
