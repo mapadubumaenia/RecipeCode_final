@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -73,55 +75,102 @@ public class RecipeContentService {
         }
     }
 
-    public void updateRecipeContents(Recipes recipe,
-                                     List<RecipeContentDto> contentDtos,
-                                     List<byte[]> images) {
-        // 기존 stepId -> 엔티티 Map
+//    public void updateRecipeContents(Recipes recipe,
+//                                     List<RecipeContentDto> contentDtos,
+//                                     List<byte[]> images) {
+//        // 기존 stepId -> 엔티티 Map
+//        Map<Long, RecipeContent> existing = recipeContentRepository
+//                .findByRecipesUuidOrderByStepOrderAsc(recipe.getUuid())
+//                .stream().collect(Collectors.toMap(RecipeContent::getStepId, Function.identity()));
+//
+//        for (int i = 0; i < contentDtos.size(); i++) {
+//            RecipeContentDto dto = contentDtos.get(i);
+//            RecipeContent entity;
+//
+//            boolean newImageUploaded = (images != null && images.size() > i && images.get(i) != null);
+//
+//            if (dto.getStepId() != null && existing.containsKey(dto.getStepId())) {
+//                // 기존 단계 업데이트
+//                entity = existing.remove(dto.getStepId());
+//                recipeMapStruct.updateRecipeContent(dto, entity);
+//                entity.setStepOrder((i+1L) * 10);
+//
+//                // 이미지 새로 업로드된 경우만 교체
+//                if (images != null && images.size() > i && images.get(i) != null) {
+//                    entity.setRecipeImage(images.get(i));
+//                }
+//            } else {
+//                // 새 단계 추가
+//                entity = recipeMapStruct.toRecipeContentEntity(dto);
+//                entity.setRecipes(recipe);
+//                entity.setStepOrder((i+1L) * 10);
+//                if (images != null && images.size() > i && images.get(i) != null) {
+//                    entity.setRecipeImage(images.get(i));
+//                }
+//            }
+//            recipeContentRepository.save(entity);
+//        }
+//
+//        // 요청에 없는 단계 삭제
+//        if (!existing.isEmpty()) {
+//            recipeContentRepository.deleteAll(existing.values());
+//        }
+//    }
+
+    public void updateRecipeContents(Recipes recipe, List<RecipeContentDto> contentDtos) {
         Map<Long, RecipeContent> existing = recipeContentRepository
                 .findByRecipesUuidOrderByStepOrderAsc(recipe.getUuid())
-                .stream().collect(Collectors.toMap(RecipeContent::getStepId, Function.identity()));
+                .stream()
+                .collect(Collectors.toMap(RecipeContent::getStepId, Function.identity()));
 
         for (int i = 0; i < contentDtos.size(); i++) {
             RecipeContentDto dto = contentDtos.get(i);
             RecipeContent entity;
 
             if (dto.getStepId() != null && existing.containsKey(dto.getStepId())) {
-                // 기존 단계 업데이트
                 entity = existing.remove(dto.getStepId());
                 recipeMapStruct.updateRecipeContent(dto, entity);
-                entity.setStepOrder((i+1L) * 10);
-
-                // 이미지 새로 업로드된 경우만 교체
-                if (images != null && images.size() > i && images.get(i) != null) {
-                    entity.setRecipeImage(images.get(i));
-                }
+                entity.setStepOrder((i + 1L) * 10);
             } else {
-                // 새 단계 추가
                 entity = recipeMapStruct.toRecipeContentEntity(dto);
                 entity.setRecipes(recipe);
-                entity.setStepOrder((i+1L) * 10);
-                if (images != null && images.size() > i && images.get(i) != null) {
-                    entity.setRecipeImage(images.get(i));
-                }
+                entity.setStepOrder((i + 1L) * 10);
+                entity = recipeContentRepository.save(entity); // stepId 확보
             }
+
+            // 🔑 업로드가 있을 때만 바이트/URL 교체
+            if (dto.getRecipeImage() != null && !dto.getRecipeImage().isEmpty()) {
+                try {
+                    entity.setRecipeImage(dto.getRecipeImage().getBytes());
+                } catch (IOException e) {
+                    throw new UncheckedIOException("단계 이미지 변환 실패", e);
+                }
+                entity.setRecipeImageUrl(generateStepDownloadUrl(entity.getStepId()));
+            }
+            // 업로드가 없으면 건드리지 않음(기존 이미지/URL 유지)
+
+            // 초기 마이그레이션 등으로 URL이 비었으면 보정
+            if (entity.getRecipeImage() == null || entity.getRecipeImageUrl().isBlank()) {
+                entity.setRecipeImageUrl(generateStepDownloadUrl(entity.getStepId()));
+            }
+
             recipeContentRepository.save(entity);
         }
 
-        // 요청에 없는 단계 삭제
-        if (!existing.isEmpty()) {
-            recipeContentRepository.deleteAll(existing.values());
-        }
+        // 요청에 빠진 단계는 삭제
+        if (!existing.isEmpty()) recipeContentRepository.deleteAll(existing.values());
     }
+
 
     public String generateStepDownloadUrl(Long stepId) {
         try{
             return ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/content/download")
+                    .fromCurrentContextPath()
+                    .path("/recipes/content/download")
                     .queryParam("stepId", stepId)
                     .toUriString();
         } catch (IllegalStateException e) {
-            return "/content/download?stepId=" + stepId;
+            return "/recipes/content/download?stepId=" + stepId;
         }
     }
 

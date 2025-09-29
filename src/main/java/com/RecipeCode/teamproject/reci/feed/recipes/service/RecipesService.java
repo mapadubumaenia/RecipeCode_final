@@ -192,9 +192,9 @@ public class RecipesService {
         // 2-1) 재료
         ingredientService.replaceAll(ingredientDtos, recipe);
         // 2-2) 조리 단계
-        recipeContentService.updateRecipeContents(recipe, contentDtos, images);
+        recipeContentService.updateRecipeContents(recipe, contentDtos);
 
-        // 🔥 기존 태그 삭제 후 새로 추가
+        // 기존 태그 삭제 후 새로 추가
         recipeTagService.syncTagsForRecipe(recipe, tagDtos);
     }
 

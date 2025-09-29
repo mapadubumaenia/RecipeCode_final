@@ -80,9 +80,9 @@
         tabVideo?.classList.toggle('is-active', !isImg);
         tabVideo?.setAttribute('aria-selected', String(!isImg));
 
-        thumbPane.style.display = isImg ? '' : 'none';
-        imagePane.style.display = isImg ? '' : 'none';   // ← 추가
-        videoPane.style.display = isImg ? 'none' : '';
+        thumbPane?.style && (thumbPane.style.display = isImg ? '' : 'none');
+        imagePane?.style && (imagePane.style.display = isImg ? '' : 'none');
+        videoPane?.style && (videoPane.style.display = isImg ? 'none' : '');
         mountMeta(isImg ? 'IMAGE' : 'VIDEO');
 
         if (!isImg) updateVideoPreview();
@@ -240,7 +240,7 @@
       </div>
       <div class="step-body">
         <label class="upload">
-          <input type="file" name="stepImages" accept="image/*" />
+          <input type="file" accept="image/*" />
           <span class="ph">이미지 업로드</span>
           <img class="hidden" alt="">
         </label>
@@ -274,7 +274,7 @@
 
             // 파일 input은 동일 name으로(서버가 순서대로 받게)
             const file = step.querySelector('input[type="file"]');
-            if (file) file.name = 'stepImages';
+            if (file) file.name = `contents[${i}].recipeImage`;
         });
         updateMoveButtons();
 
@@ -295,7 +295,7 @@
             const newStep = makeStep();
             steps.insertBefore(newStep, step.nextElementSibling);
             renumberSteps();
-            // ✅ 여기서만 바인딩 (jQuery 필요)
+            // 여기서만 바인딩 (jQuery 필요)
              if ($jq && window.RecipesValidation?.rebindSteps) {
                window.RecipesValidation.rebindSteps($jq(newStep));
              }
@@ -369,7 +369,8 @@
             const expected = new Set([
                 `contents[${i}].stepExplain`,
                 `contents[${i}].stepOrder`,
-                `contents[${i}].stepId`
+                `contents[${i}].stepId`,
+                `contents[${i}].recipeImage`
             ]);
             step.querySelectorAll('input[name^="contents["], textarea[name^="contents["]').forEach(el=>{
                 if (!expected.has(el.name)) {
@@ -447,7 +448,7 @@
 
             if (res.ok) {
                 alert("삭제되었습니다.");
-                location.href = `${contextPath}/`;
+                location.href = `${contextPath}/mypage`;
             } else {
                 const msg = await res.text();
                 alert("삭제 실패: " + msg);

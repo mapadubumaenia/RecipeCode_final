@@ -142,6 +142,7 @@ public interface RecipeMapStruct {
 
     // Entity → DTO
     @Mapping(source = "recipes.uuid", target = "recipes")
+    @Mapping(target = "recipeImage", ignore = true)
     RecipeContentDto toRecipeContentDto(RecipeContent entity);
 
     List<RecipeContentDto> toRecipeContentDtoList(List<RecipeContent> entities);
@@ -149,6 +150,7 @@ public interface RecipeMapStruct {
     // DTO → Entity
     @Mapping(source = "recipes", target = "recipes.uuid")
     @Mapping(target = "recipeImage", ignore = true) // 이미지 byte[]는 서비스에서 처리
+    @Mapping(target = "recipeImageUrl", ignore = true)    // URL은 서비스에서
     RecipeContent toRecipeContentEntity(RecipeContentDto dto);
 
     List<RecipeContent> toRecipeContentEntityList(List<RecipeContentDto> dtos);
@@ -156,5 +158,6 @@ public interface RecipeMapStruct {
     // Dirty Checking용 업데이트
     @Mapping(target = "recipes", ignore = true)
     @Mapping(target = "recipeImage", ignore = true)
+    @Mapping(target = "recipeImageUrl", ignore = true)
     void updateRecipeContent(RecipeContentDto dto, @MappingTarget RecipeContent entity);
 }

@@ -327,7 +327,7 @@
                                 </div>
                                 <div class="step-body">
                                     <label class="upload">
-                                        <input type="file" name="stepImages" accept="image/*" />
+                                        <input type="file" accept="image/*" />
                                         <span class="ph">이미지 업로드</span>
                                         <img class="hidden" alt="">
                                     </label>
