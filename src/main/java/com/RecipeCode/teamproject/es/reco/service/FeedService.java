@@ -97,14 +97,18 @@ public class FeedService {
             items.add(new RecipeCardDto(
                     d.getId(),
                     nvl(d.getTitle()),
-                    nvl(d.getAuthorId()),   // ✅ 여기!
+                    nvl(d.getAuthorId()),
                     nvlLong(d.getLikes()),
                     (d.getCreatedAt() == null) ? "" : d.getCreatedAt().toString(),
                     (d.getTags() == null) ? List.of() : d.getTags(),
                     it.getScore(),
                     nvl(d.getThumbUrl()),
-                    media.kind, media.src, media.poster,
-                    nvl(d.getAuthorEmail())
+
+                    // ★ 이메일은 media보다 먼저!
+                    nvl(d.getAuthorEmail()),
+
+                    // media
+                    media.kind, media.src, media.poster
             ));
         }
 
@@ -146,7 +150,12 @@ public class FeedService {
             // ✅ 표기 필드에 authorId(또는 대체) 주입
             items.add(new RecipeCardDto(
                     id, title, authorForDisplay, likes, createdAt, tags, 0.0, thumbUrl,
-                    mediaKind, mediaSrc, poster,authorEmail
+
+                    // ★ 이메일 먼저
+                    authorEmail,
+
+                    // media
+                    mediaKind, mediaSrc, poster
             ));
         }
         int total = (hot.get("total") instanceof Number) ? ((Number) hot.get("total")).intValue() : items.size();

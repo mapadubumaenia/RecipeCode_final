@@ -184,4 +184,11 @@ public class FollowService {
         });
     }
 
+    //
+    // FollowService.java
+    public List<String> getFollowingUserIds(String viewerEmail) {
+        return followRepository.findFollowingUserIds(viewerEmail);
+    }
+
+
 }
