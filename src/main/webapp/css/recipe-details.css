@@ -49,7 +49,7 @@
 .desc{background:var(--card); border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-top:12px}
 .desc .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .tag{font-size:.8rem;background:#202020;border:1px solid #2b2b2b;color:var(--wtext);padding:6px;border-radius:999px;box-shadow: var(--shadow); font-weight: 600;}
-.desc .contentText{border:1px solid var(--line);border-radius:var(--radius);white-space:pre-line;max-height:4.5em;overflow:hidden;padding:0 14px 8px}
+.desc .contentText{border:1px solid var(--line);border-radius:var(--radius);white-space:pre-line;max-height:4.5em;overflow:hidden;padding:14px 14px}
 .desc.expanded .contentText{max-height:none}
 .toggle{color:#9bd;font-weight:700;cursor:pointer;margin-top:8px;display:inline-block}
 
@@ -90,12 +90,16 @@
 
 
 /* 사이드 추천 */
-.side{position:relative;min-height:200px}
-.side .card{display:grid;grid-template-columns:140px 1fr;gap:10px;margin-bottom:12px}
-.side .thumb{width:100%;height:100%;aspect-ratio:16/9;object-fit:cover}
-.side .info{padding:10px}
-.side .ttl{font-weight:700;margin:0 0 4px;font-size:.95rem}
-.side .sub{color:var(--muted);font-size:.8rem}
+.side-reco{
+  display:grid; grid-template-columns: 96px 1fr; gap:8px; padding: 4px;
+  border-radius:12px; background:var(--card); text-decoration:none;
+  color:var(--text); border:1px solid var(--border);
+}
+.side-reco .thumb{ width:100%; height:100%; object-fit:cover; border-radius:8px; }
+.side-reco .ttl{ font-weight:700; margin:2px 0 4px; line-height:1.2; }
+.side-reco .sub{ font-size:12px; color:var(--muted); }
+.side-reco .tags { margin:4px 0 0; }
+.side-reco .tag  { font-size:10px; color:var(--text); background: var(--chip); margin-right:6px; border: 1px none }
 
 /* 반응형 */
 @media (min-width:768px){

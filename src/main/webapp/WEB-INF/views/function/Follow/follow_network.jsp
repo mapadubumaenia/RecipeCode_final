@@ -135,7 +135,7 @@
 </main>
 
 <!-- FAQ 플로팅 버튼 -->
-<a id="faq-btn" class="faq-btn" href="<c:url value="faq" />">FAQ</a>
+<a id="faq-btn" class="faq-btn" href="<c:url value="/faq" />">FAQ</a>
 
 <script>
   const ctx = "${pageContext.request.contextPath}";

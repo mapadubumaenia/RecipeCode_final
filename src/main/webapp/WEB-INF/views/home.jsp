@@ -77,6 +77,10 @@
             background: rgba(255, 255, 255, 0.95);
         }
     </style>
+    <sec:authorize access="isAuthenticated()">
+        <meta name="_csrf" content="${_csrf.token}"/>
+        <meta name="_csrf_header" content="${_csrf.headerName}"/>
+    </sec:authorize>
 </head>
 <body>
 <header class="container">

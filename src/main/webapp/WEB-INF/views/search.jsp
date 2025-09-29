@@ -13,61 +13,24 @@
   <link rel="preconnect" href="https://www.google.com">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css">
-  <!-- 외부 스크립트: defer 권장 -->
   <script src="<c:url value='/js/search.js'/>" defer></script>
   <style>
-    /* ▶ 미디어 공통 스타일 */
-    .media {
-      width: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #000;
-      position: relative;
-    }
+    .media { width: 100%; border-radius: 12px; overflow: hidden; background: #000; position: relative; }
     .media.aspect { aspect-ratio: 16 / 9; }
-    .media > iframe,
-    .media > video,
-    .media > img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-    }
-
-    /* ▶ 라이트 유튜브: 플레이스홀더 버튼 */
+    .media > iframe, .media > video, .media > img { width: 100%; height: 100%; display: block; object-fit: cover; }
     .light-yt { cursor: pointer; }
     .light-yt:focus { outline: 3px solid #8ac4ff; outline-offset: 2px; }
-    .light-yt .play-badge {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.8);
-      display: grid; place-items: center;
-      font-size: 28px; line-height: 1;
-      user-select: none;
-    }
+    .light-yt .play-badge { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.8); display: grid; place-items: center; font-size: 28px; line-height: 1; user-select: none; }
     .light-yt:hover .play-badge { background: rgba(255,255,255,0.95); }
-
-    /* 제목만 링크 */
     a.post-link.title { text-decoration: none; }
     a.post-link.title:hover { text-decoration: underline; }
-
-    /* ▶ 태그 스타일 (#chips) */
     .tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-    .tag {
-      display:inline-block;
-      padding:2px 8px;
-      border-radius:999px;
-      background:#f2f3f5;
-      font-size:12px;
-      color:#333;
-      line-height:20px;
-      white-space:nowrap;
-    }
+    .tag { display:inline-block; padding:2px 8px; border-radius:999px; background:#f2f3f5; font-size:12px; color:#333; line-height:20px; white-space:nowrap; }
   </style>
+  <sec:authorize access="isAuthenticated()">
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
+  </sec:authorize>
 </head>
 <body>
 <header class="container">
@@ -101,7 +64,6 @@
   </div>
 </header>
 
-<!-- 서치바 -->
 <nav class="container search-bar">
   <select id="sortSelect" class="tabs select-box">
     <option value="new" selected>lastes</option>
@@ -116,17 +78,12 @@
 </nav>
 
 <main class="container layout">
-  <!-- 메인 컬럼 -->
   <section class="main">
-<%--    <h2 class="section-title">Trending Shorts</h2>--%>
-<%--&lt;%&ndash;    <div id="trending" class="trend-grid"></div>&ndash;%&gt;  트렌딩 쇼츠 제거--%>
-
     <h2 id="foryou" class="section-title">Results</h2>
     <div id="results"></div>
     <div id="resultsSentinel" style="height:1px"></div>
   </section>
 
-  <!-- 사이드바 -->
   <aside class="sidebar">
     <div class="card p-16 stack-btns">
       <a class="btn pc-register text-center" href="<c:url value='/auth/login'/>">login</a>
@@ -170,12 +127,21 @@
 <script src="${pageContext.request.contextPath}/feed-follow-btn.js"></script>
 <script src="${pageContext.request.contextPath}/footer.js"></script>
 
-
 <!-- JSP가 가진 값만 전역으로 전파 -->
 <script>
   window.__CTX__='${pageContext.request.contextPath}';
+  window.__USER_EMAIL__='';
 </script>
-
+<sec:authorize access="isAuthenticated()">
+  <script>
+    (function(){
+      var a = '<sec:authentication property="principal.userEmail"/>' || '';
+      var b = '<sec:authentication property="principal.username"/>' || '';
+      var v = (a && a.trim().length) ? a : (b && b.trim().length ? b : '');
+      if (v) window.__USER_EMAIL__ = v.trim().toLowerCase();
+    })();
+  </script>
+</sec:authorize>
 
 </body>
 </html>

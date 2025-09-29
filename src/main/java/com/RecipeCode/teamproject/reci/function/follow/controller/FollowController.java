@@ -104,4 +104,12 @@ public class FollowController {
             @RequestParam("keyword") String keyword) {
         return ResponseEntity.ok(followService.searchUsers(keyword));
     }
+
+    // userid 목록에서 팔로우중인 아이디 검색
+    @GetMapping("/mine/following-ids")
+    public ResponseEntity<List<String>> myFollowingIds() {
+        String viewerEmail = securityUtil.getLoginUser().getUsername();
+        return ResponseEntity.ok(followService.getFollowingUserIds(viewerEmail));
+    }
+
 }
