@@ -12,6 +12,7 @@
 .edit-profile {font-size:.85rem; color:#666;}
 .edit-feed {font-size:.85rem; color:#666;}
 .profile-actions {display:flex; gap:8px; margin-top:8px;}
+.avatar-ss img{width:42px;height:42px;border-radius:50%;background:#ddd;object-fit:cover}
 
 
 /* 서치 */
@@ -46,13 +47,24 @@
 .pane-title {display: none; margin: 0 0 8px; font-size: 0.95rem; font-weight: 800; color: var(--muted);}
 .jump {cursor:pointer}
 
+#followingList, #followerList{ display:grid; gap:10px; flex:1;}
+.empty-full{ height:100%; min-height: 220px; display:flex; align-items:center;
+    justify-content:center; border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--card);}
+.empty-full .post-body{ padding: 16px; }
+.empty-full .muted{ font-size: .95rem; }
+
+
 /* 푸터/버튼 (검색 페이지 none) */
 footer{display:flex;justify-content:flex-end;}
 
 /* 모바일(<640px): 탭으로 전환 */
 .only-mobile { display: flex; gap: 8px; margin-top: 12px; } /* 상단 탭 보이기 */
 .network .lists { display: grid; gap: 12px; grid-template-columns: 1fr; } /* 한 컬럼 */
-.list-pane { display: none; }           /* 기본 숨김 */
+.list-pane {
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px;
+    display:flex; flex-direction:column; min-height: 360px;
+}           /* 기본 숨김 */
 .list-pane.active { display: block; }   /* 활성 pane만 표시 */
 .list-pane .more-btn { display: none; } /* 더보기는 활성 pane에서만 */
 .list-pane.active .more-btn { display: block; }
