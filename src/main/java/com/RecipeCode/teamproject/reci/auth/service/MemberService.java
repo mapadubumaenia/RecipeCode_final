@@ -111,6 +111,11 @@ public class MemberService {
         Member member = memberRepository.findByUserEmail((memberDto.getUserEmail()))
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
+        // 프로필 이미지 URL 기본값 세팅
+        if (member.getProfileImageUrl() == null || member.getProfileImageUrl().isBlank()) {
+            member.setProfileImageUrl("/member/" + member.getUserId() + "/profile-image");
+        }
+
         member.setNickname(memberDto.getNickname());
         member.setUserLocation(memberDto.getUserLocation());
         member.setUserIntroduce(memberDto.getUserIntroduce());
@@ -119,6 +124,7 @@ public class MemberService {
         member.setUserYoutube(memberDto.getUserYoutube());
         member.setUserBlog(memberDto.getUserBlog());
         member.setProfileStatus(memberDto.getProfileStatus());
+        member.setProfileImageUrl("/member/" + member.getUserId() + "/profile-image");
 
         //비밀번호 변경(공란일시 변경x)
         if (memberDto.getPassword() != null && !memberDto.getPassword().isBlank()) {
