@@ -360,6 +360,7 @@
         form.querySelectorAll('input[name^="contents["], textarea[name^="contents["]').forEach(el=>{
             if (!steps.contains(el)) {
                 console.warn('[recipe] removed stray field outside #steps:', el.name);
+                console.log('[recipe] total files bytes =', totalUploadBytes(form));
                 el.remove();
             }
         });
