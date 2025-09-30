@@ -6,13 +6,45 @@
 
     // ------- 공통 전역 -------
     const CTX = (typeof window !== "undefined" && window.__CTX__) ? window.__CTX__ : "";
-    const USER_EMAIL = (typeof window !== "undefined" && window.__USER_EMAIL__) ? String(window.__USER_EMAIL__).trim().toLowerCase() : "";
+
+    // HTML 엔티티로 들어온 이메일(&#64; 등)을 원문으로 복원
+    function htmlUnescape(s){
+        if (s == null) return s;
+        return String(s)
+            .replace(/&amp;/g, '&')
+            .replace(/&#64;/g, '@')
+            .replace(/&#46;/g, '.')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'");
+    }
+
+    // window.__USER_EMAIL__ 우선, 없으면 <meta name="rc-user-email"> 폴백 → 소문자/트림
+    (function initUserEmail(){
+        let raw = "";
+        if (typeof window !== "undefined" && typeof window.__USER_EMAIL__ === "string") {
+            raw = window.__USER_EMAIL__;
+        } else {
+            const meta = document.querySelector('meta[name="rc-user-email"]');
+            if (meta) raw = meta.getAttribute('content') || "";
+        }
+        window.__USER_EMAIL__ = htmlUnescape(raw).trim().toLowerCase();
+    })();
+    const USER_EMAIL = window.__USER_EMAIL__ || "";
 
     // DOM ready 보장
     function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
 
     // 유틸
-    function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&quot;').replace(/'/g,'&#39;'); }
+    function esc(s){
+        return (s==null?'':String(s))
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+    }
     function isUuid36(s){ return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || ''); }
     function detailUrl(id){ return CTX + '/recipes/' + encodeURIComponent(id); }
 
@@ -34,21 +66,17 @@
         if (input == null) return '';
         let d;
         if (typeof input === 'number') {
-            // epoch(초) 혹은 ms 구분
             d = new Date(input > 1e12 ? input : input * 1000);
         } else {
             const s = String(input).trim();
-            // 숫자 형태면 epoch로 처리
             if (/^\d+$/.test(s)) {
                 const n = Number(s);
                 d = new Date(n > 1e12 ? n : n * 1000);
             } else {
-                // 일반 ISO 포함 어떤 날짜 문자열도 Date가 파싱
                 d = new Date(s);
             }
         }
-        if (isNaN(d.getTime())) return ''; // 파싱 실패시 빈 문자열
-
+        if (isNaN(d.getTime())) return '';
         const y  = d.getFullYear();
         const m  = String(d.getMonth()+1).padStart(2,'0');
         const dd = String(d.getDate()).padStart(2,'0');
@@ -114,7 +142,6 @@
             for (let i=0;i<ids.length;i+=CHUNK){
                 const chunk = ids.slice(i, i+CHUNK);
                 try{
-                    // 배치 엔드포인트가 없다면 404일 수 있으므로 try/catch
                     const res = await fetch(CTX + '/api/recipes/likes/mine?ids=' + encodeURIComponent(chunk.join(',')), {
                         headers: { 'Accept':'application/json' }, credentials:'same-origin'
                     });
@@ -128,21 +155,7 @@
                         });
                     });
                 }catch{
-                    // 폴백: 단건 상태 확인 엔드포인트가 없으면 그냥 skip
-                    // (엔드포인트가 있으면 아래를 살리고, 없으면 조용히 통과)
-                    // try {
-                    //     await Promise.all(chunk.map(async (id)=>{
-                    //         const r = await fetch(`${CTX}/api/recipes/${encodeURIComponent(id)}/like/status`, {
-                    //             headers:{'Accept':'application/json'}, credentials:'same-origin'
-                    //         });
-                    //         if (!r.ok) return;
-                    //         const b = await r.json();
-                    //         const liked = !!b?.liked;
-                    //         container.querySelectorAll(`.js-like[data-uuid="${id.replace(/"/g,'\\"')}"]`).forEach(btn=>{
-                    //             applyLikeVisual(btn, liked);
-                    //         });
-                    //     }));
-                    // } catch {}
+                    // 폴백: 단건 확인 API 없으면 조용히 skip
                 }
             }
         } catch (e) { console.warn('[hydrateMyLikesIn] skipped:', e); }
@@ -287,16 +300,18 @@
             const $sentinel = document.getElementById('forYouSentinel');
             if (!$list || !$btn) return;
 
-            let pageSize = 5;
+            // ▼ 변경: 기본 페이지 크기 상향
+            let pageSize = 10;
             let nextCursor = null;
             let busy = false;
+            let finished = false;
 
-            function buildUrl() {
+            function buildUrl(after) {
                 let url;
                 if (USER_EMAIL) url = CTX + '/api/feed/personal?userEmail=' + encodeURIComponent(USER_EMAIL);
                 else url = CTX + '/api/feed/hot?';
                 if (url.indexOf('?') === -1) url += '?'; else if (!/[&?]$/.test(url)) url += '&';
-                if (nextCursor) url += 'after=' + encodeURIComponent(nextCursor) + '&';
+                if (after) url += 'after=' + encodeURIComponent(after) + '&';
                 url += 'size=' + encodeURIComponent(pageSize);
                 return url;
             }
@@ -366,7 +381,7 @@
                     '  </div>' +
                     mediaBlock +
                     (hasUuid ? ('<a class="post-link" href="' + href + '">') : '<div class="post-link disabled" aria-disabled="true">') +
-                    '  <p class="muted" style="margin-top:8px">' + esc(it.title || '') + score + '</p>' +
+                    '  <p class="muted" style="margin-top:8px">' + esc(it.title || '')  +
                     (tagsHtml ? ('<p class="muted">' + tagsHtml + '</p>') : '') +
                     (hasUuid ? '</a>' : '</div>') +
                     '  <div class="post-cta">' +
@@ -383,37 +398,70 @@
                     '</article>';
             }
 
+            async function fetchOnce(after) {
+                const url = buildUrl(after);
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            }
+
+            // ▼ 변경: 빈 페이지가 와도 next가 있으면 연쇄로 계속 가져옴
             async function loadMore(){
-                if (busy) return;
+                if (busy || finished) return;
                 busy = true;
                 if ($btn) { $btn.disabled = true; $btn.textContent = '불러오는 중…'; }
 
-                try{
-                    const url = buildUrl();
-                    const res = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    const data = await res.json();
+                let appended = 0;
+                let loop = 0;
+                const MAX_CHAIN = 5; // 빈 페이지 연속 시 최대 5회까지 다음 커서로 연쇄 호출
 
-                    if (data && data.items && data.items.length) {
-                        let html = '';
-                        for (let i=0;i<data.items.length;i++){ html += cardHtml(data.items[i]); }
-                        const temp = document.createElement('div');
-                        temp.innerHTML = html;
-                        while (temp.firstChild) $list.appendChild(temp.firstChild);
+                try {
+                    let after = nextCursor || null;
 
-                        // 렌더 후 하이드레이션
-                        await hydrateFollowButtonsIn($list);
-                        hydrateAvatarsIn($list);
-                        await hydrateCommentCountsIn($list);
-                        await hydrateMyLikesIn($list);   // 내 좋아요 표시
+                    while (loop < MAX_CHAIN && !finished) {
+                        loop += 1;
+
+                        const data = await fetchOnce(after);
+                        const items = Array.isArray(data?.items) ? data.items : [];
+                        const next = (data && data.next) ? String(data.next) : null;
+
+                        if (items.length) {
+                            let html = '';
+                            for (let i=0;i<items.length;i++){ html += cardHtml(items[i]); }
+                            const temp = document.createElement('div');
+                            temp.innerHTML = html;
+                            while (temp.firstChild) $list.appendChild(temp.firstChild);
+
+                            // 렌더 후 하이드레이션
+                            await hydrateFollowButtonsIn($list);
+                            hydrateAvatarsIn($list);
+                            await hydrateCommentCountsIn($list);
+                            await hydrateMyLikesIn($list);
+
+                            appended += items.length;
+                        }
+
+                        nextCursor = next;
+                        after = nextCursor;
+
+                        // 멈출 조건: next가 없어졌을 때
+                        if (!nextCursor) {
+                            finished = true;
+                            break;
+                        }
+
+                        // 이번 루프에서 이미 충분히 붙였으면 종료
+                        if (appended >= pageSize) break;
+
+                        // 아이템이 0개였지만 next가 있으면 → 다음 커서로 연쇄 시도
+                        // (별도 조건 없이 while 계속)
                     }
-                    nextCursor = (data && data.next) ? data.next : null;
-                }catch(e){
+                } catch (e) {
                     console.error(e);
                     alert('추천 피드를 불러오지 못했어요.');
-                }finally{
+                } finally {
                     if ($btn) {
-                        if (nextCursor) { $btn.textContent = '더 보기'; $btn.disabled = false; }
+                        if (!finished) { $btn.textContent = '더 보기'; $btn.disabled = false; }
                         else { $btn.textContent = '마지막입니다'; $btn.disabled = true; }
                     }
                     busy = false;
@@ -427,8 +475,12 @@
             // 무한 스크롤
             if ('IntersectionObserver' in window && $sentinel) {
                 const io = new IntersectionObserver((entries) => {
-                    entries.forEach((entry) => { if (entry.isIntersecting && nextCursor && !busy) { loadMore(); } });
-                }, { root: null, rootMargin: '600px 0px' });
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting && !busy && !finished) {
+                            loadMore();
+                        }
+                    });
+                }, { root: null, rootMargin: '800px 0px', threshold: 0 });
                 io.observe($sentinel);
             } else {
                 let ticking = false;
@@ -436,8 +488,8 @@
                     if (ticking) return;
                     ticking = true;
                     requestAnimationFrame(() => {
-                        const nearBottom = window.innerHeight + window.scrollY >= (document.body.offsetHeight - 600);
-                        if (nearBottom && nextCursor && !busy) loadMore();
+                        const nearBottom = window.innerHeight + window.scrollY >= (document.body.offsetHeight - 800);
+                        if (nearBottom && !busy && !finished) loadMore();
                         ticking = false;
                     });
                 });
@@ -522,7 +574,6 @@
                     'data-liked="false" aria-pressed="false">' +
                     '❤️ <span class="like-count">' + likes + '</span>' +
                     '</button>' +
-
                     '<button class="btn-none" title="views">👁 ' + views + '</button>' +
                     '</div>';
 
@@ -533,7 +584,7 @@
             (async function(){
                 try {
                     const url = CTX + '/api/home/trending?days=7&size=4';
-                    const res = await fetch(url, { headers: { 'Accept':'application/json' }, credentials: 'same-origin' });
+                    const res = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
                     if (!res.ok) throw new Error('HTTP '+res.status);
                     const data = await res.json();
                     wrap.innerHTML = '';
