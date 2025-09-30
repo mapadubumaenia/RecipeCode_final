@@ -1,27 +1,20 @@
 /* =========================
    프로필 카드
    ========================= */
-.profile-card {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-}
 
-.profile-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    text-align: center;
-    margin-top: 12px;
-}
-
+.profile-top {display:flex; gap:8px; flex-direction: column; align-items: flex-start; justify-content: center;}
+.userInfo {display: flex; flex-direction: column; justify-content: center;}
+.profile {display: flex;}
+.muted {margin: 4px;}
+.profile-left {display: flex; justify-content: flex-start}
+.cardLeft {display: flex; flex-direction: row; justify-content: flex-start; gap:8px;}
+.profile-right {display: flex; flex-direction: column;}
+.profile-card { display: flex; flex-direction: column; justify-content: flex-start;
+    margin-bottom: 20px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--card); }
+.profile-top {flex : 1;}
+.profile-info {display: flex; flex-direction: column; align-items: flex-start; }
+.card-bottom{padding-left: 16px}
 .profile-top {
     display: flex;
     gap: 8px;
@@ -29,19 +22,19 @@
     justify-content: center;
     margin-bottom: 8px;
 }
-
 .profile-name {
     margin: 4px 0;
     font-size: 1.2rem;
     font-weight: 700;
 }
-
 .profile-info .muted {
     font-size: 0.9rem;
     color: var(--muted);
 }
 
 /* 프로필 이미지 - 왼쪽 고정 */
+.profile-img {display: flex; flex-direction: column; align-items: center; gap:8px;}
+
 .avatar-lg {
     flex-shrink: 0;
     width: 70px;
@@ -62,13 +55,13 @@
 }
 
 /* 팔로워 / 팔로잉 */
-.profile-stats {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 12px;
-    font-size: 14px;
-}
+/*.profile-stats {*/
+/*    display: flex;*/
+/*    gap: 20px;*/
+/*    justify-content: center;*/
+/*    margin-bottom: 12px;*/
+/*    font-size: 14px;*/
+/*}*/
 
 .profile-stats span {
     color: var(--text);
@@ -98,9 +91,9 @@
 }
 
 /* SNS/외부 링크 */
-.profile-links {
-    margin-top: 10px;
-}
+/*.profile-links {*/
+/*    margin-top: 10px;*/
+/*}*/
 
 .link-icon {
     margin: 0 6px;
@@ -291,6 +284,18 @@
         align-self: start;
         height: max-content;
     }
+    .left {display: flex; flex-direction: row; justify-content: space-between;}
+    .profile-top {display:flex; gap:8px; flex-direction: column; align-items: flex-start; justify-content: center;}
+    .userInfo {display: flex; flex-direction: column; justify-content: center;}
+    .profile {display: flex;}
+    .muted {margin: 4px;}
+    .profile-left {display: flex; justify-content: flex-start}
+    .cardLeft {display: flex; flex-direction: row; justify-content: flex-start; gap:8px;}
+    .profile-right {display: flex; flex-direction: column;}
+    .profile-top {flex : 1;}
+    .profile-info {display: flex; flex-direction: column; align-items: flex-start; }
+    .card-bottom{display:flex; flex-direction: row-reverse; justify-content: space-between; padding: 0 1.5rem}
+
 }
 
 @media (min-width: 1024px) {

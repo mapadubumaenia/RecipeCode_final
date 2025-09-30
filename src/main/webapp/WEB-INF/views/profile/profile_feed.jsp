@@ -73,43 +73,110 @@
 
     <!-- 프로필 카드 -->
     <section class="card profile-card">
-
-        <!-- 프로필 이미지 -->
-        <div class="avatar-lg">
-            <c:if test="${not empty user.profileImageUrl}">
-                <img src="${user.profileImageUrl}" alt="${user.nickname}" class="avatar-lg"/>
-            </c:if>
+        <aside class="left">
+        <div class="cardLeft">
+            <div class="profile-img">
+            <!-- 프로필 이미지 -->
+            <div class="avatar-lg">
+                <c:if test="${not empty user.profileImageUrl}">
+                    <img src="${user.profileImageUrl}" alt="${user.nickname}" class="avatar-lg"/>
+                </c:if>
+            </div>
         </div>
 
         <!-- 프로필 정보 -->
         <div class="profile-info">
-
             <!-- 아이디 + 닉네임 -->
             <div class="profile-top">
-                <h2 class="profile-name">${user.userId}</h2>
-                <span class="muted">${user.nickname}</span>
+                <div class="userInfo">
+                    <div class="profile">
+                        <h2 class="profile-name">${user.userId}</h2>
+                    <span class="muted">${user.nickname}</span>
+                    </div>
+                    <div class="profile-left">
+                        <!-- 위치 -->
+                        <c:if test="${not empty user.userLocation}">
+                            <p class="muted">📍 ${user.userLocation}</p>
+                        </c:if>
+                    </div>
+                </div>
             </div>
+            </div>
+        </div>
+        </aside>
 
-            <!-- 팔로워 / 팔로잉 -->
-            <div class="profile-stats">
-                <a href="/follow/network/${user.userId}" class="stat-link">
-                    팔로워 <b id="followerCount">0</b>
-                </a>
-                <a href="/follow/network/${user.userId}" class="stat-link">
-                    팔로잉 <b id="followingCount">0</b>
-                </a>
-            </div>
 
             <!-- 짧은 소개 -->
-            <c:if test="${not empty user.userIntroduce}">
-                <p class="intro">${user.userIntroduce}</p>
-            </c:if>
+<%--            <c:if test="${not empty user.userIntroduce}">--%>
+<%--                <p class="intro">${user.userIntroduce}</p>--%>
+<%--            </c:if>--%>
 
             <!-- 위치 -->
-            <c:if test="${not empty user.userLocation}">
-                <p class="muted">📍 ${user.userLocation}</p>
-            </c:if>
+<%--            <c:if test="${not empty user.userLocation}">--%>
+<%--                <p class="muted">📍 ${user.userLocation}</p>--%>
+<%--            </c:if>--%>
 
+            <!-- 관심 태그 -->
+<%--            <c:if test="${not empty user.interestTags}">--%>
+<%--                <div class="tags">--%>
+<%--                    <c:forEach items="${user.interestTags}" var="t">--%>
+<%--                        <span class="chip">#${t.tag}</span>--%>
+<%--                    </c:forEach>--%>
+<%--                </div>--%>
+<%--            </c:if>--%>
+
+            <!-- SNS / 링크 아이콘 -->
+<%--            <div class="profile-links">--%>
+<%--                <c:if test="${not empty user.userWebsite}">--%>
+<%--                    <a href="${user.userWebsite}" target="_blank" class="link-icon">🌐</a>--%>
+<%--                </c:if>--%>
+<%--                <c:if test="${not empty user.userInsta}">--%>
+<%--                    <a href="https://instagram.com/${user.userInsta}" target="_blank" class="link-icon">📸</a>--%>
+<%--                </c:if>--%>
+<%--                <c:if test="${not empty user.userYoutube}">--%>
+<%--                    <a href="https://youtube.com/${user.userYoutube}" target="_blank" class="link-icon">▶</a>--%>
+<%--                </c:if>--%>
+<%--                <c:if test="${not empty user.userBlog}">--%>
+<%--                    <a href="${user.userBlog}" target="_blank" class="link-icon">✍</a>--%>
+<%--                </c:if>--%>
+<%--            </div>--%>
+
+
+        <!-- SNS / 링크 아이콘 -->
+        <aside class="card-bottom">
+            <!-- 팔로워 / 팔로잉 -->
+            <div class="profile-right">
+                <div class="profile-stats">
+                    <a href="/follow/network/${user.userId}" class="stat-link">
+                        팔로워 <b id="followerCount">0</b>
+                    </a>
+                    <a href="/follow/network/${user.userId}" class="stat-link">
+                        팔로잉 <b id="followingCount">0</b>
+                    </a>
+                </div>
+                <div class="user-intro">
+                    <!-- 짧은 소개 -->
+                    <c:if test="${not empty user.userIntroduce}">
+                        <p class="intro">${user.userIntroduce}</p>
+                    </c:if>
+                </div>
+            </div>
+
+            <div class="bottom-left">
+            <div class="profile-links">
+               <c:if test="${not empty user.userWebsite}">
+               <a href="${user.userWebsite}" target="_blank" class="link-icon">🌐</a>
+               </c:if>
+              <c:if test="${not empty user.userInsta}">
+               <a href="https://instagram.com/${user.userInsta}" target="_blank" class="link-icon">📸</a>
+              </c:if>
+              <c:if test="${not empty user.userYoutube}">
+              <a href="https://youtube.com/${user.userYoutube}" target="_blank" class="link-icon">▶</a>
+              </c:if>
+              <c:if test="${not empty user.userBlog}">
+                <a href="${user.userBlog}" target="_blank" class="link-icon">✍</a>
+                </c:if>
+            </div>
             <!-- 관심 태그 -->
             <c:if test="${not empty user.interestTags}">
                 <div class="tags">
@@ -118,23 +185,9 @@
                     </c:forEach>
                 </div>
             </c:if>
-
-            <!-- SNS / 링크 아이콘 -->
-            <div class="profile-links">
-                <c:if test="${not empty user.userWebsite}">
-                    <a href="${user.userWebsite}" target="_blank" class="link-icon">🌐</a>
-                </c:if>
-                <c:if test="${not empty user.userInsta}">
-                    <a href="https://instagram.com/${user.userInsta}" target="_blank" class="link-icon">📸</a>
-                </c:if>
-                <c:if test="${not empty user.userYoutube}">
-                    <a href="https://youtube.com/${user.userYoutube}" target="_blank" class="link-icon">▶</a>
-                </c:if>
-                <c:if test="${not empty user.userBlog}">
-                    <a href="${user.userBlog}" target="_blank" class="link-icon">✍</a>
-                </c:if>
             </div>
-        </div>
+        </aside>
+
     </section>
 
     <!-- 메인 레이아웃 -->
