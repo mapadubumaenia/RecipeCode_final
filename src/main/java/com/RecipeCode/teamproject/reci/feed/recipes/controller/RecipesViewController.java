@@ -25,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.RecipeCode.teamproject.es.reco.service.EventIngestService;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class RecipesViewController {
     private final RecipesService recipesService;
     private final RecipeContentService recipeContentService;
     private final MemberRepository memberRepository;
-
+    private final EventIngestService eventIngestService;
     /* 레시피 등록 폼 이동 */
     @GetMapping("/recipes/add")
     public String createForm() {
@@ -214,6 +215,20 @@ public class RecipesViewController {
         model.addAttribute("isVideo", isVideo);
         model.addAttribute("insertTime", insertTime);
         model.addAttribute("viewerEmail", viewerEmail);
+
+        // ★ 이벤트 전송: 로그인 사용자만, 이메일은 소문자 고정
+        if (viewerEmail != null && !viewerEmail.isBlank()) {
+            try {
+                eventIngestService.sendEvent(
+                        viewerEmail.trim().toLowerCase(),
+                        uuid,
+                        "view"
+                );
+            } catch (Exception e) {
+                log.warn("[events] view send failed: {}", e.toString());
+            }
+        }
+
         return "feed/recipe_details"; // JSP 경로
     }
 
