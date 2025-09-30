@@ -70,8 +70,22 @@ public class RecipeReportController {
             return result;
         }
 
-        // 로그인 된 경우 -> 이메일 세팅 후 저장
-        recipeReportDto.setUserEmail(user.getUsername());
+        // 1. 로그인된 사용자
+        String loginEmail = user.getUsername();
+
+        // 2. 신고 대상 레시피 작성자 조회
+        String recipeOwnerEmail = recipesService.findById(recipeReportDto.getUuid())
+                .getMember().getUserEmail();
+
+        // 3. 자기 글이면 신고 불가
+        if (loginEmail.equals(recipeOwnerEmail)) {
+            result.put("status", "fail");
+            result.put("message", "자신의 글은 신고할 수 없습니다.");
+            return result;
+        }
+
+        // 4. 정상 저장
+        recipeReportDto.setUserEmail(loginEmail);
         recipeReportService.save(recipeReportDto);
 
         result.put("status", "ok");
@@ -79,6 +93,7 @@ public class RecipeReportController {
         result.put("message", "신고가 접수되었습니다.");
         return result;
     }
+
 
     // 상태 변경 (수정)
     @PostMapping("/report/edit")

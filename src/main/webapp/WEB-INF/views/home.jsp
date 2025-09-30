@@ -306,8 +306,6 @@
 <!-- 사이드바 팔로잉 JS -->
 <script src="${pageContext.request.contextPath}/js/mainpage-sidebar.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
-<%--시간 js--%>
-<script src="<c:url value='/js/mypage/utils.js'/>"></script>
 <%--알림 js--%>
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>
 <script src="<c:url value='/js/login-to-follow.js'/>" defer></script>

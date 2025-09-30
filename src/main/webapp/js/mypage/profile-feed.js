@@ -97,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(err => console.error("팔로잉 수 가져오기 실패:", err));
 });
 
+
 // 사이드바 mini-card (팔로잉/팔로워 리스트)
 document.addEventListener("DOMContentLoaded", () => {
     const miniCards = document.querySelectorAll(".mini-card");

@@ -8,7 +8,15 @@
     const USER_EMAIL = (typeof window !== "undefined" && window.__USER_EMAIL__) ? String(window.__USER_EMAIL__).trim().toLowerCase() : "";
 
     function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
-    function esc(s){ if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&quot;').replace(/'/g,'&#39;'); }
+     function esc(s){
+           if (s == null) return '';
+           return String(s)
+                 .replace(/&/g,'&amp;')
+             .replace(/</g,'&lt;')
+             .replace(/>/g,'&gt;')
+             .replace(/"/g,'&quot;')
+             .replace(/'/g,'&#39;');
+         }
     function fmtDate(v) {
         if (!v) return '';
         try { const d = new Date(v); if (isNaN(d.getTime())) return ''; return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); } catch { return ''; }
@@ -21,6 +29,29 @@
         if (isUuid36(b)) return b;
         return null;
     }
+
+    // ISO 문자열 / epoch(초|ms) / Date → Date
+    function toDate(input){
+        if (input == null) return null;
+        if (input instanceof Date) return isNaN(input.getTime()) ? null : input;
+        if (typeof input === 'number') return new Date(input > 1e12 ? input : input*1000);
+        const s = String(input).trim();
+        if (/^\d+$/.test(s)) { const n = Number(s); return new Date(n > 1e12 ? n : n*1000); }
+        const d = new Date(s);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+// YYYY-MM-DD HH:mm (로컬)
+    function fmtYmdHm(v){
+        const d = toDate(v); if (!d) return '';
+        const y  = d.getFullYear();
+        const m  = String(d.getMonth()+1).padStart(2,'0');
+        const dd = String(d.getDate()).padStart(2,'0');
+        const hh = String(d.getHours()).padStart(2,'0');
+        const mm = String(d.getMinutes()).padStart(2,'0');
+        return `${y}-${m}-${dd} ${hh}:${mm}`;
+    }
+
 
     // ===== 좋아요 UI 헬퍼 =====
     function applyLikeVisual(btn, liked){
@@ -198,7 +229,7 @@
 
         function renderItem(it){
             const title = esc(it.title || '');
-            const created = fmtDate(it.createdAt);
+            const created = fmtYmdHm(it.createdAt);
             const likes = (it.likes != null) ? it.likes : 0;
             const cmts  = (it.comments != null) ? it.comments : 0;
             const views = (it.views != null) ? it.views : 0;
@@ -259,7 +290,9 @@
                 '  <div class="avatar-ss"><img src="" alt="" data-user-id="' + esc(userIdAttr) + '"></div>' +
                 '  <div class="post-info">' +
                 '    <div class="post-id">' + (cleanId ? ('<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>') : '') + '</div>' +
-                '    <div class="muted">' + (created || '') + '</div>' +
+                 '    <div class="muted">' +
+                 '      <time datetime="' + esc(it.createdAt || '') + '">' + esc(created) + '</time>' +
+                 '    </div>' +
                 '  </div>' +
                 '  <button class="followbtn-sm' + (self ? ' is-self' : '') + '"' +
                 '     data-user-id="' + esc(userIdAttr) + '"' +

@@ -7,6 +7,7 @@ import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.service.MemberService;
 import com.RecipeCode.teamproject.reci.feed.recipes.dto.RecipesDto;
 import com.RecipeCode.teamproject.reci.function.follow.dto.FollowDto;
+import com.RecipeCode.teamproject.reci.function.follow.repository.FollowRepository;
 import com.RecipeCode.teamproject.reci.function.follow.service.FollowService;
 import com.RecipeCode.teamproject.reci.function.follow.service.ProfileFeedService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 @Controller
 @RequiredArgsConstructor
 public class ProfileFeedViewController {
@@ -27,6 +33,7 @@ public class ProfileFeedViewController {
     private final ProfileFeedService profileFeedService;
     private final FollowService followService;
     private final MemberService memberService;
+    private final FollowRepository followRepository;
 
     // 특정 유저 프로필 페이지
     @GetMapping("/profile/{userId:.+}")
@@ -67,10 +74,39 @@ public class ProfileFeedViewController {
         Slice<FollowDto> followers = followService.getUserFollowerList(owner.getUserId(), pageable);
         Slice<FollowDto> followings = followService.getUserFollowingList(owner.getUserId(), pageable);
 
+
         model.addAttribute("followers", followers.getContent());
         model.addAttribute("followersHasNext", followers.hasNext());
         model.addAttribute("followings", followings.getContent());
         model.addAttribute("followingsHasNext", followings.hasNext());
+
+        // 5)
+
+        Set<String> userIds = new HashSet<String>();
+        for(FollowDto f : followings.getContent()) {
+            userIds.add(f.getMember().getUserId());
+        }
+        for (FollowDto f : followers.getContent()) {
+            userIds.add(f.getMember().getUserId());
+        }
+
+        Map<String, Long> followerCounts = new HashMap<String, Long>();
+        Map<String, Long> followingCounts = new HashMap<String, Long>();
+
+        for(String uid : userIds) {
+            String idForLookup = uid.startsWith("@") ? uid : "@" + uid;
+            Member m = memberService.getByUserId(idForLookup);
+            if (m != null) {
+                long followersCount = followService.countFollowersOf(m);
+                long followingCount = followService.countFollowingOf(m);
+                followerCounts.put(uid, followersCount);
+                followingCounts.put(uid, followingCount);
+            }
+        }
+
+        model.addAttribute("followerCounts", followerCounts);
+        model.addAttribute("followingCounts", followingCounts);
+
 
         return "profile/profile_feed";
     }

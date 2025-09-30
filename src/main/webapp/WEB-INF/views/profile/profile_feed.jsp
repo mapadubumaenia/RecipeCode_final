@@ -113,9 +113,9 @@
             <!-- 관심 태그 -->
             <c:if test="${not empty user.interestTags}">
                 <div class="tags">
-                    <c:forTokens items="${user.interestTags}" delims="," var="tag">
-                        <span class="chip">#${tag}</span>
-                    </c:forTokens>
+                    <c:forEach items="${user.interestTags}" var="t">
+                        <span class="chip">#${t.tag}</span>
+                    </c:forEach>
                 </div>
             </c:if>
 
@@ -175,11 +175,11 @@
                             <!-- 중앙: 유저 정보 -->
                             <div class="mini-info">
                                 <div class="mini-top">
-                                    <span class="user-id">${f.member.userId}</span>
+                                    <a href="/follow/network/${f.member.userId}"><span class="user-id">${f.member.userId}</span></a>
                                     <span class="muted">${f.member.nickname}</span>
                                     <div class="mini-stats">
-                                        <span class="f-count">팔로워 <b>0</b></span>
-                                        <span class="f-count">팔로잉 <b>0</b></span>
+                                        <span class="f-count">팔로워 <b><c:out value="${followerCounts[f.member.userId]}" default="0"/></b></span>
+                                        <span class="f-count">팔로잉 <b><c:out value="${followingCounts[f.member.userId]}" default="0"/></b></span>
                                     </div>
                                 </div>
                                 <c:if test="${not empty f.member.userLocation}">
@@ -208,11 +208,11 @@
                             <!-- 중앙: 유저 정보 -->
                             <div class="mini-info">
                                 <div class="mini-top">
-                                    <span class="user-id">${f.member.userId}</span>
+                                    <a href="/follow/network/${f.member.userId}"><span class="user-id">${f.member.userId}</span></a>
                                     <span class="muted">${f.member.nickname}</span>
                                     <div class="mini-stats">
-                                        <span class="f-count">팔로워 <b>0</b></span>
-                                        <span class="f-count">팔로잉 <b>0</b></span>
+                                        <span class="f-count">팔로워 <b><c:out value="${followerCounts[f.member.userId]}" default="0"/></b></span>
+                                        <span class="f-count">팔로잉 <b><c:out value="${followingCounts[f.member.userId]}" default="0"/></b></span>
                                     </div>
                                 </div>
                                 <c:if test="${not empty f.member.userLocation}">
