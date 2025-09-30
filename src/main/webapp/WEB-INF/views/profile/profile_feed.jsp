@@ -25,7 +25,7 @@
                 <a href="${pageContext.request.contextPath}/" class="float-text">home</a>
             </div>
 
-            <!-- ▶ 추가: 알림 + 로그아웃 -->
+            <!-- ▶ 추가: 알림 + 마이페이지 -->
             <div class="header-actions">
                 <sec:authorize access="isAuthenticated()">
                     <sec:authentication property="principal" var="loginUser"/>
@@ -166,7 +166,7 @@
                         <div class="mini-card" data-userid="${f.member.userId}">
                             <!-- 왼쪽: 프로필 이미지 -->
                             <c:if test="${empty f.member.profileImageUrl}">
-                                <img src="/img/default-profile.png" alt="기본 이미지">
+                                <img src="/images/default_profile.jpg" alt="기본 이미지">
                             </c:if>
                             <c:if test="${not empty f.member.profileImageUrl}">
                                 <img src="${f.member.profileImageUrl}" alt="${f.member.nickname}">
