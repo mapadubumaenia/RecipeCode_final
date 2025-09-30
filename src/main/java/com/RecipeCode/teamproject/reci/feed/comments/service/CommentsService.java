@@ -109,7 +109,8 @@ public class CommentsService {
 
         Comments saved = commentsRepository.save(comment);
 
-        recipe.setCommentCount(recipe.getCommentCount() + 1);
+        // 레시피 댓글수 증가
+        recipe.incrementCommentCount();
         recipesRepository.save(recipe);
 
         log.info("댓글 저장 완료, commentsId={}", saved.getCommentsId());
@@ -182,8 +183,9 @@ public class CommentsService {
 
         commentsRepository.save(reply);
 
+        // 레시피 댓글 수 증가
         Recipes recipe = parent.getRecipes();
-        recipe.setCommentCount(recipe.getCommentCount() + 1);
+        recipe.incrementCommentCount();
         recipesRepository.save(recipe);
     }
 

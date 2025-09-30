@@ -14,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,13 +34,19 @@ public class CommentReportController {
 
     @PostMapping("/save")
     @ResponseBody
-    public CommentReportDto saveReport(@RequestBody CommentReportDto dto) {
+    public ResponseEntity<?> saveReport(@RequestBody CommentReportDto dto,
+                                       @AuthenticationPrincipal UserDetails user) {
         Comments comments = commentsRepository.findById(dto.getCommentsId())
                 .orElseThrow(() -> new RuntimeException("댓글 존재하지않음"));
 
         SecurityUserDto loginUser = securityUtil.getLoginUser();
         if (loginUser == null) {
             throw new RuntimeException("로그인 후 이용 가능합니다.");
+        }
+
+        // 본인 댓글 신고 금지
+        if (comments.getMember().getUserEmail().equals(loginUser.getUserEmail())) {
+            return ResponseEntity.badRequest().body("본인 댓글에는 신고할 수 없습니다.");
         }
 
         Member member = memberRepository.findByUserEmail(loginUser.getUsername())
@@ -56,7 +65,8 @@ public class CommentReportController {
         report.setReportType(dto.getReportType());
         report.setReportStatus(0L); // 대기중
 
-        return commentReportService.saveReport(report);
+        CommentReportDto savedDto = commentReportService.saveReport(report);
+        return ResponseEntity.ok(savedDto); // 정상 신고 시 DTO 반환
     }
 
     @PostMapping("/updateStatus")
@@ -69,10 +79,7 @@ public class CommentReportController {
 
     @PostMapping("/delete")
     public String deleteReport(@RequestParam Long reportId) {
-        CommentReport report = commentReportRepository.findById(reportId)
-                .orElseThrow(()->new RuntimeException("신고를 찾을 수 없습니다."));
-
-        commentReportService.deleteById(reportId);
+        commentReportService.softDeleteCommentByReport(reportId);
         return "redirect:/admin/moderation/reports";
     }
 

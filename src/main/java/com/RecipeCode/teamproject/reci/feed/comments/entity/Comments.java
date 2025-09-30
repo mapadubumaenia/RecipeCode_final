@@ -35,15 +35,20 @@ public class Comments extends BaseTimeEntity {
                     generator = "COMMENTS_KEY_JPA")
     private Long commentsId;                                // 댓글 PK
     private String commentsContent;
-
     private Long likeCount;
-
     private Long reportCount;
-
     private LocalDateTime updateTime;
     private LocalDateTime deletedAt;
-
     private Long commentsCount;
+
+    // 소프트 삭제
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
 
 //  대댓글용(자기참조객체)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -67,19 +72,5 @@ public class Comments extends BaseTimeEntity {
     @OneToMany(mappedBy = "comments", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentsLikes> likes = new ArrayList<>();
 
-    public void increaseLikeCount() {
-        if (likeCount == null) {
-            this.likeCount=1L;
-        }else  {
-            this.likeCount+=1;
-        }
-    }
 
-    public void decreaseLikeCount() {
-        if (likeCount == null || this.likeCount <= 0) {
-            this.likeCount=0L;
-        }else   {
-            this.likeCount-=1;
-        }
-    }
 }

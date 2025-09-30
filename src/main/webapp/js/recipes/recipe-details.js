@@ -308,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             } catch (err) {
                 console.error(err);
-                alert("신고 중 오류가 발생했습니다: " + err.message);
+                alert("신고 중 오류가 발생했습니다. " + err.message);
             }
         });
 
@@ -367,7 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // 신고 버튼 → 새 모달 열기
             const reportBtn = actions.querySelector(".myBtnReport");
             if (reportBtn) {
-                if (c.alreadyReported) {
+                if (c.alreadyReported || c.userId === window.loginUserEmail) {
                     reportBtn.disabled = true;
                     reportBtn.classList.add("reported");
                 }

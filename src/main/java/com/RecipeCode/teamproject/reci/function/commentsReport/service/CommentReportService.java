@@ -109,7 +109,21 @@ public class CommentReportService {
     }
 
     // 삭제
+    @Transactional
     public void deleteById(Long reportId) {
         commentReportRepository.deleteById(reportId);
+    }
+
+    // 신고된 댓글 삭제
+    @Transactional
+    public void softDeleteCommentByReport(Long reportId) {
+        CommentReport report = commentReportRepository.findById(reportId)
+                .orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다."));
+
+        Comments comments = report.getComments();
+        if (comments != null && comments.getDeletedAt() == null) {
+            comments.softDelete();   // deletedAt = now()
+            commentsRepository.save(comments);
+        }
     }
 }

@@ -236,7 +236,6 @@
                     <button class="btn-none" id="btnReport">🚩 신고</button>
                 </div>
             </section>
-
             <!-- 본문/태그 -->
             <section class="desc" id="postDesc">
                 <div class="tags">
