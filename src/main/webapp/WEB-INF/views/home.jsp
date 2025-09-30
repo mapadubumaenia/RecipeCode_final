@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>쉐프리드 — 레시피 피드</title>
+    <title>Lumeat — 빛나는 한 끼</title>
 
     <link rel="preconnect" href="https://www.youtube.com">
     <link rel="preconnect" href="https://i.ytimg.com">
@@ -58,7 +58,7 @@
 <body>
 <header class="container">
     <div class="flex-box">
-        <h1 class="page-title">Recipe Code</h1>
+        <h1 class="page-title">Lumeat</h1>
         <a class="register" href="/auth/register">👤</a>
         <div class="notif-wrap">
             <sec:authorize access="isAuthenticated()">

@@ -252,7 +252,6 @@
             <section class="comments" id="comments">
                 <h3 class="comments-title">💬 댓글 <span class="count"><c:out value="${recipe.commentCount}" /></span></h3>
                 <div class="comment-input">
-                    <img class="avatar-sm" src="${currentUserProfile}" alt="내 프로필"/>
                     <label class="sr-only" for="cmt"></label>
                     <textarea id="cmt" placeholder="따끈한 피드백 남기기..."></textarea>
                     <button type="button" class="btn" id="btnCmtSubmit">등록</button>
