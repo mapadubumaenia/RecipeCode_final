@@ -231,7 +231,6 @@
                     <button class="btn-none" id="btnReport">🚩 신고</button>
                 </div>
             </section>
-
             <!-- 본문/태그 -->
             <section class="desc" id="postDesc">
                 <div class="tags">
@@ -247,7 +246,6 @@
             <section class="comments" id="comments">
                 <h3 class="comments-title">💬 댓글 <span class="count"><c:out value="${recipe.commentCount}" /></span></h3>
                 <div class="comment-input">
-                    <img class="avatar-sm" src="${ctx}/images/avatar-placeholder.png" alt="" />
                     <label class="sr-only" for="cmt"></label>
                     <textarea id="cmt" placeholder="따끈한 피드백 남기기..."></textarea>
                     <button type="button" class="btn" id="btnCmtSubmit">등록</button>
