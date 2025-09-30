@@ -19,10 +19,10 @@
     <link rel="stylesheet" href="<c:url value='/css/profile-mypage.css'/>">
 
     <%-- TODO: CSRF 토큰 (나중에 적용 시 주석 해제) --%>
-    <%--
+
     <meta name="_csrf" content="${_csrf.token}"/>
     <meta name="_csrf_header" content="${_csrf.headerName}"/>
-    --%>
+
 </head>
 <body>
 <main class="container profile-page">

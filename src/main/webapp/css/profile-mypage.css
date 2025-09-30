@@ -29,6 +29,8 @@
 .privacy.private{background:#fde2e2;color:#c00}
 .feed-list{display:grid;gap:12px}
 .like.active {color:darkred; font-weight: bold;}
+.post-body {width: auto; height: 19rem; padding:10px 12px; border:1px solid var(--border);
+  border-radius:12px; background:#fff; display: flex; justify-content: center; align-items: center}
 
 /* 사이드 특징 배너 */
 .feature{display:flex;flex-direction:column;gap:10px}

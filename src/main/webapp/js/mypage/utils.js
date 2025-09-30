@@ -196,26 +196,6 @@ document.addEventListener("click", async (e) => {
         return;
     }
 
-    // try {
-    //     const res = await fetch(url, {
-    //         method,
-    //         credentials: "same-origin",
-    //         headers: { "Content-Type": "application/json" }
-    //     });
-    //     if (!res.ok) {
-    //         let msg = "";
-    //         try {
-    //             const err = await res.json();
-    //             msg = err.message || err.msg || "";
-    //         } catch {}
-    //         if (res.status === 403 || res.status === 400 || msg.includes("SELF_LIKE")) {
-    //             alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
-    //         } else {
-    //          alert("실패했습니다. 다시 시도해주세요.");
-    //         }
-    //         return;
-    //     }
-
     // 표준/유연 응답 처리: { isLike | liked, likesCount }
     const nowLiked = (body?.isLike ?? body?.liked ?? !isLike) === true;
     const cntEl    = heart.querySelector(".cnt");

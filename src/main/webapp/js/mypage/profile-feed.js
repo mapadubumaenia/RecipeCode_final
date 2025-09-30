@@ -101,28 +101,117 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
     const miniCards = document.querySelectorAll(".mini-card");
 
-    miniCards.forEach(card => {
+    // .mini-card가 0개여도 fetch 실행되도록 선처리
+    if (miniCards.length === 0) {
+        fetch(`/api/follow/${profileUserId}/follower?page=0&size=5`)
+            .then(res => res.json())
+            .then(data => {
+                const list = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+                const box  = document.getElementById("followersList");
+                if (box && !list.length) box.innerHTML = `<p class="muted">아직 팔로워가 없어요</p>`;
+                else if (box && list.length) renderMiniCards(list, "followersList");
+            })
+            .catch(() => {
+                const box = document.getElementById("followersList");
+                if (box) box.innerHTML = `<p class="muted">아직 팔로워가 없어요</p>`;
+            });
+
+        fetch(`/api/follow/${profileUserId}/following?page=0&size=5`)
+            .then(res => res.json())
+            .then(data => {
+                const list = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+                const box  = document.getElementById("followingList");
+                if (box && !list.length) box.innerHTML = `<p class="muted">아직 팔로잉이 없어요</p>`;
+                else if (box && list.length) renderMiniCards(list, "followingList");
+            })
+            .catch(() => {
+                const box = document.getElementById("followingList");
+                if (box) box.innerHTML = `<p class="muted">아직 팔로잉이 없어요</p>`;
+            });
+
+        return; // ← 여기서 끝! (아래 forEach 안 타게)
+    }
+
+    // .mini-card가 1개 이상일 때
+    miniCards.forEach((card, idx) => {
         const userId = card.dataset.userid; // (변경됨: data-email → data-userid)
         if (!userId) return;
 
-        const followerEl = card.querySelector(".mini-stats .f-count:nth-child(1) b");
-        const followingEl = card.querySelector(".mini-stats .f-count:nth-child(2) b");
+        // 첫 카드에서만 호출해 중복 fetch 방지
+        if (idx !== 0) return;
 
         // 팔로워 리스트 일부만 출력
         fetch(`/api/follow/${profileUserId}/follower?page=0&size=5`)
             .then(res => res.json())
             .then(data => {
-                renderMiniCards(data.content, "followersList");
+                const list = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+                const box  = document.getElementById("followersList");
+                if (!box) return;
+
+                // ★ 이미 서버 렌더 카드가 있으면 '없어요' 찍지 않음
+                const hasInitial = !!box.querySelector(".mini-card");
+
+                if (!list.length) {
+                    if (!hasInitial) box.innerHTML = `<p class="muted">아직 팔로워가 없어요</p>`;
+                    return;
+                }
+                renderMiniCards(list, "followersList");
+            })
+            .catch(() => {
+                const box = document.getElementById("followersList");
+                if (box && !box.querySelector(".mini-card")) {
+                    box.innerHTML = `<p class="muted">아직 팔로워가 없어요</p>`;
+                }
             });
 
         // 팔로잉 리스트 일부만 출력
         fetch(`/api/follow/${profileUserId}/following?page=0&size=5`)
             .then(res => res.json())
             .then(data => {
-                renderMiniCards(data.content, "followingList");
+                const list = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+                const box  = document.getElementById("followingList");
+                if (!box) return;
+
+                const hasInitial = !!box.querySelector(".mini-card"); // ★ 서버 렌더 존재 여부
+
+                if (!list.length) {
+                    if (!hasInitial) box.innerHTML = `<p class="muted">아직 팔로잉이 없어요</p>`;
+                    return;
+                }
+                renderMiniCards(list, "followingList");
+            })
+            .catch(() => {
+                const box = document.getElementById("followingList");
+                if (box && !box.querySelector(".mini-card")) {
+                    box.innerHTML = `<p class="muted">아직 팔로잉이 없어요</p>`;
+                }
             });
     });
 });
+
+// 사이드바 mini-card (팔로잉/팔로워 리스트) - 기존 코드
+// document.addEventListener("DOMContentLoaded", () => {
+//     const miniCards = document.querySelectorAll(".mini-card");
+//
+//     miniCards.forEach(card => {
+//         const userId = card.dataset.userid; // (변경됨: data-email → data-userid)
+//         if (!userId) return;
+//
+//         // 팔로워 리스트 일부만 출력
+//         fetch(`/api/follow/${profileUserId}/follower?page=0&size=5`)
+//             .then(res => res.json())
+//             .then(data => {
+//                 renderMiniCards(data.content, "followersList");
+//             });
+//
+//         // 팔로잉 리스트 일부만 출력
+//         fetch(`/api/follow/${profileUserId}/following?page=0&size=5`)
+//             .then(res => res.json())
+//             .then(data => {
+//                 renderMiniCards(data.content, "followingList");
+//             });
+//     });
+// });
 
 document.addEventListener("DOMContentLoaded", () => {
     const tabs = document.querySelectorAll(".follow-tabs .tab-btn");
