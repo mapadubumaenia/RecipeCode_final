@@ -39,10 +39,16 @@ function createFeedArticle(recipe, currentUserEmail) {
     const likeClass = recipe.isLike ? "like active" : "like";
     const likeCnt = Number(recipe.likeCount || 0); // ← 숫자로 캐스팅
     const isOwner = recipe.userEmail === currentUserEmail;
+    const ctx = (typeof window !== "undefined" && window.ctx) ? window.ctx : "";
+    const DEFAULT_PROFILE_IMG = ctx + "/images/default_profile.jpg";
+
 
     el.innerHTML = `
     <div class="post-head">
-      <div class="avatar-ss"><img src="${recipe.profileImageUrl || ''}" alt=""></div>
+      <div class="avatar-sm"><img src="${recipe.profileImageUrl && recipe.profileImageUrl.trim()
+        ? recipe.profileImageUrl
+        : DEFAULT_PROFILE_IMG}" 
+       alt="" class="avatar-sm"></div>
       <div class="post-info">
         <div class="post-id"><a href="/follow/network/${recipe.userId}">${recipe.userId}</a></div>
         <div class="muted">${timeAgo(recipe.insertTime)} • ${recipe.userLocation || '부산•대한민국'}</div>
@@ -84,7 +90,6 @@ function createFollowArticle(recipe) {
     const el = document.createElement("article");
     el.className = "card p-12 post";
 
-
     // 서버에서 내려줄 값: user.isLike (true/false)
     const userId  = recipe.userId || "unknown";
     const avatar  = recipe.profileImageUrl || "";
@@ -100,7 +105,12 @@ function createFollowArticle(recipe) {
 
     el.innerHTML = `
     <div class="post-head">
-    <div class="avatar-ss"><img src="${avatar}" alt="${userId}"></div>
+    <div class="avatar-ss">
+  <img src="${recipe.profileImageUrl && recipe.profileImageUrl.trim()
+        ? recipe.profileImageUrl
+        : DEFAULT_PROFILE_IMG}" 
+       alt="" class="avatar-ss">
+</div>
       <div class="leftBox">
         <div class="post-info">
         <div class="post-id"><a href="/follow/network/${userId}">${userId}</a></div>

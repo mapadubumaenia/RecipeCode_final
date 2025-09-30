@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -26,9 +27,10 @@
 
             <!-- ▶ 추가: 알림 + 로그아웃 -->
             <div class="header-actions">
-                <form action="${pageContext.request.contextPath}/auth/logout" method="post">
-                    <button type="submit" class="btn-logout">logout</button>
-                </form>
+                <sec:authorize access="isAuthenticated()">
+                    <sec:authentication property="principal" var="loginUser"/>
+                    <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+                </sec:authorize>
 
                 <div class="notif-wrap">
                     <!-- 알림 버튼 -->
@@ -111,9 +113,9 @@
             <!-- 관심 태그 -->
             <c:if test="${not empty user.interestTags}">
                 <div class="tags">
-                    <c:forTokens items="${user.interestTags}" delims="," var="tag">
-                        <span class="chip">#${tag}</span>
-                    </c:forTokens>
+                    <c:forEach items="${user.interestTags}" var="t">
+                        <span class="chip">#${t.tag}</span>
+                    </c:forEach>
                 </div>
             </c:if>
 
@@ -173,11 +175,11 @@
                             <!-- 중앙: 유저 정보 -->
                             <div class="mini-info">
                                 <div class="mini-top">
-                                    <span class="user-id">${f.member.userId}</span>
+                                    <a href="/follow/network/${f.member.userId}"><span class="user-id">${f.member.userId}</span></a>
                                     <span class="muted">${f.member.nickname}</span>
                                     <div class="mini-stats">
-                                        <span class="f-count">팔로워 <b>0</b></span>
-                                        <span class="f-count">팔로잉 <b>0</b></span>
+                                        <span class="f-count">팔로워 <b><c:out value="${followerCounts[f.member.userId]}" default="0"/></b></span>
+                                        <span class="f-count">팔로잉 <b><c:out value="${followingCounts[f.member.userId]}" default="0"/></b></span>
                                     </div>
                                 </div>
                                 <c:if test="${not empty f.member.userLocation}">
@@ -206,11 +208,11 @@
                             <!-- 중앙: 유저 정보 -->
                             <div class="mini-info">
                                 <div class="mini-top">
-                                    <span class="user-id">${f.member.userId}</span>
+                                    <a href="/follow/network/${f.member.userId}"><span class="user-id">${f.member.userId}</span></a>
                                     <span class="muted">${f.member.nickname}</span>
                                     <div class="mini-stats">
-                                        <span class="f-count">팔로워 <b>0</b></span>
-                                        <span class="f-count">팔로잉 <b>0</b></span>
+                                        <span class="f-count">팔로워 <b><c:out value="${followerCounts[f.member.userId]}" default="0"/></b></span>
+                                        <span class="f-count">팔로잉 <b><c:out value="${followingCounts[f.member.userId]}" default="0"/></b></span>
                                     </div>
                                 </div>
                                 <c:if test="${not empty f.member.userLocation}">

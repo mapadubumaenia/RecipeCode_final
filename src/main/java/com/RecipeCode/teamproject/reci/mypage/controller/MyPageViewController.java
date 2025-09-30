@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Log4j2
 @Controller
 @RequiredArgsConstructor
 public class MyPageViewController {
@@ -72,6 +74,13 @@ public class MyPageViewController {
     @GetMapping("/mypage/edit")
     public String profileEdit(@AuthenticationPrincipal SecurityUserDto principal,
                               Model model) {
+        log.info("principal: {}", principal);
+
+        if (principal == null) {
+            // 로그인 안 된 경우 처리 (로그인 페이지로 이동 or 에러 페이지)
+            return "redirect:/auth/login";
+        }
+
         Member member = memberRepository.findByUserEmailWithTags(principal.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 

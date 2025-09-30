@@ -14,6 +14,7 @@
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -36,7 +37,13 @@
             <h1 class="page-title"><c:choose><c:when test="${isEdit}">Update</c:when><c:otherwise>Create</c:otherwise></c:choose></h1>
             <a class="float-text" href="${contextPath}/">home</a>
         </div>
-        <button type="button" class="btn-logout" onclick="history.back()">Back</button>
+        <div class="notif-wrap">
+            <sec:authorize access="isAuthenticated()">
+                <sec:authentication property="principal" var="loginUser"/>
+                <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+            </sec:authorize>
+            <button type="button" class="btn-logout" onclick="history.back()">Back</button>
+        </div>
     </header>
 
 

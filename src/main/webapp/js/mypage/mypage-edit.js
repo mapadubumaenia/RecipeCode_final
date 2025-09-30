@@ -15,13 +15,19 @@ $("#avatar")?.addEventListener("change", (e) =>{
     img.classList.remove("hidden");
     $(".avatar-uploader .ph").classList.add("hidden");
 });
-//태
+//태그
 document.addEventListener("DOMContentLoaded", () => {
     const tagInput = document.querySelector("#interestTagInput");
-    const tagList = document.querySelector("#tagList");
+    const tagList = document.querySelector("#interestTagList");
     const addTagBtn = document.querySelector("#addTagBtn");
     const hiddenContainer = document.querySelector("#interestTagHidden");
 
+    // 인덱스 번호 다시 매기기
+    function reindexHiddenInputs() {
+        document.querySelectorAll("#interestTagHidden input").forEach((input, idx) => {
+            input.name = `interestTags[${idx}].tag`;
+        });
+    }
     // 태그 추가 함수
     function addTag(text) {
         const label = text.trim().replace(/^#+/, "");
@@ -84,6 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         tagSpan.remove();
+
+        reindexHiddenInputs();
     });
 });
 

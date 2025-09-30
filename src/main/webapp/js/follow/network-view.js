@@ -15,6 +15,8 @@ const followerListEl  = document.getElementById("followerList");
 const btnMoreFollowing = document.getElementById("btnMoreFollowing");
 const btnMoreFollower  = document.getElementById("btnMoreFollower");
 const tabs = document.querySelectorAll('[data-follow-tab]');
+// 기본이미지
+const defaultProfile = `${ctx}/images/default_profile.jpg`;
 
 // 상태
 const state = {
@@ -72,11 +74,15 @@ function renderItem(row) {
     const followCls  = d.followingStatus ? "is-following" : "";
     const hideBtn = email === viewerEmail;
 
+    const profileImg = (d.profileImageUrl && d.profileImageUrl.trim().length > 0)
+        ? d.profileImageUrl
+        : defaultProfile;
+
     el.innerHTML = `
     <div class="post-head flex-row">
       <div class="leftBox jump flex-box" data-uid="${d.userId}">
       <div class="avatar-ss">
-        <img src="${d.profileImageUrl || ""}" alt="${d.userId}">
+        <img src="${profileImg}" alt="${d.userId}" class="avatar-ss"/>
       </div>
       <div class="post-info ml-8">
         <div class="post-id">${d.userId}</div>
@@ -107,7 +113,7 @@ document.addEventListener("click", (e) => {
     const uid = jump.dataset.uid;
     if(!uid) return;
         // TODO: 여기여기 url 수정
-        window.location.href = `${ctx}/follow/profile/${encodeURIComponent(uid).replace(/%40/g, '@')}`;
+        window.location.href = `${ctx}/profile/${encodeURIComponent(uid).replace(/%40/g, '@')}`;
     });
 
 function resetAndReload(kind) {
@@ -187,6 +193,23 @@ async function load(kind) {
         const list = (data && Array.isArray(data.content)) ? data.content : [];
 
         const targetEl = (kind === "following") ? followingListEl : followerListEl;
+
+        if (S.page === 0 && list.length === 0) {
+            targetEl.innerHTML = `
+        <article class="card empty-full">
+          <div class="post-body">
+            <p class="muted">${
+                              kind === "following" ? "팔로잉한 사용자가 없습니다." : "아직 팔로워가 없습니다."
+                                }</p>
+          </div>
+        </article>`;
+                  S.last = true;
+                  if (kind === "following") btnMoreFollowing.style.display = "none";
+                  else btnMoreFollower.style.display = "none";
+                  return; // 더 이상 진행 X
+                }
+
+
         list.forEach(u => targetEl.appendChild(renderItem(u)));
 
         S.last = !!data.last;

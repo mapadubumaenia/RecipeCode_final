@@ -15,6 +15,7 @@
     const imgTrack = document.getElementById("imgSlides");
     const txtTrack = document.getElementById("textSlides");
     const sliderRoot = document.querySelector(".step-slider");
+    const textViewport = document.querySelector(".text-viewport");
     if (!imgTrack || !txtTrack || !sliderRoot) return;
 
     const slideCount = Math.min(
@@ -23,22 +24,32 @@
     );
     let index = 0;
 
-    function trackWidth() {
-        return sliderRoot.getBoundingClientRect().width;
-    }
+    // function trackWidth() {
+    //     return sliderRoot.getBoundingClientRect().width;
+    // }
+    //
+    // function setTranslate(px) {
+    //     imgTrack.style.transform = `translateX(${px}px)`;
+    //     txtTrack.style.transform = `translateX(${px}px)`;
+    // }
 
-    function setTranslate(px) {
-        imgTrack.style.transform = `translateX(${px}px)`;
-        txtTrack.style.transform = `translateX(${px}px)`;
+    const imgWidth = () => sliderRoot.getBoundingClientRect().width;
+    const txtWidth = () => (textViewport ? textViewport.getBoundingClientRect().width : imgWidth());
+
+    function setTranslate(imgPx, txtPx) {
+        imgTrack.style.transform = `translateX(${imgPx}px)`;
+        txtTrack.style.transform = `translateX(${txtPx}px)`;
     }
 
     function snapTo(i) {
         if (slideCount === 0) return;
         index = (i + slideCount) % slideCount;
-        const x = -index * trackWidth();
+        // const x = -index * trackWidth();
+
         imgTrack.classList.remove("no-trans");
         txtTrack.classList.remove("no-trans");
-        setTranslate(x);
+        // setTranslate(x);
+        setTranslate(-index * imgWidth(), -index * txtWidth());
     }
 
     window.addEventListener("resize", () => snapTo(index));

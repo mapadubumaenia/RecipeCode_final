@@ -2,6 +2,8 @@ package com.RecipeCode.teamproject.reci.feed.recipes.controller;
 
 import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
+import com.RecipeCode.teamproject.reci.auth.service.MemberService;
 import com.RecipeCode.teamproject.reci.auth.service.UserDetailsServiceImpl;
 import com.RecipeCode.teamproject.reci.feed.ingredient.dto.IngredientDto;
 import com.RecipeCode.teamproject.reci.feed.recipecontent.dto.RecipeContentDto;
@@ -34,7 +36,7 @@ import java.util.List;
 public class RecipesViewController {
     private final RecipesService recipesService;
     private final RecipeContentService recipeContentService;
-
+    private final MemberRepository memberRepository;
 
     /* 레시피 등록 폼 이동 */
     @GetMapping("/recipes/add")
@@ -190,6 +192,21 @@ public class RecipesViewController {
                 embedUrl = dto.getVideoUrl();
             }
         }
+
+        String profileUrl;
+        if (user != null) {
+            Member member = memberRepository.findByUserEmail(user.getUsername())
+                    .orElseThrow(() -> new RuntimeException("회원 없음"));
+            if (member.getProfileImageUrl() == null || member.getProfileImageUrl().isBlank()) {
+                profileUrl = "/member/" + member.getUserId() + "/profile-image";
+            } else {
+                profileUrl = member.getProfileImageUrl();
+            }
+        } else {
+            // 비로그인자도 기본 이미지 경로 세팅
+            profileUrl = "/images/default_profile.jpg";
+        }
+        model.addAttribute("currentUserProfile", profileUrl);
 
 
         model.addAttribute("recipe", dto);
