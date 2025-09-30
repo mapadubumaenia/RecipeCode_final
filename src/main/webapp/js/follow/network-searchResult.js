@@ -21,11 +21,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 searchResult.innerHTML = users.map(user => `
                   <div class="card p-12 search-user flex-box" data-user-id="${user.userId}">
                     <div class="leftBox flex-row">
-                        <div class="avatar-ss"><img src="${user.profileImageUrl || ''}" alt=""></div>
+                        <div class="avatar-ss">        
+                        <img src="${(user.profileImageUrl && user.profileImageUrl.trim())
+                    ? user.profileImageUrl
+                    :  '/images/default_profile.jpg'}" 
+             alt="${user.nickname || user.userId}"></div>
                         <span>${user.userId}</span> <span>${user.nickname}</span>
                     </div>
                         <div class="rightBox flex-row">
-                            <div>${user.userIntroduce}</div>
+                            <div>${user.userIntroduce|| ''}</div>
                         </div>
                   </div>
                 `).join("");
