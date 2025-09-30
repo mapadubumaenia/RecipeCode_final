@@ -34,7 +34,7 @@ public class MemberTagService {
 
 
 
-    //    레시피에 태그 저장
+    //    멤버에 태그 저장
     public void saveTagsForMember(List<TagDto> tagDtos,
                                   Member member) {
         for (TagDto dto : tagDtos) {
