@@ -11,9 +11,12 @@ import com.RecipeCode.teamproject.reci.feed.recipeslikes.entity.RecipesLikes;
 import com.RecipeCode.teamproject.reci.feed.recipeslikes.repository.RecipesLikesRepository;
 import com.RecipeCode.teamproject.reci.function.notification.enums.NotificationEvent;
 import com.RecipeCode.teamproject.reci.function.notification.service.NotificationService;
+import com.RecipeCode.teamproject.es.reco.service.EventIngestService;   // ★ 추가
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,34 +32,32 @@ public class RecipesLikesService {
     private final RecipeMapStruct recipeMapStruct;
     private final ErrorMsg errorMsg;
     private final NotificationService notificationService;
+    private final EventIngestService eventIngestService;   // ★ 추가
 
-    // 좋아요 토글 기능
     @Transactional
     public RecipesLikesDto toggleLike(String recipeUuid, String userEmail){
         Member member = memberRepository.findByUserEmail(userEmail)
-                .orElseThrow(()->new RuntimeException(errorMsg.getMessage("errors.not.found")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
         Recipes recipes = recipesRepository.findByUuid(recipeUuid)
-                .orElseThrow(()->new RuntimeException(errorMsg.getMessage("errors.not.found")));
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
 
         if (recipes.getLikeCount() == null) recipes.setLikeCount(0L);
 
         boolean liked;
         RecipesLikesDto recipesLikesDto = new RecipesLikesDto();
 
-        // 이미 좋아요 되어 있으면 취소
-        if (recipesLikesRepository.existsByMemberAndRecipes(member,recipes)){
-            recipesLikesRepository.deleteByMemberAndRecipes(member,recipes);
-
-        // 음수 방지
+        if (recipesLikesRepository.existsByMemberAndRecipes(member, recipes)) {
+            // 취소
+            recipesLikesRepository.deleteByMemberAndRecipes(member, recipes);
             long curr = recipes.getLikeCount() == null ? 0L : recipes.getLikeCount();
             recipes.setLikeCount(Math.max(0L, curr - 1));
-
             liked = false;
         } else {
-            if(userEmail.equalsIgnoreCase(recipes.getMember().getUserEmail())){
+            // 자기글 방지
+            if (userEmail.equalsIgnoreCase(recipes.getMember().getUserEmail())) {
                 throw new IllegalArgumentException(errorMsg.getMessage("errors.my.likes"));
             }
-            // 새 좋아요 추가
+            // 추가
             RecipesLikes like = new RecipesLikes();
             like.setMember(member);
             like.setRecipes(recipes);
@@ -65,44 +66,50 @@ public class RecipesLikesService {
             recipes.setLikeCount(recipes.getLikeCount() + 1);
             liked = true;
 
-            // 알림 생성
+            // 알림
             notificationService.createNotification(
-                    like.getMember().getUserEmail(),                 // 좋아요 누른 사람
-                    like.getRecipes().getMember().getUserEmail(),    // 레시피 작성자
-                    NotificationEvent.LIKE,                          // 이벤트 타입 (LIKE)
-                    "LIKE",                                          // 소스 타입
-                    String.valueOf(like.getLikeId())                 // 소스 ID
+                    like.getMember().getUserEmail(),
+                    like.getRecipes().getMember().getUserEmail(),
+                    NotificationEvent.LIKE,
+                    "LIKE",
+                    String.valueOf(like.getLikeId())
             );
-
         }
 
-        // 최종 동기화 (최소 수정 포인트 ②) — DB 집계로 맞춤
+        // DB 집계로 동기화
         long count = recipesLikesRepository.countVisibleLikes(recipeUuid);
         recipes.setLikeCount(count);
 
-        // 결과 DTO 채우기
+        // DTO
         recipesLikesDto.setUserEmail(userEmail);
         recipesLikesDto.setUuid(recipeUuid);
         recipesLikesDto.setLiked(liked);
         recipesLikesDto.setLikesCount(count);
 
+        // ★ 이벤트는 '정말 성공'했을 때만, 그리고 커밋 이후에 전송
+        if (liked) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() {
+                    eventIngestService.sendEvent(
+                            userEmail.trim().toLowerCase(),
+                            recipeUuid,
+                            "like"
+                    );
+                }
+            });
+        }
+
         return recipesLikesDto;
     }
 
-
-    // [NEW] 단건 상태 조회
     @Transactional(readOnly = true)
     public boolean isLiked(String recipeUuid, String userEmail) {
         return recipesLikesRepository.existsByMember_UserEmailAndRecipes_Uuid(userEmail, recipeUuid);
     }
 
-    // [NEW] 배치 상태 조회
     @Transactional(readOnly = true)
     public Map<String, Boolean> likedMapFor(String userEmail, List<String> uuids) {
         if (uuids == null || uuids.isEmpty()) return Map.of();
-
-        // repo에 맞는 쿼리 메서드가 없다면 exists 루프/커스텀 쿼리 둘 중 한가지:
-        // 간단 루프(개수 적을 때 충분히 빠름)
         Map<String, Boolean> out = new HashMap<>();
         for (String id : uuids) {
             boolean liked = recipesLikesRepository.existsByMember_UserEmailAndRecipes_Uuid(userEmail, id);
@@ -110,6 +117,4 @@ public class RecipesLikesService {
         }
         return out;
     }
-
-
 }

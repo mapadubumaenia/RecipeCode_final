@@ -28,95 +28,125 @@ public class FeedService {
     private final ElasticsearchOperations es;
     private final SearchService searchService;
 
-    /** HOT 피드 */
+    /** 비로그인: HOT 피드 */
     public FeedPageDto hot(String after, int size) {
         size = Math.min(Math.max(size, 1), 50);
         Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
         return mapHotToDto(hot);
     }
 
-    /** 개인화 피드 */
+    /** 로그인: 개인화 피드만 (HOT 보강 없음, 좋아요한 글도 노출) */
     public FeedPageDto personalFeed(String userEmail, String after, int size) {
         size = Math.min(Math.max(size, 1), 50);
 
+        // 비로그인: HOT만
         if (userEmail == null || userEmail.isBlank()) {
             Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
             return mapHotToDto(hot);
         }
 
-        // 이메일 키 소문자 정규화
-        String key = userEmail.trim().toLowerCase();
+        final String key = userEmail.trim().toLowerCase();
 
-        // 개인 추천 문서 조회 (없으면 HOT 폴백)
-        UserRecsDoc rec;
+        // 커서(오프셋) 디코딩 — 과거 형식(idx:, 숫자) 호환
+        int off = decodeLegacy(after);
+
+        // 개인화 문서 조회 (없거나 비어도 에러없이 빈 피드 반환)
+        UserRecsDoc rec = null;
         try {
             rec = es.get(key, UserRecsDoc.class);
-        } catch (Exception e) {
-            Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
-            return mapHotToDto(hot);
-        }
+        } catch (Exception ignore) {}
 
         if (rec == null || rec.getItems() == null || rec.getItems().isEmpty()) {
-            Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
-            return mapHotToDto(hot);
+            return new FeedPageDto(0, List.of(), null);
         }
 
-        int offset = decode(after);
         List<UserRecsDoc.Item> all = rec.getItems();
-        if (offset >= all.size()) return new FeedPageDto(all.size(), List.of(), null);
-
-        List<UserRecsDoc.Item> page = all.subList(offset, Math.min(offset + size, all.size()));
-        List<String> ids = page.stream().map(UserRecsDoc.Item::getRecipeId).toList();
-        if (ids.isEmpty()) return new FeedPageDto(all.size(), List.of(), null);
-
-        // recipe-v2에서 해당 아이템만 조회(공개/미삭제만)
-        Query q = Query.of(b -> b.bool(bb -> bb
-                .must(m -> m.ids(i -> i.values(ids)))
-                .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
-                .filter(f -> f.bool(b2 -> b2.mustNot(mn -> mn.term(t -> t.field("deleted").value(true)))))
-        ));
-
-        NativeQuery nq = NativeQuery.builder()
-                .withQuery(q)
-                .withPageable(PageRequest.of(0, ids.size()))
-                .build();
-
-        SearchHits<RecipeSearchDoc> hits = es.search(nq, RecipeSearchDoc.class);
-        Map<String, RecipeSearchDoc> byId = hits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .collect(Collectors.toMap(RecipeSearchDoc::getId, r -> r, (a, b) -> a));
-
-        // 추천 순서 유지 + 미디어 메타 포함 매핑
-        List<RecipeCardDto> items = new ArrayList<>();
-        for (UserRecsDoc.Item it : page) {
-            RecipeSearchDoc d = byId.get(it.getRecipeId());
-            if (d == null) continue; // 삭제/비공개/미존재 스킵
-
-            Media media = buildMedia(d);
-
-            items.add(new RecipeCardDto(
-                    d.getId(),
-                    nvl(d.getTitle()),
-                    nvl(d.getAuthorId()),
-                    nvlLong(d.getLikes()),
-                    (d.getCreatedAt() == null) ? "" : d.getCreatedAt().toString(),
-                    (d.getTags() == null) ? List.of() : d.getTags(),
-                    it.getScore(),
-                    nvl(d.getThumbUrl()),
-
-                    // ★ 이메일은 media보다 먼저!
-                    nvl(d.getAuthorEmail()),
-
-                    // media
-                    media.kind, media.src, media.poster
-            ));
+        final int totalPersonal = all.size();
+        if (off >= totalPersonal) {
+            return new FeedPageDto(totalPersonal, List.of(), null);
         }
 
-        Integer nextIdx = (offset + items.size() < all.size()) ? (offset + items.size()) : null;
-        String next = (nextIdx == null) ? null : encode(nextIdx);
-        return new FeedPageDto(all.size(), items, next);
+        // ===== 핵심 수정: 정확한 커서 전진 =====
+        // idx: 현재 "검토 시작 위치" 포인터. 아이템 하나를 '검토'할 때마다 idx++.
+        int idx = Math.max(0, off);
+
+        List<RecipeCardDto> out = new ArrayList<>(size);
+        Set<String> seenIds = new LinkedHashSet<>();
+
+        // ES 배치 조회를 위해 청크 단위로 가져오되,
+        // 실제 커서는 아이템 단위로만 전진시킨다.
+        while (out.size() < size && idx < totalPersonal) {
+            int chunkEnd = Math.min(idx + Math.max(size * 2, 20), totalPersonal);
+            List<UserRecsDoc.Item> chunk = all.subList(idx, chunkEnd);
+
+            // 이번 청크의 id들 조회
+            List<String> ids = chunk.stream().map(UserRecsDoc.Item::getRecipeId).toList();
+            if (ids.isEmpty()) break;
+
+            Query q = Query.of(b -> b.bool(bb -> bb
+                    .must(m -> m.ids(i -> i.values(ids)))
+                    .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
+                    .filter(f -> f.bool(b2 -> b2.mustNot(mn -> mn.term(t -> t.field("deleted").value(true)))))
+            ));
+            NativeQuery nq = NativeQuery.builder()
+                    .withQuery(q)
+                    .withPageable(PageRequest.of(0, ids.size()))
+                    .build();
+
+            SearchHits<RecipeSearchDoc> hits;
+            try {
+                hits = es.search(nq, RecipeSearchDoc.class);
+            } catch (Exception ex) {
+                // ES 일시 오류 → 이번 청크는 모두 '검토'한 것으로 간주하고 건너뜀
+                idx = chunkEnd;
+                continue;
+            }
+
+            Map<String, RecipeSearchDoc> byId = hits.getSearchHits().stream()
+                    .map(SearchHit::getContent)
+                    .collect(Collectors.toMap(RecipeSearchDoc::getId, r -> r, (a, b) -> a));
+
+            // 청크 내부를 아이템 단위로 처리하며 idx를 '정확히' 전진
+            for (int j = 0; j < chunk.size() && out.size() < size; j++) {
+                UserRecsDoc.Item it = chunk.get(j);
+                RecipeSearchDoc d = byId.get(it.getRecipeId());
+
+                // 이 아이템은 '검토 완료' → 커서 한 칸 전진
+                idx++;
+
+                if (d == null) continue; // 비공개/삭제/미존재
+                if (key.equalsIgnoreCase(nvl(d.getAuthorEmail()))) continue; // 내 글 제외
+                if (!seenIds.add(d.getId())) continue; // 중복 방지
+
+                Media media = buildMedia(d);
+                out.add(new RecipeCardDto(
+                        d.getId(),
+                        nvl(d.getTitle()),
+                        nvl(d.getAuthorId()),
+                        nvlLong(d.getLikes()),
+                        (d.getCreatedAt() == null) ? "" : d.getCreatedAt().toString(),
+                        (d.getTags() == null) ? List.of() : d.getTags(),
+                        it.getScore(),
+                        nvl(d.getThumbUrl()),
+                        nvl(d.getAuthorEmail()),
+                        media.kind, media.src, media.poster
+                ));
+            }
+
+            // 만약 out이 꽉 차지 않았고, 위 for 루프가 청크 끝까지 돌았다면
+            // 남은 청크 아이템들은 모두 '검토'한 상태이므로 idx는 이미 그만큼 전진되어 있음.
+            // (for 안에서 idx++를 했기 때문에 별도 처리 불필요)
+            // 다음 while 루프로 넘어가면 idx부터 다음 청크를 만든다.
+        }
+
+        String next = (idx < totalPersonal) ? encodeIdx(idx) : null;
+
+        return new FeedPageDto(totalPersonal, out, next);
     }
 
+    // ======================
+    // HOT 매핑
+    // ======================
     @SuppressWarnings("unchecked")
     private FeedPageDto mapHotToDto(Map<String, Object> hot) {
         List<Map<String, Object>> list =
@@ -127,7 +157,6 @@ public class FeedService {
             String id = Objects.toString(m.get("id"), "");
             String title = Objects.toString(m.get("title"), "");
 
-            // ✅ authorId 우선, 없으면 authorNick
             String authorId  = Objects.toString(m.getOrDefault("authorId", ""), "");
             String authorNick = Objects.toString(m.getOrDefault("authorNick", ""), "");
             String authorForDisplay = !authorId.isBlank() ? authorId : authorNick;
@@ -141,20 +170,15 @@ public class FeedService {
                 for (Object o : (List<?>) tg) tags.add(Objects.toString(o, ""));
             }
 
-            String authorEmail = Objects.toString(m.getOrDefault("authorEmail",""), ""); // ★ 꺼내기
+            String authorEmail = Objects.toString(m.getOrDefault("authorEmail",""), "");
             String thumbUrl = Objects.toString(m.getOrDefault("thumbUrl", ""), "");
             String mediaKind = Objects.toString(m.getOrDefault("mediaKind", "image"), "image");
             String mediaSrc  = Objects.toString(m.getOrDefault("mediaSrc", thumbUrl), thumbUrl);
             String poster    = Objects.toString(m.getOrDefault("poster", thumbUrl), thumbUrl);
 
-            // ✅ 표기 필드에 authorId(또는 대체) 주입
             items.add(new RecipeCardDto(
                     id, title, authorForDisplay, likes, createdAt, tags, 0.0, thumbUrl,
-
-                    // ★ 이메일 먼저
                     authorEmail,
-
-                    // media
                     mediaKind, mediaSrc, poster
             ));
         }
@@ -166,15 +190,14 @@ public class FeedService {
     // ===============================
     // 미디어 유틸
     // ===============================
-
     private static final Pattern YT_V = Pattern.compile("[?&]v=([A-Za-z0-9_-]{11})");
     private static final Pattern YT_SHORTS_EMBED = Pattern.compile("/(shorts|embed)/([A-Za-z0-9_-]{11})");
     private static final Pattern YT_BE = Pattern.compile("youtu\\.be/([A-Za-z0-9_-]{11})");
 
     private static class Media {
-        final String kind;   // youtube | video | image
-        final String src;    // youtube: embed URL, video: 파일 URL, image: 이미지 URL
-        final String poster; // 이미지/포스터
+        final String kind;
+        final String src;
+        final String poster;
         Media(String k, String s, String p){ this.kind=k; this.src=s; this.poster=p; }
     }
 
@@ -226,8 +249,28 @@ public class FeedService {
     }
 
     // ===============================
-    // 기타 유틸
+    // 커서 & 기타 유틸
     // ===============================
+    /** 과거 커서(숫자/idx:n/base64 idx:) 지원 */
+    private static int decodeLegacy(String after) {
+        if (after == null || after.isBlank()) return 0;
+        try {
+            byte[] raw = Base64.getUrlDecoder().decode(after);
+            String s = new String(raw, StandardCharsets.UTF_8);
+            if (s.startsWith("idx:")) return Integer.parseInt(s.substring(4));
+            return Integer.parseInt(s.trim());
+        } catch (Exception e) {
+            try {
+                return Integer.parseInt(after.trim());
+            } catch (Exception ignore) { return 0; }
+        }
+    }
+
+    private static String encodeIdx(int off) {
+        String s = "idx:" + off;
+        return Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(s.getBytes(StandardCharsets.UTF_8));
+    }
 
     private static String nvl(String s){ return (s == null) ? "" : s; }
     private static long nvlLong(Long v){ return (v == null) ? 0L : v; }
@@ -235,21 +278,5 @@ public class FeedService {
     private static long coerceLong(Object o) {
         if (o instanceof Number) return ((Number) o).longValue();
         try { return Long.parseLong(String.valueOf(o)); } catch (Exception e) { return 0L; }
-    }
-
-    private static int decode(String after) {
-        if (after == null || after.isBlank()) return 0;
-        try {
-            byte[] raw = Base64.getUrlDecoder().decode(after);
-            String s = new String(raw, StandardCharsets.UTF_8);
-            if (s.startsWith("idx:")) return Integer.parseInt(s.substring(4));
-            return Integer.parseInt(s.trim());
-        } catch (Exception e) { return 0; }
-    }
-
-    private static String encode(int off) {
-        String s = "idx:" + off;
-        return Base64.getUrlEncoder().withoutPadding()
-                .encodeToString(s.getBytes(StandardCharsets.UTF_8));
     }
 }
