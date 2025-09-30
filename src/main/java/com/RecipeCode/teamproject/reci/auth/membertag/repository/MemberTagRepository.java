@@ -23,4 +23,6 @@ public interface MemberTagRepository extends JpaRepository<MemberTag, Long> {
 
     @Query("select mt from MemberTag mt join fetch mt.tag where mt.member.userEmail = :email")
     List<MemberTag> findByMemberWithTag(@Param("email") String email);
+
+    boolean existsByTag(Tag tag);
 }

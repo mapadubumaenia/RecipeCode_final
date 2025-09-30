@@ -2,11 +2,14 @@ package com.RecipeCode.teamproject.reci.tag.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.RecipeMapStruct;
+import com.RecipeCode.teamproject.reci.auth.membertag.repository.MemberTagRepository;
+import com.RecipeCode.teamproject.reci.feed.recipeTag.repository.RecipeTagRepository;
 import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
 import com.RecipeCode.teamproject.reci.tag.entity.Tag;
 import com.RecipeCode.teamproject.reci.tag.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +18,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TagService {
     private final TagRepository tagRepository;
+    private final RecipeTagRepository recipeTagRepository;
+    private final MemberTagRepository memberTagRepository;
     private final RecipeMapStruct recipeMapStruct;
     private final ErrorMsg errorMsg;
 
@@ -65,5 +70,20 @@ public class TagService {
                 .orElseThrow(()->new RuntimeException(errorMsg.getMessage("errors.not.found")));
         tag.setDeleted(true);
     }
+
+    @Transactional
+    public void cleanupUnusedTags() {
+        List<Tag> allTags = tagRepository.findAll();
+        for (Tag tag : allTags) {
+            boolean usedByMember = memberTagRepository.existsByTag(tag);
+            boolean usedByRecipe = recipeTagRepository.existsByTag(tag);
+
+            if (!usedByMember && !usedByRecipe && !tag.isDeleted()) {
+                tag.setDeleted(true);
+                tagRepository.save(tag);
+            }
+        }
+    }
+
 
 }

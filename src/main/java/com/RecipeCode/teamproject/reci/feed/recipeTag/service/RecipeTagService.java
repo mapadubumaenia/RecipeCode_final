@@ -66,17 +66,6 @@ public class RecipeTagService {
         }
     }
 
-    //  RecipeTagService 쪽에 연결 끊긴 태그 처리 로직 추가
-    public void cleanupUnusedTags() {
-        List<Long> inUseIds = recipeTagRepository.findAllTagIdsInUse();
-        List<Tag> allTags = tagRepository.findAll();
-        for (Tag tag : allTags) {
-            if (!inUseIds.contains(tag.getTagId()) && !tag.isDeleted()) {
-                tag.setDeleted(true);
-                tagRepository.save(tag);
-            }
-        }
-    }
 
     /** 태그 더티체킹 적용 : **/
 
@@ -125,7 +114,7 @@ public class RecipeTagService {
         }
 
         // 6) 연결이 하나도 남지 않은 태그는 soft delete
-        cleanupUnusedTags();
+        tagService.cleanupUnusedTags();
 
     }
 
