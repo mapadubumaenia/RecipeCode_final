@@ -125,7 +125,8 @@
             if (!atId) return;
             const url = profileImgUrlFromAtUserId(atId);
             if (!url) return;
-            img.onerror = function(){ this.removeAttribute('src'); };
+            img.onerror = function(){ this.onerror = null; // 무한 루프 방지
+                this.src = CTX + "/images/default_profile.jpg"; }; // 404 → 비우기
             img.src = url;
         });
     }

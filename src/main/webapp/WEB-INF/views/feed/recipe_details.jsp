@@ -8,6 +8,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 
 <%-- 날짜 포맷을 쓰고 싶으면 fmt를 추가하고, LocalDateTime -> String 변환은 컨버터/DTO에서 처리 권장
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -37,7 +38,10 @@
             </div>
 
             <div class="header-actions">
-                <a class="register">👤</a>
+                 <sec:authorize access="isAuthenticated()">
+                    <sec:authentication property="principal" var="loginUser"/>
+                    <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+                 </sec:authorize>
                 <div class="notif-wrap">
                     <!-- 알림 버튼 -->
                     <button
@@ -248,7 +252,7 @@
             <section class="comments" id="comments">
                 <h3 class="comments-title">💬 댓글 <span class="count"><c:out value="${recipe.commentCount}" /></span></h3>
                 <div class="comment-input">
-                    <img class="avatar-sm" src="${ctx}/images/avatar-placeholder.png" alt="" />
+                    <img class="avatar-sm" src="${currentUserProfile}" alt="내 프로필"/>
                     <label class="sr-only" for="cmt"></label>
                     <textarea id="cmt" placeholder="따끈한 피드백 남기기..."></textarea>
                     <button type="button" class="btn" id="btnCmtSubmit">등록</button>

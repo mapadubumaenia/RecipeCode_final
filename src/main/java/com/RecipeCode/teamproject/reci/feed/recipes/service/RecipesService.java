@@ -212,7 +212,12 @@ public class RecipesService {
         // 2) DTO 매핑
         RecipesDto dto = recipeMapStruct.toRecipeDto(recipe);
 
-        // 3) 좋아요 여부
+        // 3) 작성자 프로필 이미지 세팅
+        if (dto.getProfileImageUrl() == null || dto.getProfileImageUrl().isBlank()) {
+            dto.setProfileImageUrl("/member/" + owner.getUserId() + "/profile-image");
+        }
+
+        // 4) 좋아요 여부
         if (userEmail != null && ! userEmail.isBlank()) {
             memberRepository.findByUserEmail(userEmail).ifPresent(viewer ->{
                 boolean l = recipesLikesRepository.existsByMemberAndRecipes(viewer, recipe);
@@ -222,7 +227,7 @@ public class RecipesService {
             dto.setLiked(false);
         }
 
-        // 4) 팔로우 여부
+        // 5) 팔로우 여부
         boolean followingOwner = false;
         if (userEmail != null && ! userEmail.isBlank() && !userEmail.equals(owner.getUserEmail())) {
             Member viewer = memberRepository.findByUserEmail(userEmail)

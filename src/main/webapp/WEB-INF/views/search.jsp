@@ -41,7 +41,8 @@
       <a class="register" href="register_page.html">👤</a>
       <div class="notif-wrap">
         <sec:authorize access="isAuthenticated()">
-          <sec:authentication property="principal.nickname"/>님
+          <sec:authentication property="principal" var="loginUser"/>
+          <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
         </sec:authorize>
         <!-- 알림 버튼 -->
         <button

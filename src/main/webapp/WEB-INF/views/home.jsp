@@ -90,7 +90,7 @@
         <div class="notif-wrap">
             <sec:authorize access="isAuthenticated()">
                 <sec:authentication property="principal" var="loginUser"/>
-                ${loginUser.nickname}님
+                <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
             </sec:authorize>
 
             <!-- 알림 버튼 -->
@@ -293,8 +293,8 @@
         <button class="search-btn" aria-label="검색">🔍</button>
     </div>
     <nav class="tabs">
-        <a class="tab is-active" href="newfeed-ver-mypage-wireframe.html">Profile</a>
-        <a class="tab" href="create-update.html">Upload</a>
+        <a class="tab is-active" href="/mypage">Profile</a>
+        <a class="tab" href="/recipes/add">Upload</a>
     </nav>
 </footer>
 
