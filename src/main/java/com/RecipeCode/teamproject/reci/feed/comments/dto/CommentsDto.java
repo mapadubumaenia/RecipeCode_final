@@ -20,6 +20,7 @@ public class CommentsDto {
     private boolean liked;
     private boolean alreadyReported;
     private Long parentId;          // 부모 댓글 ID (대댓글이면 채워짐)
+    private String profileImageUrl; // 프로필이미지
 
     private LocalDateTime insertTime;
     private LocalDateTime updateTime;

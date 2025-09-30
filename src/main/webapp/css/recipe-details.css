@@ -216,3 +216,59 @@ textarea:focus {
 .modal-content button[type="button"]:hover {
   background: #f9fafb;
 }
+
+/* 댓글 액션 버튼 공통 */
+.comment-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px; /* 아이콘과 텍스트 간격 */
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.comment-actions button:hover {
+  background: var(--chip);
+  color: #fff;
+}
+
+/* 좋아요 버튼 */
+.comment-actions .btnLike {
+  border-color: #e5e7eb;
+}
+.comment-actions .btnLike.active {
+  color: #dc2626; /* 빨강 하트 */
+  font-weight: 700;
+}
+
+/* 신고 버튼 */
+.comment-actions .myBtnReport {
+  border-color: #fbbf24; /* 노랑 계열 */
+  color: #92400e;
+}
+.comment-actions .myBtnReport.reported {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: default;
+  border-color: #d1d5db;
+}
+
+/* 답글/수정/삭제 버튼 */
+.comment-actions .btnReply,
+.comment-actions .btnEdit,
+.comment-actions .btnDelete {
+  border-color: #e5e7eb;
+  color: #374151;
+}
+.comment-actions .btnReply:hover,
+.comment-actions .btnEdit:hover,
+.comment-actions .btnDelete:hover {
+  background: #3b82f6;
+  color: #fff;
+}
