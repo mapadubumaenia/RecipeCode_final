@@ -223,6 +223,7 @@
                             data-uuid="${recipe.uuid}"
                             data-like="${recipe.liked ? 'true' : 'false'}"
                             aria-pressed="${recipe.liked}"
+                            data-owner="${isOwner}"
                     ${isOwner ? 'aria-disabled="true" title="본인 레시피에는 좋아요를 누를 수 없습니다."' : ''}>
                         <span class="icon" aria-hidden="true"></span>
                         <span class="cnt">${recipe.likeCount}</span>
