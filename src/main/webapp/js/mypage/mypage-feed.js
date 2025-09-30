@@ -21,17 +21,34 @@ document.addEventListener("DOMContentLoaded", () => {
         window.fetch(getApiUrl())
             .then(res => res.json())
             .then(data => {
-                data.content.forEach(recipe => {
-                    const article = createFeedArticle(recipe, currentUserEmail);
-                    feedContainer.appendChild(article);
-                });
-
+                if (!data.content || data.content.length === 0) {
+                    // 게시글이 없으면 안내 메시지 카드 추가 (중복 방지)
+                    if (!feedContainer.querySelector(".no-feed")) {
+                        const emptyCard = document.createElement("article");
+                        emptyCard.className = "card post no-feed";
+                        emptyCard.innerHTML = `
+            <div class="post-body">
+                <p class="muted">아직 작성한 글이 없습니다.</p>
+            </div>
+        `;
+                        feedContainer.appendChild(emptyCard);
+                    }
+                } else {
+                    // 기존 "없습니다" 메시지가 있으면 제거
+                    const oldMsg = feedContainer.querySelector(".no-feed");
+                    if (oldMsg) oldMsg.remove();
+                    data.content.forEach(recipe => {
+                        const article = createFeedArticle(recipe, currentUserEmail);
+                        feedContainer.appendChild(article);
+                    });
+                }
                 isLast = data.last;
                 page++;
-                isLoading = false;
+                // isLoading = false;
             })
-            .catch(err => {
-                console.error("Error:", err);
+            .catch(err =>
+                console.error("Error:", err))
+                .finally(() => {
                 isLoading = false;
             });
     }

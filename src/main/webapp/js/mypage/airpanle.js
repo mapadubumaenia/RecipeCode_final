@@ -99,13 +99,6 @@
             txt.textContent = '불러오기 실패';
         }
     }
-    // 유저로케이션으로 초기 선택
-    // const userSido = (box.dataset.userSido || '').trim();
-    // if (userSido) {
-    //     // option value와 텍스트가 동일하므로 text 비교 사용
-    //     const opt = Array.from(sidoSel.options).find(o => o.text.trim() === userSido);
-    //     if (opt) sidoSel.value = opt.text;
-    // }
 
     // 초기 로드
     loadAir();
