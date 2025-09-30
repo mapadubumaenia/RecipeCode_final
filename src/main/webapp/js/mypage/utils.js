@@ -1,12 +1,24 @@
 // utils.js
 
 // TODO: (운영 시 활성화) CSRF 토큰을 JS에서 쓰고 싶을 때
-// const CSRF = (() => {
-//     const t = document.querySelector('meta[name="_csrf"]');
-//     const h = document.querySelector('meta[name="_csrf_header"]');
-//     if (!t || !h) return { header: null, token: null };
-//     return { header: h.content, token: t.content };
-// })();
+const CSRF = (() => {
+    const t = document.querySelector('meta[name="_csrf"]');
+    const h = document.querySelector('meta[name="_csrf_header"]');
+    if (!t || !h) return { header: null, token: null };
+    return { header: h.content, token: t.content };
+})();
+
+// 중복 클릭 방지
+function setBusy(el, v) {
+    if (!el) return;
+    if (v) {
+        el.dataset.busy = "true";
+        // el.style.pointerEvents = "none"; // 원하면 주석 해제로 시각적/물리적 더블클릭 완전 차단
+    } else {
+        delete el.dataset.busy;
+        // el.style.pointerEvents = "";
+    }
+}
 
 
 // 시간 변환
@@ -146,47 +158,103 @@ document.addEventListener("click", async (e) => {
     if (!heart || !heart.dataset.uuid) return;
 
     // 내 레시피에는 못누름
-    if (heart.dataset.owner === "true") {
+    if (heart.dataset.owner === "true" || heart.getAttribute("aria-disabled") === "true") {
         alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
         return;
     }
 
+    // 중복 클릭 방지
+    if (heart.dataset.busy === "true") return;
+    setBusy(heart, true);
+
     const uuid   = heart.dataset.uuid;
     const isLike = heart.dataset.like === "true";
-    const url    = `${typeof window.ctx === "string" ? window.ctx : ""}/api/recipes/${encodeURIComponent(uuid)}/like`;
-    const method = isLike ? "DELETE" : "POST";
+
+    const ctx    = (typeof window.ctx === "string") ? window.ctx : "";
+    const url    = `${ctx}/api/recipes/${encodeURIComponent(uuid)}/like`;
+    let method = isLike ? "DELETE" : "POST";
+
+    // 헤더: Accept + CSRF(있으면)
+    const headers = { "Accept": "application/json" };
+    if (CSRF.header && CSRF.token) headers[CSRF.header] = CSRF.token;
 
     try {
-        const res = await fetch(url, {
-            method,
-            credentials: "same-origin",
-            headers: { "Content-Type": "application/json" }
-        });
-        if (!res.ok) {
-            let msg = "";
-            try {
-                const err = await res.json();
-                msg = err.message || err.msg || "";
-            } catch {}
-            if (res.status === 403 || res.status === 400 || msg.includes("SELF_LIKE")) {
-                alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
-            } else {
-             alert("실패했습니다. 다시 시도해주세요.");
-            }
+        let res = await fetch(url, { method, credentials: "same-origin", headers });
+
+        // 서버가 DELETE 막을 때(405) 폴백: POST로 토글
+    if (res.status === 405 && method === "DELETE") {
+        method = "POST";
+        res = await fetch(url, { method, credentials: "same-origin", headers });
+    }
+
+    // 응답 파싱
+    const ctype = res.headers.get("content-type") || "";
+    const body  = ctype.includes("application/json") ? await res.json() : { message: await res.text() };
+
+    // 에러 처리
+    if (!res.ok) {
+        if (res.status === 401) {
+            alert("로그인 후 이용해주세요.");
             return;
         }
-        const dto = await res.json();
-        const now = (dto.isLike ?? dto.liked ?? false) === true;
-        heart.classList.toggle("active", now);
-        heart.dataset.like = String(now);
-        heart.setAttribute("aria-pressed", String(now));
+        const msg = body?.message || body?.msg || "좋아요 처리에 실패했어요.";
+        if (res.status === 400 || res.status === 403 || /SELF_LIKE|본인/.test(msg)) {
+            alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
+        } else {
+            alert(msg);
+        }
+        return;
+    }
 
-        const cntEl = heart.querySelector(".cnt");
-        const newCnt = Number(dto.likesCount ?? (cntEl ? cntEl.textContent : "0"));
-        if (cntEl) cntEl.textContent = String(newCnt);
+    // try {
+    //     const res = await fetch(url, {
+    //         method,
+    //         credentials: "same-origin",
+    //         headers: { "Content-Type": "application/json" }
+    //     });
+    //     if (!res.ok) {
+    //         let msg = "";
+    //         try {
+    //             const err = await res.json();
+    //             msg = err.message || err.msg || "";
+    //         } catch {}
+    //         if (res.status === 403 || res.status === 400 || msg.includes("SELF_LIKE")) {
+    //             alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
+    //         } else {
+    //          alert("실패했습니다. 다시 시도해주세요.");
+    //         }
+    //         return;
+    //     }
+
+    // 표준/유연 응답 처리: { isLike | liked, likesCount }
+    const nowLiked = (body?.isLike ?? body?.liked ?? !isLike) === true;
+    const cntEl    = heart.querySelector(".cnt");
+    const newCnt   = Number(body?.likesCount ?? (cntEl ? cntEl.textContent : "0"));
+
+    // UI 반영
+    heart.classList.toggle("active", nowLiked);
+    heart.dataset.like = String(nowLiked);
+    heart.setAttribute("aria-pressed", String(nowLiked));
+    if (cntEl && Number.isFinite(newCnt)) cntEl.textContent = String(newCnt);
+
     } catch (err) {
         console.error(err);
-        alert("실패했습니다. 다시 시도해주세요.");
+        alert("네트워크 오류가 발생했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+        setBusy(heart, false);
     }
+    // const dto = await res.json();
+    //     const now = (dto.isLike ?? dto.liked ?? false) === true;
+    //     heart.classList.toggle("active", now);
+    //     heart.dataset.like = String(now);
+    //     heart.setAttribute("aria-pressed", String(now));
+    //
+    //     const cntEl = heart.querySelector(".cnt");
+    //     const newCnt = Number(dto.likesCount ?? (cntEl ? cntEl.textContent : "0"));
+    //     if (cntEl) cntEl.textContent = String(newCnt);
+    // } catch (err) {
+    //     console.error(err);
+    //     alert("실패했습니다. 다시 시도해주세요.");
+    // }
     
 });
