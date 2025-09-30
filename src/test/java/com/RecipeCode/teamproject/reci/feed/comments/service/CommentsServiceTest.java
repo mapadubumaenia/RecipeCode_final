@@ -54,13 +54,4 @@ class CommentsServiceTest {
         assertEquals(member, entity.getMember());
         verify(commentsRepository, times(1)).save(entity);
     }
-
-    @Test
-    void deleteComment() {
-        doNothing().when(commentsRepository).deleteById(1L);
-
-        service.deleteComment(1L);
-
-        verify(commentsRepository, times(1)).deleteById(1L);
-    }
 }

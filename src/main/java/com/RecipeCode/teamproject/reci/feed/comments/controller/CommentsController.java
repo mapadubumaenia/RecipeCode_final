@@ -100,8 +100,16 @@ public class CommentsController {
     // 댓글 삭제
     @DeleteMapping("/{commentsId}")
     public void deleteComment(@PathVariable Long commentsId) {
-        commentsService.deleteComment(commentsId);
+        // 로그인 확인
+        SecurityUserDto loginUser = securityUtil.getLoginUser();
+        if (loginUser == null) {
+            throw new RuntimeException("로그인 후 이용 가능합니다.");
+        }
+        String userEmail = loginUser.getUsername();
+
+        commentsService.deleteComment(commentsId, userEmail);
     }
+
 
     // 관리자 삭제
     @DeleteMapping("/admin/{commentsId}")
