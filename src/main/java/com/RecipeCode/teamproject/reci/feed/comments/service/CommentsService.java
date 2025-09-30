@@ -222,9 +222,19 @@ public class CommentsService {
 
     // 댓글/대댓글 삭제
     @Transactional
-    public void deleteComment(Long commentsId) {
+    public void deleteComment(Long commentsId, String userEmail) {
         Comments comments = commentsRepository.findById(commentsId)
                 .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+
+        // 삭제된 댓글은 수정 불가
+        if (comments.getDeletedAt() != null) {
+            throw new RuntimeException("삭제된 댓글은 수정할 수 없습니다.");
+        }
+
+        // 작성자 확인
+        if (!comments.getMember().getUserEmail().equals(userEmail)) {
+            throw new RuntimeException("본인 댓글만 수정할 수 있습니다.");
+        }
 
         comments.setDeletedAt(LocalDateTime.now());
     }
