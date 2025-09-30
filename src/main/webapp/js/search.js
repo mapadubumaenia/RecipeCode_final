@@ -8,18 +8,22 @@
     const USER_EMAIL = (typeof window !== "undefined" && window.__USER_EMAIL__) ? String(window.__USER_EMAIL__).trim().toLowerCase() : "";
 
     function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
-     function esc(s){
-           if (s == null) return '';
-           return String(s)
-                 .replace(/&/g,'&amp;')
-             .replace(/</g,'&lt;')
-             .replace(/>/g,'&gt;')
-             .replace(/"/g,'&quot;')
-             .replace(/'/g,'&#39;');
-         }
+    function esc(s){
+        if (s == null) return '';
+        return String(s)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+    }
     function fmtDate(v) {
         if (!v) return '';
-        try { const d = new Date(v); if (isNaN(d.getTime())) return ''; return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); } catch { return ''; }
+        try {
+            const d = new Date(v);
+            if (isNaN(d.getTime())) return '';
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        } catch { return ''; }
     }
     function isUuid36(s){ return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s || ''); }
     function pickUuid(it){
@@ -41,7 +45,7 @@
         return isNaN(d.getTime()) ? null : d;
     }
 
-// YYYY-MM-DD HH:mm (로컬)
+    // YYYY-MM-DD HH:mm (로컬)
     function fmtYmdHm(v){
         const d = toDate(v); if (!d) return '';
         const y  = d.getFullYear();
@@ -51,7 +55,6 @@
         const mm = String(d.getMinutes()).padStart(2,'0');
         return `${y}-${m}-${dd} ${hh}:${mm}`;
     }
-
 
     // ===== 좋아요 UI 헬퍼 =====
     function applyLikeVisual(btn, liked){
@@ -71,8 +74,9 @@
         else btn.innerHTML = `❤️ <span class="like-count">${v}</span>`;
     }
     async function hydrateMyLikesIn(container){
+        // (변경 #3) 자기 글은 제외 + disabled 제외
         const btns = Array.from(container.querySelectorAll('.js-like[data-uuid]'))
-            .filter(b => !b.hasAttribute('disabled'));
+            .filter(b => !b.hasAttribute('disabled') && b.dataset.self !== '1');
         if (btns.length === 0 || !USER_EMAIL) return;
         const ids = Array.from(new Set(btns.map(b => b.getAttribute('data-uuid')).filter(Boolean)));
         if (ids.length === 0) return;
@@ -289,9 +293,9 @@
                 '  <div class="avatar-ss"><img src="" alt="" data-user-id="' + esc(userIdAttr) + '"></div>' +
                 '  <div class="post-info">' +
                 '    <div class="post-id">' + (cleanId ? ('<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>') : '') + '</div>' +
-                 '    <div class="muted">' +
-                 '      <time datetime="' + esc(it.createdAt || '') + '">' + esc(created) + '</time>' +
-                 '    </div>' +
+                '    <div class="muted">' +
+                '      <time datetime="' + esc(it.createdAt || '') + '">' + esc(created) + '</time>' +
+                '    </div>' +
                 '  </div>' +
                 '  <button class="followbtn-sm' + (self ? ' is-self' : '') + '"' +
                 '     data-user-id="' + esc(userIdAttr) + '"' +
@@ -307,11 +311,13 @@
                 tagsHtml +
                 (idOk ? '</a>' : '</div>') +
                 '<div class="post-cta">' +
-                '  <button class="btn-none js-like" ' +
-                (idOk && !self
-                    ? ('data-uuid="' + esc(uuid) + '" ')
-                    : 'disabled aria-disabled="true" title="' + (self ? '내 게시물은 좋아요를 누를 수 없어요' : '이 카드엔 uuid가 없어요') + '" ') +
-                '      data-liked="false" aria-pressed="false">' +
+                // (변경 #1) disabled 제거 + 자기 글이면 data-self="1" 부여
+                (function(){
+                    const attrs = [];
+                    if (idOk) attrs.push('data-uuid="' + esc(uuid) + '"');
+                    if (self) attrs.push('data-self="1" title="내 게시물은 좋아요를 누를 수 없어요"');
+                    return '  <button class="btn-none js-like" ' + attrs.join(' ') + ' data-liked="false" aria-pressed="false">';
+                })() +
                 '    ❤️ <span class="like-count">' + likes + '</span>' +
                 '  </button>' +
                 '  <button class="btn-none">💬 ' + cmts + '</button>' +
@@ -457,6 +463,12 @@
             const btn = e.target.closest('.js-like');
             if (!btn) return;
 
+            // (변경 #2) 본인 게시물: 경고창 띄우고 종료
+            if (btn.dataset.self === '1') {
+                alert('본인 게시물에는 좋아요를 누를 수 없어요.');
+                return;
+            }
+
             if (btn.hasAttribute('disabled')) return;
             const uuid = btn.getAttribute('data-uuid');
             if (!uuid) return;
@@ -494,7 +506,14 @@
                         location.href = CTX + '/auth/login';
                         return;
                     }
-                    if (!res.ok) { throw new Error('HTTP ' + res.status); }
+                    // (선택) 서버 오류 메시지 alert (errors.my.likes 등)
+                    if (!res.ok) {
+                        try {
+                            const t = await res.text();
+                            if (t) alert(t.slice(0, 200));
+                        } catch {}
+                        throw new Error('HTTP ' + res.status);
+                    }
 
                     const dto = await res.json();
                     const serverLiked = !!(dto && dto.liked);
