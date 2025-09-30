@@ -281,7 +281,8 @@
                                     </div>
                                     <div class="step-body">
                                         <label class="upload">
-                                            <input type="file" name="stepImages" accept="image/*" />
+                                            <%-- TODO: 여기 --%>
+                                            <input type="file" name="contents[${cs.index}].recipeImage" accept="image/*" />
                                             <span class="ph <c:if test='${not empty c.recipeImageUrl}'>hidden</c:if>">이미지 업로드</span>
                                             <img class="<c:if test='${empty c.recipeImageUrl}'>hidden</c:if>" alt=""
                                                  <c:if test='${not empty c.recipeImageUrl}'>src='${c.recipeImageUrl}'</c:if> />
@@ -311,7 +312,7 @@
                                 </div>
                                 <div class="step-body">
                                     <label class="upload">
-                                        <input type="file" name="stepImages" accept="image/*" />
+                                        <input type="file" name="contents[0].recipeImage" accept="image/*" />
                                         <span class="ph">이미지 업로드</span>
                                         <img class="hidden" alt="">
                                     </label>
