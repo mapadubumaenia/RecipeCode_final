@@ -55,17 +55,6 @@ public class MemberTagService {
             memberTagRepository.save(memberTag);
         }
     }
-    //  RecipeTagService 쪽에 연결 끊긴 태그 처리 로직 추가
-    public void cleanupUnusedTags() {
-        List<Long> inUseIds = memberTagRepository.findAllTagIdsInUse();
-        List<Tag> allTags = tagRepository.findAll();
-        for (Tag tag : allTags) {
-            if (!inUseIds.contains(tag.getTagId()) && !tag.isDeleted()) {
-                tag.setDeleted(true);
-                tagRepository.save(tag);
-            }
-        }
-    }
 
 
     @Transactional
@@ -112,7 +101,7 @@ public class MemberTagService {
         }
 
         // 6) 아무도 안 쓰는 태그는 soft delete
-        cleanupUnusedTags();
+        tagService.cleanupUnusedTags();
     }
 
 }
