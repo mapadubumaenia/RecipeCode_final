@@ -62,6 +62,79 @@
     }
 
 
+    // 상대/절대 경로를 절대 URL로 변환
+    function toAbsUrl(path){
+        try { return new URL(path, window.location.origin).href; }
+        catch { return String(path || ''); }
+    }
+
+// 텍스트를 클립보드에 복사 (HTTPS/보안컨텍스트 우선, 폴백 포함)
+    async function copyText(text){
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return true;
+            }
+        } catch {}
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly','');
+            ta.style.position = 'fixed';
+            ta.style.top = '-1000px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+
+    // Share 버튼: 상세 URL 복사 + 알림
+    document.addEventListener('click', async function(e){
+        const btn = e.target.closest('.js-share');
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 게시물 uuid 찾기
+        const card = btn.closest('article.post[data-id]');
+        const rid  = card ? card.getAttribute('data-id') : null;
+        if (!rid || !isUuid36(rid)) {
+            alert('공유할 링크를 찾지 못했어요.');
+            return;
+        }
+
+        // 상세조회 경로 → 절대 URL
+        const href = toAbsUrl(detailUrl(rid));
+
+        const ok = await copyText(href);
+        alert(ok ? '링크가 복사되었어요.\n' : '클립보드 복사에 실패했어요.');
+    });
+
+// Share 버튼 키보드 접근성 (Enter/Space)
+    document.addEventListener('keydown', async function(e){
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const btn = document.activeElement;
+        if (!btn || !btn.classList || !btn.classList.contains('js-share')) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const card = btn.closest('article.post[data-id]');
+        const rid  = card ? card.getAttribute('data-id') : null;
+        if (!rid || !isUuid36(rid)) {
+            alert('공유할 링크를 찾지 못했어요.');
+            return;
+        }
+        const href = toAbsUrl(detailUrl(rid));
+        const ok = await copyText(href);
+        alert(ok ? '링크가 복사되었어요.\n'  : '클립보드 복사에 실패했어요.');
+    });
 
 
     // ISO 문자열/epoch 숫자 → "YYYY-MM-DD HH:mm" (로컬시간)
