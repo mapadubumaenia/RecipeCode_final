@@ -344,7 +344,7 @@
                 const displayIdRaw = it.authorId || it.authorNick || it.author || '';
                 const cleanId = (displayIdRaw.startsWith('@') ? displayIdRaw.slice(1) : displayIdRaw).trim();
                 const userIdAttr = cleanId ? ('@' + cleanId) : '';
-                const profileHref = CTX + '/follow/profile/' + encodeURIComponent(cleanId);
+                const profileHref = CTX + '/profile/' + encodeURIComponent(cleanId);
                 const authorEmail = (it.authorEmail || '').trim().toLowerCase();
 
                 let tagsHtml = '';

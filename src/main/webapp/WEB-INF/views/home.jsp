@@ -59,7 +59,6 @@
 <header class="container">
     <div class="flex-box">
         <h1 class="page-title">Lumeat</h1>
-        <a class="register" href="/auth/register">👤</a>
         <div class="notif-wrap">
             <sec:authorize access="isAuthenticated()">
                 <sec:authentication property="principal" var="loginUser"/>

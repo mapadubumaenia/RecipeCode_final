@@ -22,7 +22,7 @@
     <header class="profile-header">
         <div class="flex-row">
             <h1 class="page-title">Login</h1>
-            <a href="/" class="float-text">home</a>
+            <a href="/home" class="float-text">home</a>
         </div>
         <a class="btn-logout" href="/auth/register">Back</a>
     </header>

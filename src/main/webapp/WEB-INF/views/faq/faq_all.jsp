@@ -12,7 +12,7 @@
     <header class="profile-header">
         <div class="flex-row">
             <h1 class="page-title">FAQ</h1>
-            <a href="newfeed-ver-main-wireframe.html" class="float-text">home</a>
+            <a href="/" class="float-text">home</a>
         </div>
         <a class="btn-logout" href="newfeed-ver-main-wireframe.html">Back</a>
     </header>
