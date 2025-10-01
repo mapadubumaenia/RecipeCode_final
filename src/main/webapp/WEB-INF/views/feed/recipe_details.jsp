@@ -159,7 +159,7 @@
                 </aside>
             </c:if>
                 <aside class="panel">
-                    <h3>🧾 재료</h3>
+                    <h3><i data-lucide="salad" class="icon"></i> 재료</h3>
                     <ul class="grid">
                         <c:choose>
                             <c:when test="${not empty recipe.ingredients}">
@@ -233,8 +233,8 @@
                         <span class="cnt">${recipe.likeCount}</span>
                     </button>
 
-                    <button class="btn-none share-btn float-text" data-uuid="${recipe.uuid}">🔗공유</button>
-                    <button class="btn-none" id="btnReport">🚩 신고</button>
+                    <button class="btn-none share-btn float-text" data-uuid="${recipe.uuid}"><i data-lucide="forward" class="icon"></i> 공유</button>
+                    <button class="btn-none" id="btnReport"><i data-lucide="alarm-smoke" class="icon flip"></i> 신고</button>
                 </div>
             </section>
             <!-- 본문/태그 -->
@@ -281,6 +281,13 @@
 </script>
 <script src="${ctx}/js/recipes/recipe-details.js"></script>
 <script src="${ctx}/js/recipes/recipe-detailside.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        lucide.createIcons(); // data-lucide 속성을 SVG로 변환
+    });
+</script>
+
 
 <div id="myReportModal" class="modal" hidden>
     <div class="modal-content">
