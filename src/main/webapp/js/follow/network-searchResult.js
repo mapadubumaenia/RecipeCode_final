@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? user.profileImageUrl
                     :  '/images/default_profile.jpg'}" 
              alt="${user.nickname || user.userId}"></div>
-                        <span>${user.userId}</span> <span>${user.nickname}</span>
+                        <span class="user-id">${user.userId}</span> <span>${user.nickname}</span>
                     </div>
                         <div class="rightBox flex-row">
                             <div>${user.userIntroduce|| ''}</div>

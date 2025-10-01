@@ -29,7 +29,7 @@
             <div class="header-actions">
                 <sec:authorize access="isAuthenticated()">
                     <sec:authentication property="principal" var="loginUser"/>
-                    <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+                    <a class="alink"  href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>
                 </sec:authorize>
 
                 <div class="notif-wrap">
@@ -148,10 +148,10 @@
             <div class="profile-right">
                 <div class="profile-stats">
                     <a href="/follow/network/${user.userId}" class="stat-link">
-                        팔로워 <b id="followerCount">0</b>
+                        <span class="f-text">Followers</span> <span class="fc-text" id="followerCount">0</span>
                     </a>
                     <a href="/follow/network/${user.userId}" class="stat-link">
-                        팔로잉 <b id="followingCount">0</b>
+                        <span class="f-text">Following</span> <span class="fc-text" id="followingCount">0</span>
                     </a>
                 </div>
                 <div class="user-intro">
