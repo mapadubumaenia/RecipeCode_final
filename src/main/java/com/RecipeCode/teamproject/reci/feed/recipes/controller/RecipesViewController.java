@@ -1,7 +1,10 @@
 package com.RecipeCode.teamproject.reci.feed.recipes.controller;
 
+import com.RecipeCode.teamproject.common.MapStruct;
+import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
+import com.RecipeCode.teamproject.reci.auth.membertag.service.MemberTagService;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
 import com.RecipeCode.teamproject.reci.auth.service.MemberService;
 import com.RecipeCode.teamproject.reci.auth.service.UserDetailsServiceImpl;
@@ -39,11 +42,18 @@ public class RecipesViewController {
     private final RecipeContentService recipeContentService;
     private final MemberRepository memberRepository;
     private final EventIngestService eventIngestService;
+
     /* 레시피 등록 폼 이동 */
     @GetMapping("/recipes/add")
-    public String createForm() {
-        return "feed/recipe_add"; // JSP or Thymeleaf 템플릿
+    public String createForm(@AuthenticationPrincipal SecurityUserDto principal,
+                             Model model) {
+        // 1) 비로그인일 때 로그인 페이지로
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        return "feed/recipe_add";
     }
+
 
     /* 레시피 수정 폼 이동 */
     @GetMapping("/recipes/{uuid}/edit")

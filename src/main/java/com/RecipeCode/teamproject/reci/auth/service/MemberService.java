@@ -66,6 +66,7 @@ public class MemberService {
             member.setProfileStatus("PUBLIC");
             member.setProvider("local");
             member.setRole("R_USER");
+            member.setDeleted("N");
             memberRepository.save(member);
             memberRepository.flush();
 //          알림설정 기본값

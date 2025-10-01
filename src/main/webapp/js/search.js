@@ -242,7 +242,7 @@
             const authorRawId = it.authorId || it.authorNick || '';
             const cleanId = (authorRawId && authorRawId.startsWith('@')) ? authorRawId.substring(1) : (authorRawId || '');
             const userIdAttr = cleanId ? ('@' + cleanId) : '';
-            const profileHref = cleanId ? (CTX + '/follow/profile/' + encodeURIComponent(cleanId)) : '#';
+            const profileHref = cleanId ? (CTX + '/profile/' + encodeURIComponent(cleanId)) : '#';
             const authorEmail = (it.authorEmail || '').trim().toLowerCase();
             const self = (USER_EMAIL && authorEmail && USER_EMAIL === authorEmail);
 
