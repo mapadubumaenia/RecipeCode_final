@@ -10,10 +10,10 @@
     position: relative;
 }
 
-
+.btn {background: var(--brand);}
+.btn:hover {background: var(--btn);}
 
 .notif-btn {
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 40px;
@@ -21,13 +21,13 @@
     border-radius: 12px;
     cursor: pointer;
     background: var(--card);
-    border: 1px solid var(--border);
+    border: 1px solid var(--card);
     box-shadow: var(--shadow);
     position: relative;
-    color:var(--text);
+    color:var(--wtext);
 }
 .notif-btn:hover {
-    background: #f3f4f6;
+    background: var(--card);
 }
 
 /* 빨간 dot */
@@ -138,7 +138,7 @@
     padding: 4px 8px;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background: var(--card);
+    background: var(--btn);
     cursor: pointer;
     font-size: 0.85rem;
 }

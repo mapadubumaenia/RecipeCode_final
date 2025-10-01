@@ -62,7 +62,7 @@
 
 .intro {
     margin: 8px 0;
-    color: #555;
+    color: var(--text);
     font-size: 14px;
 }
 
@@ -300,6 +300,7 @@
     padding: 6px 12px;
     border-radius: 20px;
     border: 1px solid var(--brand);
+    color: var(--text);
     background: var(--bg);
     cursor: pointer;
     font-size: 14px;
