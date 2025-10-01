@@ -14,7 +14,7 @@
             <h1 class="page-title">FAQ</h1>
             <a href="/" class="float-text">home</a>
         </div>
-        <a class="btn-logout" href="newfeed-ver-main-wireframe.html">Back</a>
+        <a class="btn-back" href="/mypage">Back</a>
     </header>
 
     <section class="layout">
