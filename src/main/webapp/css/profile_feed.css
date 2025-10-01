@@ -2,7 +2,6 @@
    프로필 카드
    ========================= */
 
-.alink{cursor:pointer; color: var(--subtext); font-weight: 700}
 .profile-top {display:flex; gap:8px; flex-direction: column; align-items: flex-start; justify-content: center;}
 .userInfo {display: flex; flex-direction: column; justify-content: center;}
 .profile {display: flex;}

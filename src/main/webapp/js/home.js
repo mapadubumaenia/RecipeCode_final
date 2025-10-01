@@ -401,7 +401,7 @@
                     if (!tag) return;
                     const node = document.createElement('div');
                     node.className = 'tag-item';
-                    node.innerHTML = '<span>#' + esc(tag) + '</span><span class="chip">' + esc(fmt.format(cnt)) + '</span>';
+                    node.innerHTML = '<div class="tag-bar"><span>#' + esc(tag) + '</span><span class="chip">' + esc(fmt.format(cnt)) + '</span></div>';
                     frag.appendChild(node);
                 });
                 if (frag.childNodes.length > 0) { $wrap.innerHTML = ''; $wrap.appendChild(frag); }
