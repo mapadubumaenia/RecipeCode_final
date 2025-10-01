@@ -3,7 +3,8 @@
 .search-bar{display:flex;gap:8px;flex:1}
 .search-input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
 .search-btn{padding:10px 12px;border:none;border-radius:12px;
-  background:var(--btn);color:var(--wtext);cursor:pointer;font-weight: 700; font-size: 14px;}
+  background:var(--brand);color:var(--wtext);cursor:pointer;font-weight: 700; font-size: 14px;}
+.search-btn:hover{background: var(--muted);}
 
 /* 목록/태그 */
 .trend-grid{display:grid;grid-auto-flow:column;grid-auto-columns:80%;gap:12px;overflow-x:auto;padding:4px 2px 8px;margin-bottom:8px}
