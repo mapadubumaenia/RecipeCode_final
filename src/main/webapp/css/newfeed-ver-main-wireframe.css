@@ -1,7 +1,8 @@
 /* 헤더 */
 .search-bar{display:none;}
 .search-btn{padding:10px 12px;border:none;border-radius:12px;
-  background:var(--btn);color:var(--wtext);cursor:pointer;font-weight: 700; font-size: 14px;}
+  background:var(--brand);color:var(--wtext);cursor:pointer;font-weight: 700; font-size: 14px;}
+.search-btn:hover{background: var(--muted);}
 
 /* 트렌딩/태그/피드 전용 */
 .trend-grid{display:grid;grid-auto-flow:column;grid-auto-columns:80%;gap:12px;
@@ -80,6 +81,10 @@
 
 /* 하단 플로팅/검색바(PC만 노출) */
 .search{flex:1;border:1px solid var(--border);border-radius:12px;padding:6px;outline:none;width:100%}
+.btab{padding:7px 12px;border-radius:12px;background:var(--card); border:1px solid var(--brand); font-size: 14px; font-weight:600;}
+.btab:hover{background: var(--brand); border:1px solid var(--brand); color: var(--wtext);}
+.btab.is-active{background:var(--brand);color:var(--wtext);}
+.btab.is-active:hover{background: var(--muted);}
 
 .js-like.is-liked { color: var(--like); font-weight: 700; }
 

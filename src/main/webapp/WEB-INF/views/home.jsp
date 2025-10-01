@@ -203,8 +203,8 @@
         <button class="search-btn" aria-label="검색">search</button>
     </div>
     <nav class="tabs">
-        <a class="tab is-active" href="/mypage">Profile</a>
-        <a class="tab" href="/recipes/add">Upload</a>
+        <a class="btab is-active" href="/mypage">Profile</a>
+        <a class="btab" href="/recipes/add">Upload</a>
     </nav>
 </footer>
 
