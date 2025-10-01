@@ -56,6 +56,25 @@
         return `${y}-${m}-${dd} ${hh}:${mm}`;
     }
 
+    // 24h 초과 → YYYY-MM-DD HH:mm
+// 24h 이내 → N시간 전
+// 1h 이내 → N분 전
+// 1분 미만 → 방금 전
+    function fmtSmartTime(input){
+        const d = toDate(input);
+        if (!d) return '';
+        let diff = Date.now() - d.getTime();
+        if (!Number.isFinite(diff) || diff < 0) diff = 0;
+
+        const mins  = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+
+        if (hours >= 24) return fmtYmdHm(d);
+        if (hours >= 1)  return `${hours}시간 전`;
+        if (mins  >= 1)  return `${mins}분 전`;
+        return '방금 전';
+    }
+
     // ===== 좋아요 UI 헬퍼 =====
     function applyLikeVisual(btn, liked){
         btn.dataset.liked = liked ? 'true' : 'false';
@@ -233,7 +252,7 @@
 
         function renderItem(it){
             const title = esc(it.title || '');
-            const created = fmtYmdHm(it.createdAt);
+            const created = fmtSmartTime(it.createdAt);
             const likes = (it.likes != null) ? it.likes : 0;
             const cmts  = (it.comments != null) ? it.comments : 0;
             const views = (it.views != null) ? it.views : 0;
@@ -295,7 +314,7 @@
                 '  <div class="post-info">' +
                 '    <div class="post-id">' + (cleanId ? ('<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>') : '') + '</div>' +
                 '    <div class="muted">' +
-                '      <time datetime="' + esc(it.createdAt || '') + '">' + esc(created) + '</time>' +
+                '      <time datetime="' + esc((toDate(it.createdAt)?.toISOString()) || '') + '">' + esc(created) + '</time>' +
                 '    </div>' +
                 '  </div>' +
                 '  <button class="followbtn-sm' + (self ? ' is-self' : '') + '"' +
