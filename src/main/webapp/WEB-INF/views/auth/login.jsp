@@ -24,7 +24,7 @@
             <h1 class="page-title">Login</h1>
             <a href="/home" class="float-text">home</a>
         </div>
-        <a class="btn-logout" href="/auth/register">Back</a>
+        <a class="btn-back" href="/auth/register">Back</a>
     </header>
 
     <!-- 로그인 카드 -->
@@ -69,8 +69,8 @@
                 <!-- 제출 -->
                 <div class="actions" style="margin-top:12px">
                     <div class="left">
-                        <a class="btn ghost" href="/auth/register">회원가입</a>
-                        <a class="btn ghost" href="/auth/findPassword">비밀번호 찾기</a>
+                        <a class="btn primary" href="/auth/register">회원가입</a>
+                        <a class="btn primary" href="/auth/findPassword">비밀번호 찾기</a>
                     </div>
                     <button class="btn primary" id="submitBtn" type="submit">로그인</button>
                 </div>
