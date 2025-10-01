@@ -97,7 +97,10 @@
 
 <main class="container layout">
   <section class="main">
-    <h2 id="foryou" class="section-title">Results</h2>
+    <div class="section-head">
+      <h2 id="foryou" class="section-title">Results</h2>
+      <a class="btn upload-top" href="<c:url value='/recipes/add'/>">Upload</a>
+    </div>
     <div id="results"></div>
     <div id="resultsSentinel" style="height:1px"></div>
   </section>

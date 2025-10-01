@@ -124,3 +124,40 @@ header .home-btn{ margin-left: 4px; white-space: nowrap; }
 }
 .empty .emoji { font-size:28px; margin-bottom:8px; }
 .empty .hint { font-size:13px; color:#888; margin-top:6px; }
+
+
+/* 검색 페이지: 하단 푸터 버튼 전부 숨김 */
+footer{ display:none !important; }
+
+/* Results 타이틀 + Upload 버튼 한 줄 정렬 */
+.section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+/* 모바일 기본: Upload 보이기 */
+.section-head .upload-top{
+  display:inline-flex;           /* 모바일에서 노출 */
+  padding:8px 12px;
+  border-radius:12px;
+  border:1px solid var(--brand);
+  background:var(--brand);
+  color:var(--wtext);
+  font-weight:700;
+  text-decoration:none;
+  line-height:1;
+}
+.section-head .upload-top:hover{
+  background: var(--muted);
+  border-color: var(--muted);
+}
+
+/* 데스크탑 이상: Upload 숨김 */
+@media (min-width:1024px){
+  .section-head .upload-top{
+    display:none;                /* PC에서는 숨김 (기존 별도 업로드 버튼 사용) */
+  }
+}

@@ -104,3 +104,44 @@
   .search-input{flex:1;border:1px solid var(--border);border-radius:12px;
     padding:10px 12px;background:var(--card)}
 }
+
+/* 모바일(<=768px)에서 하단 Profile 버튼 숨기고, 검색창 공간 확장 */
+@media (max-width: 768px) {
+  footer .tabs .btab:first-child { /* Profile */
+    display: none;
+  }
+
+  footer .authbar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  footer .authbar .search {
+    flex: 1;
+    min-width: 0;      /* overflow 방지 */
+    padding: 10px 12px;
+    font-size: 16px;   /* 터치 키보드 최적화 */
+  }
+
+  footer .authbar .search-btn {
+    padding: 10px 14px;
+  }
+}
+
+/* 기본: 헤더 로그인 버튼 숨김 (데스크톱) */
+.login-top {
+  display: none;
+}
+
+/* 모바일(≤768px)에서만 보이게 */
+@media (max-width: 768px) {
+  .login-top {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+}
+
