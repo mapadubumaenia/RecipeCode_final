@@ -16,25 +16,53 @@
 /* 1-2) 다크모드 */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg:#1a1a1a;          /* 배경 → 거의 검정에 가까운 다크 그레이 */
-    --card:#242424;        /* 카드 배경 → BG보다 살짝 밝게 */
-    --border:#3a3a3a;      /* 테두리 → BG와 카드 중간 톤 */
-    --line:#3a3a3a;        /* 구분선도 동일 */
-    --text:#e5e5e5;        /* 일반 텍스트 → 거의 흰색 */
-    --muted:#9ca3af;       /* 서브 텍스트 → 그레이톤 */
-    --brand:#60a5fa;       /* 브랜드 포인트 → 파란 계열 (화이트 모드보다 밝게) */
-    --tag:#333;            /* 태그 배경 → 어두운 그레이 */
-    --btn:#3b82f6;         /* 버튼 메인 → 블루톤 */
-    --wtext:#fff;          /* 버튼 안 텍스트 → 흰색 */
-    --radius:16px;
-    --shadow:0 2px 10px rgba(0,0,0,.6); /* 다크에서 더 뚜렷한 그림자 */
-    --chip:#333;           /* 칩/작은 요소 BG */
-    --maxw:1080px;
-    --danger:#f87171;      /* 빨강 → 톤 다운 */
-    --ok:#34d399;          /* 초록 → 네온 느낌 살짝 */
-    --warn:#fbbf24;        /* 노랑/주황 → 경고 */
+    --bg: #18181B; /* 기본 배경: 거의 블랙, 완전 검정은 아님 */
+    --card: #1F1F23; /* 카드 배경: 약간 더 밝은 다크톤 */
+    --border: #2C2C30; /* 테두리: 은은한 다크 그레이 */
+    --line: #2C2C30;
+    --text: #E5E7EB; /* 메인 텍스트: 밝은 회색 (거의 흰색) */
+    --muted: #9CA3AF; /* 흐린 텍스트 */
+    --brand: #A6B9CC; /* Primary 버튼: 유지 */
+    --tag: #2E3035; /* 태그 배경: 어두운 네이비/그레이 */
+    --btn: #DCDFe4; /* Secondary 버튼: 유지 */
+    --wtext: #F5F5F5; /* 버튼 내 글씨: 유지 */
+    --pointlavender: #B7A6CC; /* 라벤더 포인트: 유지 */
+    --logout: #3A3A3A; /* 로그아웃 버튼 기본 */
+    --subtext: #A1A1AA; /* 서브 텍스트: 밝은 그레이 */
+    --like: #F87171; /* Soft Crimson → 더 밝게 튀도록 */
+    --tagchip: #4B5563; /* 칩 배경: 중간톤 그레이 */
+    --logouthover: #505050; /* 로그아웃 hover: 좀 더 밝은 다크 */
+    --lavenderhover: #9F8DB8; /* 라벤더 hover: 기존 값 유지 */
+    --radius: 16px;
+    --shadow: 0 2px 10px rgba(0, 0, 0, .4); /* 그림자 진하게 */
+    --chip: #2C2C30;
+    --maxw: 1080px;
+    --danger: #ef4444; /* 빨간 경고 */
+    --ok: #22c55e; /* 초록 확인 */
+    --warn: #f59e0b; /* 주황 경고 */
   }
 }
+/*@media (prefers-color-scheme: dark) {*/
+/*  :root {*/
+/*    --bg:#1a1a1a;          !* 배경 → 거의 검정에 가까운 다크 그레이 *!*/
+/*    --card:#242424;        !* 카드 배경 → BG보다 살짝 밝게 *!*/
+/*    --border:#3a3a3a;      !* 테두리 → BG와 카드 중간 톤 *!*/
+/*    --line:#3a3a3a;        !* 구분선도 동일 *!*/
+/*    --text:#e5e5e5;        !* 일반 텍스트 → 거의 흰색 *!*/
+/*    --muted:#9ca3af;       !* 서브 텍스트 → 그레이톤 *!*/
+/*    --brand:#60a5fa;       !* 브랜드 포인트 → 파란 계열 (화이트 모드보다 밝게) *!*/
+/*    --tag:#333;            !* 태그 배경 → 어두운 그레이 *!*/
+/*    --btn:#3b82f6;         !* 버튼 메인 → 블루톤 *!*/
+/*    --wtext:#fff;          !* 버튼 안 텍스트 → 흰색 *!*/
+/*    --radius:16px;*/
+/*    --shadow:0 2px 10px rgba(0,0,0,.6); !* 다크에서 더 뚜렷한 그림자 *!*/
+/*    --chip:#333;           !* 칩/작은 요소 BG *!*/
+/*    --maxw:1080px;*/
+/*    --danger:#f87171;      !* 빨강 → 톤 다운 *!*/
+/*    --ok:#34d399;          !* 초록 → 네온 느낌 살짝 *!*/
+/*    --warn:#fbbf24;        !* 노랑/주황 → 경고 *!*/
+/*  }*/
+/*}*/
 
 /* 2) 리셋/기본 */
 *{box-sizing:border-box}
@@ -152,11 +180,11 @@ footer{display:flex;align-items:center;justify-content:space-between;position:fi
 /* 10) 알림(Notif) 컴포넌트 */
 .header-actions{display:flex;align-items:center;gap:10px;position:relative}
 .notif-wrap{position:relative}
-.notif-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;cursor:pointer;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow)}
+.notif-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;cursor:pointer;background:var(--card);border:1px solid var(--card);box-shadow:var(--shadow);color:var(--wtext)}
 .notif-btn:hover{background:#f3f4f6}
 .notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ff4d4f;box-shadow:0 0 0 2px #fff;display:none}
 .notif-btn.has-new .notif-dot{display:block}
-.notif-item button {padding: 4px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; font-size: .85rem;}
+.notif-item button {padding: 4px 8px; border: 1px solid var(--btn); border-radius: 8px; background: var(--btn); cursor: pointer; font-size: .85rem;}
 .notif-item button:hover {background: var(--brand); background-color: var(--brand); color: var(--wtext);}
 /* 10-1) 드롭다운 패널 */
 .notif-panel{position:absolute;top:calc(100% + 8px);right:0;width:min(420px,92vw); color: var(--text); background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:8px;z-index:1000;display:none}
@@ -212,6 +240,7 @@ footer{display:flex;align-items:center;justify-content:space-between;position:fi
   footer{display:none}
   .stack-btns{display:flex;flex-direction:column;gap:8px;margin:16px 0}
 }
+  .stack-btns a:hover{background: var(--lavenderhover); border:1px solid var(--lavenderhover); color: var(--wtext);}
 
 .search-bar form {
   display: flex;         /* 부모 .search-bar와 동일하게 */

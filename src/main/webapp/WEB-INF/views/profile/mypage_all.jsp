@@ -17,6 +17,7 @@
     <!-- 공통 CSS: contextPath 기준 -->
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/profile-mypage.css'/>">
+    <link rel="stylesheet" href="<c:url value='/css/notification.css'/>">
 
     <%-- TODO: CSRF 토큰 (나중에 적용 시 주석 해제) --%>
 
@@ -101,8 +102,8 @@
             </div>
             <div class="profile-right">
                 <div class="follow-count">
-                <span class="f-text">Followers</span> <span class="fc-text">${followersCount} </span>
-                <span class="f-text">Following</span> <span class="fc-text">${followingCount}</span>
+                <a class="alink" href="<c:url value='/follow/network/${user.userId}'/>"><span class="f-text">Followers</span> <span class="fc-text">${followersCount} </span></a>
+                    <a class="alink" href="<c:url value='/follow/network/${user.userId}'/>"><span class="f-text">Following</span> <span class="fc-text">${followingCount}</span></a>
                 </div>
                 <c:if test="${not empty user.interestTags}">
                     <div class="tags">
