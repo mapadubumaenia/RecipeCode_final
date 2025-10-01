@@ -61,6 +61,9 @@
         return 0;
     }
 
+
+
+
     // ISO 문자열/epoch 숫자 → "YYYY-MM-DD HH:mm" (로컬시간)
     function fmtYmdHm(input){
         if (input == null) return '';
@@ -84,6 +87,51 @@
         const mm = String(d.getMinutes()).padStart(2,'0');
         return `${y}-${m}-${dd} ${hh}:${mm}`;
     }
+
+    // 공통: 입력(ISO 문자열/정수 epoch 초·ms) → Date
+    function toDate(input){
+        if (input == null) return null;
+        let d;
+        if (typeof input === 'number') {
+            d = new Date(input > 1e12 ? input : input * 1000);
+        } else {
+            const s = String(input).trim();
+            if (/^\d+$/.test(s)) {
+                const n = Number(s);
+                d = new Date(n > 1e12 ? n : n * 1000);
+            } else {
+                d = new Date(s);
+            }
+        }
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+// 새 포맷터: 24시간 초과 → YYYY-MM-DD HH:mm, 24시간 이내 → N시간 전, 1시간 이내 → N분 전, 1분 미만 → 방금 전
+    function fmtSmartTime(input){
+        const d = toDate(input);
+        if (!d) return '';
+
+        const now = Date.now();
+        let diff = now - d.getTime();
+        if (!Number.isFinite(diff)) return '';
+
+        if (diff < 0) diff = 0; // 미래값 들어오면 0으로 클램프
+
+        const min = Math.floor(diff / 60000);
+        const hour = Math.floor(diff / 3600000);
+
+        if (hour >= 24) {
+            return fmtYmdHm(d); // 기존 포맷 재사용
+        } else if (hour >= 1) {
+            return `${hour}시간 전`;
+        } else if (min >= 1) {
+            return `${min}분 전`;
+        } else {
+            return '방금 전';
+        }
+    }
+
+
 
     // ===== 좋아요 UI 헬퍼 =====
     function applyLikeVisual(btn, liked){
@@ -369,7 +417,7 @@
                     '    <div class="avatar-ss"><img src="" alt="" data-user-id="' + esc(userIdAttr) + '"></div>' +
                     '    <div class="post-info">' +
                     '      <div class="post-id">' + (cleanId ? '<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>' : '') + '</div>' +
-                    '      <div class="muted"><time datetime="' + esc(it.createdAt || '') + '">' + esc(fmtYmdHm(it.createdAt)) + '</time></div>' +
+                    '      <div class="muted"><time datetime="' + esc((toDate(it.createdAt)?.toISOString()) || '') + '">' + esc(fmtSmartTime(it.createdAt)) + '</time></div>' +
                     '    </div>' +
                     '    <button class="followbtn-sm' + (self ? ' is-self' : '') + '"' +
                     '       data-user-id="' + esc(userIdAttr) + '"' +
