@@ -60,6 +60,10 @@
     <div class="flex-box">
         <h1 class="page-title">Lumeat</h1>
         <div class="notif-wrap">
+            <!-- ▼ 비로그인일 때만 노출되는 로그인 버튼 -->
+            <sec:authorize access="!isAuthenticated()">
+                <a class="btn small ghost login-top" href="<c:url value='/auth/login'/>">Login</a>
+            </sec:authorize>
             <sec:authorize access="isAuthenticated()">
                 <sec:authentication property="principal" var="loginUser"/>
                 <a class="alink"  href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>

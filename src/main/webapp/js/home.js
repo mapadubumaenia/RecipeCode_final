@@ -830,3 +830,21 @@
         setupTrending();
     });
 })();
+
+(function () {
+    const CTX = (typeof window !== "undefined" && window.__CTX__) ? window.__CTX__ : "";
+    const $input = document.querySelector('footer .authbar .search');
+    const $btn   = document.querySelector('footer .authbar .search-btn');
+    if (!$input || !$btn) return;
+
+    const go = () => {
+        const q = ($input.value || '').trim();
+        const url = CTX + '/search' + (q ? ('?q=' + encodeURIComponent(q)) : '');
+        window.location.href = url;
+    };
+
+    $btn.addEventListener('click', (e) => { e.preventDefault(); go(); });
+    $input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); go(); }
+    });
+})();
