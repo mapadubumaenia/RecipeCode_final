@@ -1,7 +1,7 @@
 // utils.js
 
 // TODO: (운영 시 활성화) CSRF 토큰을 JS에서 쓰고 싶을 때
-const CSRF = (() => {
+window.CSRF = window.CSRF || (() => {
     const t = document.querySelector('meta[name="_csrf"]');
     const h = document.querySelector('meta[name="_csrf_header"]');
     if (!t || !h) return { header: null, token: null };

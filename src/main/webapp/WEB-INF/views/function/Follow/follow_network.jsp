@@ -34,7 +34,7 @@
           <!-- 알림 버튼 -->
           <sec:authorize access="isAuthenticated()">
             <sec:authentication property="principal" var="loginUser"/>
-            <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+            <a class="alink" href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>
           </sec:authorize>
           <button
                   id="btnNotif"
@@ -82,11 +82,11 @@
     </div>
     <div class="profile-info">
       <div class="profile-top">
-        <h3 class="profile-name">${profileOwnerId} ${profileOwner.userLocation}</h3>
+        <h3 class="profile-name">${profileOwnerId} <span class="location">${profileOwner.userLocation}</span></h3>
       </div>
       <div class="profile-actions btn-none">
-          <span>Followers ${followersCount} </span>
-          <span>Following ${followingCount}</span>
+        <span class="f-text">Followers</span> <span class="fc-text"> ${followersCount} </span>
+          <span class="f-text">Following</span> <span class="fc-text"> ${followingCount}</span>
       </div>
     </div>
     <div class="rightBox">
