@@ -57,7 +57,9 @@ public class FeedService {
         } catch (Exception ignore) {}
 
         if (rec == null || rec.getItems() == null || rec.getItems().isEmpty()) {
-            return new FeedPageDto(0, List.of(), null);
+            // 방금 가입/이벤트 미수집 → HOT 피드 반환
+            Map<String, Object> hot = searchService.searchAndLog(null, List.of(), "hot", after, size);
+            return mapHotToDto(hot);
         }
 
         List<UserRecsDoc.Item> all = rec.getItems();

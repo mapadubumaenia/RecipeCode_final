@@ -21,7 +21,9 @@
 .search-following {display:flex; gap:8px; margin:8px 0 16px;}
 .search-following input {flex:1; padding:10px 12px; border:1px solid var(--border);
     border-radius:12px; background:var(--bg);}
-.btn {background: var(--brand); color: var(--wtext); padding:10px 14px; border:1px solid var(--brand); border-radius:12px; font-weight:700; }
+.btn {padding:10px 12px;border:none;border-radius:12px;
+    background:var(--brand);color:var(--wtext);cursor:pointer;font-weight: 700; font-size: 14px;}
+.btn:hover {background: var(--muted);}
 .user-id{font-weight:600}
 
 /* 접근성용 숨김 헤딩 */
@@ -46,9 +48,12 @@
 .nick,.meta{color:var(--muted);font-size:.9rem}
 .comment{margin-top:4px;font-size:.95rem}
 .follow-btn{padding:8px 12px;border-radius:999px;border:1px dashed var(--btn);background:var(--btn);color:var(--wtext);font-weight:700;cursor:pointer; box-shadow: var(--shadow);}
+.follow-btn:hover{background: var(--brand); border: 1px solid var(--brand);}
 .follow-btn.is-following{border:1px solid var(--brand); background:var(--brand); color:var(--wtext);box-shadow: var(--shadow);}
+.follow-btn.is-following:hover{background: var(--muted); border: 1px solid var(--muted);}
 .pane-title {display: none; margin: 0 0 8px; font-size: 0.95rem; font-weight: 800; color: var(--muted);}
 .jump {cursor:pointer}
+.post-id {font-weight: 700}
 
 #followingList, #followerList{ display:grid; gap:10px; flex:1;}
 .empty-full{ height:100%; min-height: 220px; display:flex; align-items:center;
