@@ -137,7 +137,7 @@
             <!-- 조리 순서: VIDEO면 숨김 -->
             <c:if test="${not isVideo}">
                 <aside class="panel mb-12">
-                    <h3>👣 조리 순서</h3>
+                    <h3><i data-lucide="clipboard" class="icon"></i> 조리 순서</h3>
                     <div id="textPanel">
                         <div class="text-viewport">
                             <div class="slides" id="textSlides">
@@ -241,7 +241,7 @@
             <section class="desc" id="postDesc">
                 <div class="tags">
                     <c:forEach var="t" items="${recipe.tags}">
-                        <span class="tag">#<c:out value="${t.tag}" /></span>
+                        <span class="tag"><c:out value="${t.tag}" /></span>
                     </c:forEach>
                 </div>
                 <div class="contentText"><c:out value="${recipe.recipeIntro}" /></div>
@@ -282,11 +282,8 @@
 <script src="${ctx}/js/recipes/recipe-details.js"></script>
 <script src="${ctx}/js/recipes/recipe-detailside.js"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        lucide.createIcons(); // data-lucide 속성을 SVG로 변환
-    });
-</script>
+<script src="/js/icons-init.js" defer></script>
+
 
 
 <div id="myReportModal" class="modal" hidden>
