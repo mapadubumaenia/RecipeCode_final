@@ -233,7 +233,7 @@ public class CommentsService {
 
         // 작성자 확인
         if (!comments.getMember().getUserEmail().equals(userEmail)) {
-            throw new RuntimeException("본인 댓글만 수정할 수 있습니다.");
+            throw new RuntimeException("본인 댓글만 삭제할 수 있습니다.");
         }
 
         comments.setDeletedAt(LocalDateTime.now());
