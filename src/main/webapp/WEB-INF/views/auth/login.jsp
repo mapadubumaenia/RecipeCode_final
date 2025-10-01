@@ -49,14 +49,6 @@
                     </div>
                 </div>
 
-                <!-- 약관 동의 대신 자동 로그인 옵션 -->
-                <div class="field">
-                    <label class="switch">
-                        <input type="checkbox" id="remember" name="remember" />
-                        <span>로그인 상태 유지</span>
-                    </label>
-                </div>
-
                 <!-- 소셜 로그인 -->
                 <div class="divider">또는</div>
                 <div class="social">
