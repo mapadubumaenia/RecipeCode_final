@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Lumeat — 빛나는 한 끼</title>
+    <title>Lu:meet</title>
 
     <link rel="preconnect" href="https://www.youtube.com">
     <link rel="preconnect" href="https://i.ytimg.com">
@@ -58,7 +58,7 @@
 <body>
 <header class="container">
     <div class="flex-box">
-        <h1 class="page-title">Lumeat</h1>
+        <h1 class="page-title">Lu:meet</h1>
         <div class="notif-wrap">
             <!-- ▼ 비로그인일 때만 노출되는 로그인 버튼 -->
             <sec:authorize access="!isAuthenticated()">

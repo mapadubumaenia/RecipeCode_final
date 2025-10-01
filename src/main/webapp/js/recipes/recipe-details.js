@@ -441,8 +441,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         headers: {"Content-Type": "application/json"},
                         body: JSON.stringify({commentsContent: newContent})
                     });
-                    const data = await res.json();
+                    if (!res.ok) {
+                        const errMsg = await res.text();
+                        alert(errMsg);
+                        return;
+                    }
 
+                    const data = await res.json();
                     contentElem.textContent = data.commentsContent;
                     textarea.remove();
                     controls.remove();
