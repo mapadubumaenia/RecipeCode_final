@@ -5,10 +5,9 @@
 /* 1) 디자인 토큰 */
 /* 1-1) 기본모드 */
 :root{
-  --bg:#FAFAFA; --card:#F5F5F5; --border:#EEF1F5; --line:#EEF1F5; --text:#515766;
-  --muted:#6b7280; --brand:#A6B9CC; --tag:#eef2f7; --btn:#DCDFe4; --wtext:#F5F5F5;
-  --pointlavender:#B7A6CC; --logout:#E9E6E0; --subtext:#6E7580; --like:#C85A5A;
-  --radius:16px; --shadow:0 2px 10px rgba(0,0,0,.05); --chip:#DCDFe4;
+  --bg:#f7f7f9; --card:#fff; --border:#e9e9ee; --line:#e9e9ee; --text:hsl(0, 0%, 13%);
+  --muted:#6b7280; --brand:#111827; --tag:#eef2f7; --btn:#111827; --wtext:#fff;
+  --radius:16px; --shadow:0 2px 10px rgba(0,0,0,.05); --chip:#eef2f7;
   --maxw:1080px; --danger:#dc2626; --ok:#16a34a; --warn:#d97706;
 }
 
@@ -64,8 +63,7 @@ a{color:inherit;text-decoration:none;cursor:pointer}
 .muted{color:var(--muted);font-size:.9rem}
 .trend-card{display:flex;flex-direction:column;gap:8px}
 .trend-title{font-weight:800;font-size:1rem}
-.f-text {color: var(--subtext); font-weight: 600;}
-.fc-text {color: var(--subtext); }
+
 
 /* 5) 버튼 (페이지별 변주 최소화) */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
@@ -73,7 +71,7 @@ a{color:inherit;text-decoration:none;cursor:pointer}
 .btn.primary{background:var(--brand);color:var(--wtext);border-color:var(--brand)}
 .btn.ghost{background:var(--card);border-color:var(--border)}
 .btn.danger{background:var(--card);border-color:#f2caca;color:#c33}
-.btn-logout{border:none;background:var(--logout);padding:6px 10px;border-radius:8px;cursor:pointer;color: var(--wtext); font-weight:700}
+.btn-logout{border:none;background:#eee;padding:6px 10px;border-radius:8px;cursor:pointer;color: #1a1a1a;}
 .btn-none{border: 0; background-color: inherit; font-size: 16px;cursor: pointer; color: var(--text);}
 .followbtn-sm{border: 1px dotted var(--muted); background: var(--card); color: var(--text); border-radius: 12px; padding: 6px; cursor: pointer;}
 .followbtn-md{border: 1px dotted var(--muted); background: var(--card); color: var(--text); border-radius: 12px; padding: 8px 8px; cursor: pointer;}
@@ -102,12 +100,12 @@ footer{display:flex;align-items:center;justify-content:space-between;position:fi
 .authbar{flex:1;display:flex;gap:10px;align-items:center;max-width:var(--maxw);padding:10px 12px}
 
 /* 6-2) 하단 공통 : 플루팅 FAQ */
-.faq-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--btn);color:var(--wtext);font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .2s,transform .2s;line-height:56px; text-align:center;}
-.faq-btn:hover{background:var(--brand);transform:translateY(-2px)}
+.faq-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .2s,transform .2s;line-height:56px; text-align:center;}
+.faq-btn:hover{background:#000;transform:translateY(-2px)}
 
 /* 6-3) 하단 공통 : 탑투 */
-.to-top{position:fixed;bottom:80px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--btn);color:var(--wtext);font-size:20px;font-weight:700;cursor:pointer;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .2s,transform .2s;z-index:50}
-.to-top:hover{background:var(--brand);transform:translateY(-2px)}
+.to-top{position:fixed;bottom:80px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:22px;font-weight:bold;cursor:pointer;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .2s,transform .2s;z-index:50}
+.to-top:hover{background:#000;transform:translateY(-2px)}
 
 /* 7) 탭 */
 .tabs{display:flex;gap:8px;overflow:auto;padding:6px 8px}
@@ -172,10 +170,8 @@ footer{display:flex;align-items:center;justify-content:space-between;position:fi
 /* 미세먼지 */
 #airBox .air-row { display:flex; gap:8px; align-items: center; margin:6px 0 10px; }
 #airBox .air-select { padding:4px 8px; }
-#airBox .air-text { font-weight:500; line-height:1.4; }
+#airBox .air-text { font-weight:600; line-height:1.4; }
 #airBox .air-text { white-space: pre-line; }
-.air-row label {color:var(--text); font-weight: 600}
-.air-row select {border-radius: 8px; border:1px solid var(--border); background: var(--bg); color: var(--text)}
 .airview {display:flex;flex-direction:column;justify-content: center;}
 
 

@@ -96,13 +96,13 @@
                 </div>
                 <div class="profile-left">
                     <span>${user.nickname}</span>
-                    <span>${user.userLocation}</span>
+                    <span class="location">${user.userLocation}</span>
                 </div>
             </div>
             <div class="profile-right">
                 <div class="follow-count">
-                <span>Followers ${followersCount} </span>
-                <span>Following ${followingCount}</span>
+                <span class="f-text">Followers</span> <span class="fc-text">${followersCount} </span>
+                <span class="f-text">Following</span> <span class="fc-text">${followingCount}</span>
                 </div>
                 <c:if test="${not empty user.interestTags}">
                     <div class="tags">
