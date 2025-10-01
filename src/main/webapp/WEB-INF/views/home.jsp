@@ -180,7 +180,8 @@
             <h2 class="section-title">Following</h2>
             <sec:authorize access="!isAuthenticated()">
                 <div class="card p-16 empty-follow" style="text-align:center; padding:24px;">
-                    <div style="font-size:32px; line-height:1.2; margin-bottom:8px;">🔒</div>
+                    <div style="font-size:32px; line-height:1.2; margin-bottom:8px;"><i data-lucide="Lock"></i>
+                    </div>
                     <p style="margin:4px 0;"><strong>로그인 후 사용 가능합니다</strong></p>
                     <p class="muted" style="margin:8px 0 16px;">관심 있는 셰프를 팔로우하면 새 레시피가 여기 표시됩니다.</p>
                     <a class="btn primary" href="<c:url value='/auth/login'/>">Login</a>
@@ -217,5 +218,9 @@
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>
 <script src="<c:url value='/js/login-to-follow.js'/>" defer></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="/js/icons-init.js" defer></script>
+
+
 </body>
 </html>
