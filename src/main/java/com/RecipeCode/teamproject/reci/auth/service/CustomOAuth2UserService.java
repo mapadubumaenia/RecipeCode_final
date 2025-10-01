@@ -79,18 +79,31 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             if (profileImageUrl != null) {
                 profileImage = downloadImageAsBytes(profileImageUrl); // 🔹 여기서 변환
             }
+
+            // 기본 userId 후보 생성
+            String baseUserId = nickname != null
+                    ? (nickname.startsWith("@") ? nickname : "@" + nickname)
+                    : "@" + provider + "_" + providerId;
+
+            // 중복되면 숫자 붙여서 보정
+            String uniqueUserId = baseUserId;
+            int count = 1;
+            while (memberRepository.existsByUserId(uniqueUserId)) {
+                uniqueUserId = baseUserId + count;
+                count++;
+            }
+
             // 최초 로그인 → 회원 가입 처리
             member = Member.builder()
                     .userEmail(email)
-                    .userId(    nickname != null
-                            ? (nickname.startsWith("@") ? nickname : "@" + nickname)
-                            : "@" + provider + "_" + providerId)
+                    .userId(uniqueUserId)
                     .nickname(nickname != null ? nickname : provider + "_" + providerId)
                     .profileImage(profileImage)
                     .profileStatus("PUBLIC")
                     .role("R_USER")
                     .provider(provider)
                     .providerId(providerId)
+                    .deleted("N")
                     .build();
             memberRepository.save(member);
             memberRepository.flush();

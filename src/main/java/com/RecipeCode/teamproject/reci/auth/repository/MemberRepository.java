@@ -27,6 +27,7 @@ public interface MemberRepository extends JpaRepository<Member,String> {
     // TODO: Profile(Mypage) 안에서 userId 검색
     List<Member> findByUserIdContainingIgnoreCase(String keyword);
 
+    boolean existsByUserId(String userId);
 
 
 
