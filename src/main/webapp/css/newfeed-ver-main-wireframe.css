@@ -1,7 +1,7 @@
 /* 헤더 */
 .search-bar{display:none;}
 .search-btn{padding:10px 12px;border:none;border-radius:12px;
-  background:var(--brand);color:var(--wtext);cursor:pointer}
+  background:var(--btn);color:var(--wtext);cursor:pointer;font-weight: 700; font-size: 14px;}
 
 /* 트렌딩/태그/피드 전용 */
 .trend-grid{display:grid;grid-auto-flow:column;grid-auto-columns:80%;gap:12px;
@@ -10,11 +10,13 @@
 .trend-title{font-weight:800;font-size:1rem}
 .trend-desc{color:var(--muted);font-size:.9rem}
 .actions{display:flex;gap:12px;font-size:.9rem;color:var(--muted);justify-content: space-between;}
-.populartag{margin-top:6px}
+.populartag{margin-top:32px; background: var(--bg)}
 .tags{display:grid;gap:8px}
 .tag-item{display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px dashed var(--line);padding:10px 2px}
-.chip{background:var(--tag);padding:6px 10px;border-radius:999px;font-size:.85rem}
+  border-bottom:1px dashed var(--line);padding:6px 10px}
+.tag-item span {padding:6px 10px; border-radius: 6px; background: var(--tagchip); font-weight:600;color: var(--wtext)}
+.chip{font-weight:600; padding:6px 10px;border-radius:6px;font-size:.85rem; color: var(--wtext)}
+.tag-bar {display: flex; justify-content: space-between; background: var(--bg); width: 100%; padding:6px 6px;border-radius:6px; }
 
 /* 사이드 특징 배너 */
 .feature{display:flex;flex-direction:column;gap:10px}
@@ -27,10 +29,10 @@
 .post-id{font-weight: 700;}
 .followbtn-sm {justify-items: flex-end;}
 .followbtn-sm[aria-busy="true"]{opacity: .6; pointer-events:none;}
-.followbtn-sm.is-active{background: var(--brand); color:var(--wtext);border-color: var(--brand);}
+.followbtn-sm.is-active{background: var(--brand); color:var(--wtext);border-color: var(--brand); border: 1px solid var(--brand);}
 .post-cta{display:flex;gap:14px}
 
-.like.active {color:darkred; font-weight: bold;}
+.like.active {color:var(--like); font-weight: bold;}
 
 /* 커뮤니티 피드 카드 */
 .post{display:flex;flex-direction:column;gap:10px;margin-bottom: 8px;}
@@ -79,7 +81,7 @@
 /* 하단 플로팅/검색바(PC만 노출) */
 .search{flex:1;border:1px solid var(--border);border-radius:12px;padding:6px;outline:none;width:100%}
 
-.js-like.is-liked { color: #e0245e; font-weight: 700; }
+.js-like.is-liked { color: var(--like); font-weight: 700; }
 
 /* 반응형 */
 @media (min-width:768px){

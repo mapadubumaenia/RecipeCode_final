@@ -42,7 +42,7 @@
       <div class="notif-wrap">
         <sec:authorize access="isAuthenticated()">
           <sec:authentication property="principal" var="loginUser"/>
-          <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+          <a class="alink"  href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>
         </sec:authorize>
         <!-- 알림 버튼 -->
         <button
@@ -91,7 +91,7 @@
   <aside class="search-bar">
     <input id="q" class="search-input" type="search"
            placeholder="Search for recipes… (e.g. Spaghetti, Pancakes, Salad)"/>
-    <button id="btnSearch" class="search-btn" aria-label="검색">🔍</button>
+    <button id="btnSearch" class="search-btn" aria-label="검색">search</button>
   </aside>
 </nav>
 

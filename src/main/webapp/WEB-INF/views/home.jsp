@@ -62,7 +62,7 @@
         <div class="notif-wrap">
             <sec:authorize access="isAuthenticated()">
                 <sec:authentication property="principal" var="loginUser"/>
-                <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+                <a class="alink"  href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>
             </sec:authorize>
 
             <button id="btnNotif" class="notif-btn" aria-haspopup="dialog" aria-expanded="false"
@@ -90,7 +90,7 @@
     <form action="${pageContext.request.contextPath}/search" method="get">
         <input name="q" class="search-input" type="search"
                placeholder="Search for recipes… (e.g. Spaghetti, Pancakes, Salad)"/>
-        <button class="search-btn" aria-label="검색">🔍</button>
+        <button class="search-btn" aria-label="검색">search</button>
     </form>
 </div>
 
@@ -200,7 +200,7 @@
 <footer>
     <div class="authbar">
         <input class="search" type="search" placeholder="재료·요리·해시태그 검색"/>
-        <button class="search-btn" aria-label="검색">🔍</button>
+        <button class="search-btn" aria-label="검색">search</button>
     </div>
     <nav class="tabs">
         <a class="tab is-active" href="/mypage">Profile</a>
