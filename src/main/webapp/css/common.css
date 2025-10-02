@@ -40,6 +40,7 @@
     --danger: #ef4444; /* 빨간 경고 */
     --ok: #22c55e; /* 초록 확인 */
     --warn: #f59e0b; /* 주황 경고 */
+    .step-body textarea {color: var(--wtext);} /* 단계 설명 글씨 색 */
   }
 }
 /*@media (prefers-color-scheme: dark) {*/
