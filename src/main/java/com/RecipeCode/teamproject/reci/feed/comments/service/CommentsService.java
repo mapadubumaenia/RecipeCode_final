@@ -238,20 +238,4 @@ public class CommentsService {
 
         comments.setDeletedAt(LocalDateTime.now());
     }
-
-    // 관리자 댓글/대댓글 삭제
-    @Transactional
-    public void adminDeleteComment(Long commentsId) {
-        Comments comments = commentsRepository.findById(commentsId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
-
-        String recipeUuid = comments.getRecipes().getUuid();
-
-        // 실제 삭제
-        commentsRepository.delete(comments);
-
-        // 재정렬
-        reorderComments(recipeUuid);
-    }
-
 }

@@ -4,6 +4,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>관리자 신고 페이지</title>
     <link rel="stylesheet" href="/css/common.css">
 

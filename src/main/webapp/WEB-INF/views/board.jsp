@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>관리자 대시보드</title>
     <style>
         body {

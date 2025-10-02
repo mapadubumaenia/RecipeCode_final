@@ -20,6 +20,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>레시피 등록/수정</title>
     <!-- 공통 리소스 contextPath 기준 -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
@@ -42,7 +43,7 @@
                 <sec:authentication property="principal" var="loginUser"/>
                 <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
             </sec:authorize>
-            <button type="button" class="btn-logout" onclick="history.back()">Back</button>
+            <button type="button" class="btn-back" onclick="history.back()">Back</button>
         </div>
     </header>
 

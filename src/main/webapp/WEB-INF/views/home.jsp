@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>Lu:meet</title>
 
     <link rel="preconnect" href="https://www.youtube.com">
