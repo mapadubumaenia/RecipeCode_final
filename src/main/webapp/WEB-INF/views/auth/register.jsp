@@ -193,8 +193,6 @@
             agree: agree.checked
         };
         e.target.submit();
-        console.log('SIGNUP PAYLOAD', payload);
-        alert('가입 폼 검증 완료! (백엔드 연동 지점)');
     });
 </script>
 </body>

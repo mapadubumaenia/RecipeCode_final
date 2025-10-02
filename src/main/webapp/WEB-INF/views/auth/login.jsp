@@ -86,13 +86,12 @@
         });
     });
 
-    // 제출 (와이어프레임용)
+    // 제출
     $('#loginForm').addEventListener('submit', (e)=>{
         e.preventDefault();
         const payload = {
             email: $('#email').value.trim(),
             password: $('#pw').value,
-            remember: $('#remember').checked
         };
         e.target.submit();
     });
