@@ -37,8 +37,11 @@
                 <!-- 이메일 -->
                 <div class="field">
                     <label for="email">이메일</label>
-                    <input class="input" type="email" id="email" name="userEmail" placeholder="you@example.com" required />
-                    <div class="hint">로그인 및 알림용. 공개되지 않습니다.</div>
+                        <div class="input-wrap">
+                            <input class="input" type="email" id="email" name="userEmail" placeholder="you@example.com" required />
+                            <button type="button" class="btn secondary check" id="checkEmailBtn">중복확인</button>
+                        </div>
+                    <div class="hint" id="emailHint">로그인 및 알림용. 공개되지 않습니다.</div>
                 </div>
 
                 <!-- 아이디(핸들) -->
@@ -46,6 +49,7 @@
                     <label for="handle">아이디</label>
                     <div class="input-wrap">
                         <input class="input" type="text" id="handle" name="userId" placeholder="yourid" minlength="3" maxlength="20" required />
+                        <button type="button" class="btn secondary check" id="checkHandleBtn">중복확인</button>
                     </div>
                     <div class="hint" id="handleHint">영문/숫자/밑줄, 3–20자</div>
                 </div>

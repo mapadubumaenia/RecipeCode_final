@@ -39,7 +39,6 @@
     <h1 class="page-title">Search</h1>
     <a class="home-btn" href="<c:url value='/'/>">home</a>
     <div class="header-actions">
-      <a class="register" href="${pageContext.request.contextPath}/mypage">👤</a>
       <div class="notif-wrap">
         <sec:authorize access="isAuthenticated()">
           <sec:authentication property="principal" var="loginUser"/>
