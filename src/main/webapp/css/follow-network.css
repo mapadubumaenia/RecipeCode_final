@@ -79,7 +79,7 @@ footer{display:flex;justify-content:flex-end;}
 
 
 /* 반응형 */
-@media (min-width: 640px) {
+@media (min-width: 648px) {
     .only-mobile { display: none; }                         /* 탭 숨김 */
     .network .lists { grid-template-columns: 1fr 1fr; }     /* 두 컬럼 */
     .list-pane { display: block; }                          /* 둘 다 표시 */
@@ -87,3 +87,4 @@ footer{display:flex;justify-content:flex-end;}
     .pane-title {display: block; margin-bottom: 10px; font-size: 1rem; color: var(--text);
     }
 }
+
