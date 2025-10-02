@@ -19,7 +19,6 @@
             margin: auto;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-
         /* 제목 */
         .page-title {
             max-width: 1200px;
@@ -27,7 +26,6 @@
             font-size: 1.8rem;
             font-weight: bold;
         }
-
         /* 탭 */
         .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
         .tabs button {
@@ -38,27 +36,26 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .tabs button.active {
-            background: #111827;
-            color: #fff;
-            border-color: #111827;
-        }
-
-        /* 탭 내용 */
+        .tabs button.active {background: #111827;color: #fff;border-color: #111827;}
         .tabContent { display: none; }
         .tabContent.active { display: block; }
-
-        /* 필터 */
         .filter { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; }
         .filter select { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; }
-
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
         th { background: #f5f5f5; }
-
         .btn.small { padding: 5px 10px; border-radius: 8px; font-size: 0.85rem; }
         .btn.green { background: #22c55e; color: #fff; border: none; }
         .btn.red { background: #ef4444; color: #fff; border: none; }
+        /* 사이드바 메뉴 크기/행간 고정 */
+        .sidebar .nav a {
+            font-size: 14px;
+            line-height: 1.4;
+            padding: 10px 12px;
+        }
+        .sidebar .brand {
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
