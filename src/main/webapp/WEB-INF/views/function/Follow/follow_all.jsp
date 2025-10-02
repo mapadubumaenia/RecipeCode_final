@@ -4,6 +4,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <html>
 <head>
+  <%@ include file="/WEB-INF/views/common/head.jsp" %>
   <title>신고 관리</title>
   <link rel="stylesheet" href="/css/common.css">
   <link rel="stylesheet" href="/css/follow.css">

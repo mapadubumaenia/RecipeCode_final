@@ -6,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>Profile</title>
 
     <!-- 공통 CSS -->

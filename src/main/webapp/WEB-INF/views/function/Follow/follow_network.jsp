@@ -10,6 +10,8 @@
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>Follow Network</title>
   <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
   <link rel="stylesheet" href="<c:url value='/css/follow-network.css'/>">

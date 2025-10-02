@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>FAQ 등록</title>
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/add_faq.css">

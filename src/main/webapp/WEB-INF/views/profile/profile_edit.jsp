@@ -12,6 +12,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>프로필 편집</title>
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
     <link rel="stylesheet" href="<c:url value='/css/profile-edit.css'/>">

@@ -21,6 +21,7 @@
     <!-- JSP <head> 안에 추가 (스프링 시큐리티 쓰면 제공됨) -->
 <%--    <meta name="_csrf" content="${_csrf.token}"/>--%>
 <%--    <meta name="_csrf_header" content="${_csrf.headerName}"/>--%>
+        <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title><c:out value="${recipe.recipeTitle}"/> - Details</title>
     <c:set var="ctx" value="${pageContext.request.contextPath}" />
     <link rel="stylesheet" href="${ctx}/css/common.css" />
@@ -283,6 +284,9 @@
 <script src="${ctx}/js/recipes/recipe-detailside.js"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="/js/icons-init.js" defer></script>
+<script>
+    window.loginUserEmail = "${loginUser != null ? loginUser.userEmail : ''}";
+</script>
 
 
 
