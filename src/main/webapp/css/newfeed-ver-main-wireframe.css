@@ -65,6 +65,8 @@
   object-fit: cover;            /* 중앙 기준 꽉 채우기 */
 }
 
+
+
 /* 댓글에서 쓰는 큰 아바타는 기존 크기 유지 */
 .cmt .avatar-ss{
   width: 40px;
@@ -145,3 +147,65 @@
   }
 }
 
+/* ============================
+   좋아요 버튼 디자인만 상세와 동일 (JS/HTML 수정 없음)
+   대상: ForYou/Trending 등 .js-like 버튼
+   ============================ */
+
+/* 버튼 베이스: 이모지 텍스트가 차지하는 공간=0, 우리 하트/숫자만 보이게 */
+.post-cta .js-like,
+.actions .js-like {
+  border: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;          /* 하트-숫자 간격 */
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  font-size: 0;      /* ← 핵심: 기존 이모지(텍스트) 폭을 0으로 */
+  line-height: 1;
+}
+
+/* 숫자는 보기 좋은 크기로 복구(부모가 0이라 rem로 지정) */
+.post-cta .js-like .like-count,
+.post-cta .js-like .cnt,
+.actions .js-like .like-count,
+.actions .js-like .cnt {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+/* 기본(미선택): 회색 빈 하트 */
+.post-cta .js-like::before,
+.actions .js-like::before {
+  content: "♡";
+  color: #aaa;
+  font-size: 1.1rem;         /* rem로 직접 지정 (부모 0 영향 X) */
+  transform: translateY(-1px);
+  display: inline-block;
+  transition: transform 120ms ease, color 120ms ease;
+}
+
+/* 활성(좋아요) 상태: 빨간 꽉찬 하트 + 살짝 팝 */
+.post-cta .js-like.is-liked::before,
+.post-cta .js-like[aria-pressed="true"]::before,
+.actions .js-like.is-liked::before,
+.actions .js-like[aria-pressed="true"]::before {
+  content: "♥";
+  color: var(--like, var(--accent, darkred));
+  transform: translateY(-1px) scale(1.1);
+}
+
+/* 접근성: 모션 최소화 시 트랜지션 제거 */
+@media (prefers-reduced-motion: reduce) {
+  .post-cta .js-like::before,
+  .actions .js-like::before { transition: none; }
+}
+
+/* 비활성 시 */
+.post-cta .js-like[disabled],
+.actions .js-like[disabled] {
+  opacity: .6;
+  pointer-events: none;
+}
