@@ -191,4 +191,11 @@ public class MemberService {
         member.setDeletedAt(LocalDateTime.now()); // 탈퇴일 저장
         memberRepository.save(member);
     }
+
+    public boolean existsByEmail(String email) {
+        return memberRepository.existsByUserEmail(email);
+    }
+    public boolean existsByUserId(String userId) {
+        return memberRepository.existsByUserId(userId);
+    }
 }

@@ -14,6 +14,7 @@
     /* 인풋 그룹 (아이콘/토글) */
     .input-wrap{position:relative}
     .input-wrap .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
+    .input-wrap .check{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
 
     /* 비밀번호 강도 */
     .strength{height:8px;background:#eee;border-radius:999px;overflow:hidden}

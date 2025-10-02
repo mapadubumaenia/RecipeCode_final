@@ -1,6 +1,68 @@
 // ===== 유틸 =====
 const $ = (s, el=document) => el.querySelector(s);
 const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+let emailChecked = false;
+let handleChecked = false;
+
+// 중복체크
+async function checkDuplicate(type, value) {
+    try {
+        const res = await fetch(`/auth/check-${type}?value=${encodeURIComponent(value)}`);
+        const result = await res.json(); // { exists: true/false }
+        return !result.exists;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
+
+// 이메일 중복체크
+$('#checkEmailBtn').addEventListener('click', async ()=>{
+    const emailInput = $('#email');              // input 요소
+    const email = emailInput.value.trim();
+    if(!email) { alert('이메일을 입력하세요'); return; }
+
+    if (!emailInput.checkValidity()) {
+        $('#emailHint').textContent = '올바른 이메일 형식을 입력하세요.';
+        $('#emailHint').style.color = '#dc2626';
+        emailChecked = false;
+        validateAll();
+        return;
+    }
+
+    const ok = await checkDuplicate("email", email);
+    emailChecked = ok;
+    $('#emailHint').textContent = ok ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.';
+    $('#emailHint').style.color = ok ? '#16a34a' : '#dc2626';
+    validateAll();
+});
+
+//아이디 중복체크
+function validateHandle(){
+    const v = handle.value.trim();
+    const ok = /^[A-Za-z0-9_]{3,20}$/.test(v.replace(/^@/,''));
+    if (!ok) {
+        handleHint.textContent = '영문/숫자/밑줄만, 3–20자';
+        handleHint.style.color = 'var(--mute)';
+        handleChecked = false;  // 형식 틀리면 무조건 false
+        return false;
+    }
+    // 형식만 맞았을 때
+    handleHint.textContent = '올바른 아이디 형식입니다. 중복 확인을 해주세요.';
+    handleHint.style.color = '#16a34a';
+    handleChecked = false;  // 중복확인 버튼 누르기 전까지 false 유지
+    return true;
+}
+
+$('#checkHandleBtn').addEventListener('click', async ()=>{
+    const handleVal = $('#handle').value.trim();
+    if(!validateHandle()) { alert('아이디 형식을 확인하세요'); return; }
+    const ok = await checkDuplicate("handle", handleVal);
+    handleChecked = ok;
+    handleHint.textContent = ok ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.';
+    handleHint.style.color = ok ? '#16a34a' : '#dc2626';
+    validateAll();
+});
 
 // 비밀번호 보기 토글
 $$(".toggle").forEach(btn=>{
@@ -10,6 +72,7 @@ $$(".toggle").forEach(btn=>{
         input.type = input.type === 'password' ? 'text' : 'password';
     });
 });
+
 
 // 비밀번호 강도 (아주 단순화)
 const pw = $('#pw');
@@ -44,21 +107,15 @@ function renderPwMatch(){
     hint.style.color = pw.value === pw2.value ? '#16a34a' : '#dc2626';
 }
 
-function validateHandle(){
-    const v = handle.value.trim();
-    const ok = /^[A-Za-z0-9_]{3,20}$/.test(v.replace(/^@/,''));
-    handleHint.textContent = ok ? '사용 가능한 형식입니다.' : '영문/숫자/밑줄만, 3–20자';
-    handleHint.style.color = ok ? '#16a34a' : 'var(--muted)';
-    return ok;
-}
 
 function validateAll(){
     const emailOk = $('#email').checkValidity();
-    const handleOk = validateHandle();
+    const v = handle.value.trim();
+    const handleOk =  /^[A-Za-z0-9_]{3,20}$/.test(v);
     const pwOk = pw.value.length >= 8;
     const matchOk = pw.value && pw.value === pw2.value;
     const agreeOk = agree.checked;
-    const allOk = emailOk && handleOk && pwOk && matchOk && agreeOk;
+    const allOk = emailOk && handleOk && pwOk && matchOk && agreeOk && emailChecked && handleChecked;
     submitBtn.disabled = !allOk;
     formError.textContent = allOk ? '' : '';
 }
