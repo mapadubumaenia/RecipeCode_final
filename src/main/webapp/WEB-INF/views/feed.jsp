@@ -5,6 +5,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <%@ include file="/WEB-INF/views/common/head.jsp" %>
   <title>Feed</title>
 </head>
 <body>

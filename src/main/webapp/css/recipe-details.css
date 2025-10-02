@@ -78,6 +78,7 @@ v
 .name{flex:1; color:var(--text)}
 .name .createdAt {font-weight: normal; }
 .cmtActions{display: flex; flex-wrap: nowrap; gap: 12px; justify-content: end;}
+.time {font-size: 0.85rem; color: var(--muted)}
 
 /* 댓글 수정 */
 .editing .cmtCard { background: var(--card); border-radius: 12px; padding: 8px;}

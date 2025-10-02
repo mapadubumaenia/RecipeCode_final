@@ -10,6 +10,7 @@
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <html>
 <head>
+  <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>Follow Network</title>
   <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
   <link rel="stylesheet" href="<c:url value='/css/follow-network.css'/>">

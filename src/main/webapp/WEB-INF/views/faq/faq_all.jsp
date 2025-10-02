@@ -2,6 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>FAQ</title>
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/faq_all.css">
@@ -14,7 +15,7 @@
             <h1 class="page-title">FAQ</h1>
             <a href="/" class="float-text">home</a>
         </div>
-        <a class="btn-back" href="/mypage">Back</a>
+        <a class="btn-back" href="${pageContext.request.contextPath}/mypage">Back</a>
     </header>
 
     <section class="layout">

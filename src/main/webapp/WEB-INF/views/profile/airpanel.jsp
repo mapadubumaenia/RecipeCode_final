@@ -9,6 +9,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>Title</title>
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>">
 </head>

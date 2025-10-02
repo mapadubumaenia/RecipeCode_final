@@ -6,6 +6,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
+      <%@ include file="/WEB-INF/views/common/head.jsp" %>
   <title>Admin · Recipe Code</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="<c:url value='/css/common.css'/>">

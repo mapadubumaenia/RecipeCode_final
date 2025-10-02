@@ -3,6 +3,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title>FAQ 수정/삭제</title>
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/update_faq.css">

@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/search","/recipes/**").permitAll() // JSP 뷰
                         .requestMatchers("/css/**","/js/**","/images/**","/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll() // 검색 API
+                        .requestMatchers("/comments/**").permitAll() // 댓글 조회 허용
                         .anyRequest().permitAll()
 
                 )

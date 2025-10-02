@@ -7,6 +7,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <%@ include file="/WEB-INF/views/common/head.jsp" %>
   <title>Search</title>
   <link rel="preconnect" href="https://www.youtube.com">
   <link rel="preconnect" href="https://i.ytimg.com">
@@ -38,7 +39,7 @@
     <h1 class="page-title">Search</h1>
     <a class="home-btn" href="<c:url value='/'/>">home</a>
     <div class="header-actions">
-      <a class="register" href="register_page.html">👤</a>
+      <a class="register" href="${pageContext.request.contextPath}/mypage">👤</a>
       <div class="notif-wrap">
         <sec:authorize access="isAuthenticated()">
           <sec:authentication property="principal" var="loginUser"/>
@@ -120,7 +121,7 @@
       <!-- 비로그인: 안내 카드 -->
       <sec:authorize access="!isAuthenticated()">
         <div class="card p-16 empty-follow" style="text-align:center; padding:24px;">
-          <div style="font-size:32px; line-height:1.2; margin-bottom:8px;">🔒</div>
+          <div style="font-size:32px; line-height:1.2; margin-bottom:8px;"><i data-lucide="Lock"></i></div>
           <p style="margin:4px 0;"><strong>로그인 후 사용 가능합니다</strong></p>
           <p class="muted" style="margin:8px 0 16px;">관심 있는 셰프를 팔로우하면 새 레시피가 여기 표시됩니다.</p>
           <a class="btn primary" href="<c:url value='/auth/login'/>">Login</a>
@@ -173,5 +174,7 @@
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>
 <script src="<c:url value='/js/login-to-follow.js'/>" defer></script>
 <script src="${pageContext.request.contextPath}/js/mainpage-sidebar.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="/js/icons-init.js" defer></script>
 </body>
 </html>
