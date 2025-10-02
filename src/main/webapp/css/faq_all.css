@@ -6,12 +6,6 @@
 .chip{background:var(--chip);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-weight:700;cursor:pointer}
 .chip.is-active{background:#111827;color:#fff;border-color:#111827}
 
-
-@media (min-width: 992px){
-    .layout{grid-template-columns:1fr 320px}
-    .sidebar{position:sticky;top:12px;align-self:start;height:max-content}
-}
-
 /* 검색 박스 */
 .search{display:grid;gap:10px}
 .search .row{display:grid;grid-template-columns:1fr auto;gap:8px}
@@ -38,84 +32,46 @@
 
 /* 하이라이트 */
 mark{background:#fff2a8;padding:0 2px;border-radius:4px}
-@media (min-width: 768px) {
+
+@media (max-width: 768px) {
 .profile-header {padding: 16px 24px;}
     .page-title {
-        font-size: 4.8rem;
+        font-size: 2.2rem;
     }
     .float-text {
-        font-size: 1.6rem;
+        font-size: 1rem;
     }
     .btn-back {
-        font-size: 1.4rem;
+        font-size: 1rem;
     }
     .filters {
         justify-content: center;
         gap: 12px;
     }
     .chip {
-        padding: 12px 20px;
-        font-size: 1.6rem;
+        padding: 12px 12px;
+        font-size: 0.8rem;
     }
     .search .row {
         justify-content: center;
     }
     .search .input {
         max-width: 900px;
-        font-size: 1.8rem;
+        font-size: 1rem;
     }
     .faq-q {
-        font-size: 2.2rem;
+        font-size: 1rem;
         font-weight: 500;
     }
     .faq-a {
-        font-size: 1.8rem;
+        font-size: 0.8rem;
     }
     .sidebar {
         display: none;
     }
 }
-@media (min-width: 1024px) {
-    .layout {
-        display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 18px;
-    }
-    .profile-header {
-        padding: 16px 24px;
-    }
-    .page-title {
-        font-size: 4.4rem;
-    }
-    .float-text {
-        font-size: 1.6rem;
-    }
-    .btn-back {
-        font-size: 1.4rem;
-    }
-    .filters {
-        justify-content: center;
-        gap: 12px;
-    }
-    .chip {
-        padding: 12px 20px;
-        font-size: 1.4rem;
-    }
-    .search .row {
-        justify-content: center;
-    }
-    .search .input {
-        max-width: 900px;
-        font-size: 1.6rem;
-    }
-    .faq-q {
-        font-size: 1.6rem;
-        font-weight: 500;
-    }
-    .faq-a {
-        font-size: 1.4rem;
-    }
-    .sidebar {
-        display: block;
-    }
+
+@media (min-width: 992px){
+    .layout{grid-template-columns:1fr 320px}
+    .sidebar{position:sticky;top:12px;align-self:start;height:max-content}
 }
