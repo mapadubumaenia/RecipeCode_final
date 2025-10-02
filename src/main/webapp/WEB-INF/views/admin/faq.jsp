@@ -10,7 +10,6 @@
     <style>
         .action-buttons { margin-top:8px; }
         .action-buttons button { margin-right:4px; }
-
         .filters { display:flex; gap:8px; margin-bottom:16px; margin-top: 16px;}
         .chip { padding:6px 12px; border-radius:8px; border:1px solid #ccc; cursor:pointer; }
         .chip.is-active { background:#111827; color:#fff; border-color:#111827; }
@@ -19,7 +18,14 @@
         .faq-a { margin-top:8px; }
         .action-buttons { margin-top:8px; }
         .action-buttons button { margin-right:4px; }
-
+        .sidebar .nav a {
+            font-size: 14px;
+            line-height: 1.4;
+            padding: 10px 12px;
+        }
+        .sidebar .brand {
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
