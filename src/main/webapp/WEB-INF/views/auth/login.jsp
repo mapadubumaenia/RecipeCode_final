@@ -50,21 +50,15 @@
                     </div>
                 </div>
 
-                <!-- 약관 동의 대신 자동 로그인 옵션 -->
-                <div class="field">
-                    <label class="switch">
-                        <input type="checkbox" id="remember" name="remember" />
-                        <span>로그인 상태 유지</span>
-                    </label>
-                </div>
-
                 <!-- 소셜 로그인 -->
                 <div class="divider">또는</div>
                 <div class="social">
 
 
-                    <button type="button" class="btn social" onclick="location.href='<c:url value='/oauth2/authorization/google'/>'">🔵 Continue with Google</button>
-                    <button type="button" class="btn social" onclick="location.href='<c:url value='/oauth2/authorization/kakao'/>'">🟡 Continue with Kakao</button>
+                    <button type="button" class="btn social" onclick="location.href='<c:url value='/oauth2/authorization/google'/>'"><img src="<c:url value='/images/google_logo.png'/>"
+                                                                                                                                              alt="Google" style="width:12px; height:12px; vertical-align:middle;">Continue with Google</button>
+                    <button type="button" class="btn social" onclick="location.href='<c:url value='/oauth2/authorization/kakao'/>'"><img src="<c:url value='/images/kakao_logo.png'/>"
+                                                                                                                                          alt="Kakao" style="width:16px; height:16px; vertical-align:middle;">Continue with Kakao</button>
                 </div>
 
                 <!-- 제출 -->
@@ -81,30 +75,7 @@
         </article>
     </section>
 </main>
-
-<script>
-    const $ = (s, el=document) => el.querySelector(s);
-    const $$ = (s, el=document) => [...el.querySelectorAll(s)];
-
-    // 비밀번호 보기 토글
-    $$(".toggle").forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-            const input = document.querySelector(btn.dataset.target);
-            if(!input) return;
-            input.type = input.type === 'password' ? 'text' : 'password';
-        });
-    });
-
-    // 제출 (와이어프레임용)
-    $('#loginForm').addEventListener('submit', (e)=>{
-        e.preventDefault();
-        const payload = {
-            email: $('#email').value.trim(),
-            password: $('#pw').value,
-            remember: $('#remember').checked
-        };
-        e.target.submit();
-    });
-</script>
+<%--  JS  --%>
+<script src="<c:url value='/js/auth/login.js'/>"></script>
 </body>
 </html>

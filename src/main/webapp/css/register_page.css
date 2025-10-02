@@ -40,6 +40,22 @@
     .error{color:var(--danger);font-size:.9rem}
     .ok{color:var(--ok)}
 
+
+    /* 비활성화 상태 */
+    #submitBtn:disabled {
+        background-color:var(--btn); /* 연한 회색 */
+        color: #9ca3af;           /* 흐린 글씨 */
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    /* 활성화 상태 */
+    #submitBtn:not(:disabled) {
+        background-color:var(--brand);
+        color: white;
+        cursor: pointer;
+    }
+
     /* 반응형 */
     @media (min-width:768px){
       .auth{max-width:640px}

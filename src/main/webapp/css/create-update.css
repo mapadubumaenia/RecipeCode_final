@@ -88,6 +88,9 @@
 .muted{color:var(--muted)}
 .small{font-size:.92rem}
 
+
+
+
 /* 반응형 */
 @media (min-width:992px){
   .form{display:flex;align-items:flex-start;gap:12px}
