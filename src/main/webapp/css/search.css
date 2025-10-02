@@ -161,3 +161,60 @@ footer{ display:none !important; }
     display:none;                /* PC에서는 숨김 (기존 별도 업로드 버튼 사용) */
   }
 }
+
+
+/* ============================
+   Search 페이지 좋아요 버튼 "디자인만" 상세와 동일
+   JS/HTML 수정 없음
+   ============================ */
+
+/* 버튼 베이스: 기존 텍스트 이모지(❤️)가 차지하는 공간을 0으로 */
+#results .post-cta .js-like {
+  border: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;          /* 하트-숫자 간격 */
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  font-size: 0 !important;   /* 핵심: 원래 이모지 폭 제거 */
+  line-height: 1;
+  color: transparent !important; /* 원래 이모지 안보이게 */
+}
+
+/* 숫자는 크기/색 복구 */
+#results .post-cta .js-like .like-count,
+#results .post-cta .js-like .cnt {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+/* 기본(미선택): 회색 빈 하트 */
+#results .post-cta .js-like::before {
+  content: "♡";
+  color: #aaa;
+  font-size: 1.1rem;        /* 부모 font-size:0 영향 안 받도록 직접 지정 */
+  transform: translateY(-1px);
+  display: inline-block;
+  transition: transform 120ms ease, color 120ms ease;
+}
+
+/* 활성(좋아요) 상태: 빨간 꽉찬 하트 + 살짝 팝 */
+#results .post-cta .js-like.is-liked::before,
+#results .post-cta .js-like[aria-pressed="true"]::before {
+  content: "♥";
+  color: var(--like, var(--accent, darkred));
+  transform: translateY(-1px) scale(1.1);
+}
+
+/* 접근성: 모션 최소화 시 트랜지션 제거 */
+@media (prefers-reduced-motion: reduce) {
+  #results .post-cta .js-like::before { transition: none; }
+}
+
+/* 비활성 시 시각 피드백만 (선택) */
+#results .post-cta .js-like[disabled] {
+  opacity: .6;
+  pointer-events: none;
+}
