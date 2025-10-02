@@ -42,7 +42,17 @@ document.addEventListener("DOMContentLoaded", () => {
             page += 1;
 
             if (page === 1 && list.length === 0) {
-                followContainer.innerHTML = `<p class="muted">표시할 레시피가 없어요.</p>`;
+                if (currentTab === "following") {
+                    followContainer.innerHTML = `
+      <div class="card p-16 empty-follow" style="text-align:center; padding:24px;">
+        <div style="font-size:32px; line-height:1.2; margin-bottom:8px;">📭</div>
+        <p style="margin:4px 0;"><strong>팔로우한 유저가 없어요</strong></p>
+        <p class="muted" style="margin:8px 0 0;">관심 있는 셰프를 팔로우하면 새 레시피가 여기 표시됩니다.</p>
+      </div>
+    `;
+                } else {
+                    followContainer.innerHTML = `<p class="muted">표시할 레시피가 없어요.</p>`;
+                }
             }
 
         }catch(err) {

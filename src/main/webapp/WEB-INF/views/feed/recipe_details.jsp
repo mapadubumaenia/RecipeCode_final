@@ -137,7 +137,7 @@
             <!-- 조리 순서: VIDEO면 숨김 -->
             <c:if test="${not isVideo}">
                 <aside class="panel mb-12">
-                    <h3>👣 조리 순서</h3>
+                    <h3><i data-lucide="clipboard" class="icon"></i> 조리 순서</h3>
                     <div id="textPanel">
                         <div class="text-viewport">
                             <div class="slides" id="textSlides">
@@ -159,7 +159,7 @@
                 </aside>
             </c:if>
                 <aside class="panel">
-                    <h3>🧾 재료</h3>
+                    <h3><i data-lucide="salad" class="icon"></i> 재료</h3>
                     <ul class="grid">
                         <c:choose>
                             <c:when test="${not empty recipe.ingredients}">
@@ -233,15 +233,15 @@
                         <span class="cnt">${recipe.likeCount}</span>
                     </button>
 
-                    <button class="btn-none share-btn float-text" data-uuid="${recipe.uuid}">🔗공유</button>
-                    <button class="btn-none" id="btnReport">🚩 신고</button>
+                    <button class="btn-none share-btn float-text" data-uuid="${recipe.uuid}"><i data-lucide="forward" class="icon"></i> 공유</button>
+                    <button class="btn-none" id="btnReport"><i data-lucide="alarm-smoke" class="icon flip"></i> 신고</button>
                 </div>
             </section>
             <!-- 본문/태그 -->
             <section class="desc" id="postDesc">
                 <div class="tags">
                     <c:forEach var="t" items="${recipe.tags}">
-                        <span class="tag">#<c:out value="${t.tag}" /></span>
+                        <span class="tag"><c:out value="${t.tag}" /></span>
                     </c:forEach>
                 </div>
                 <div class="contentText"><c:out value="${recipe.recipeIntro}" /></div>
@@ -281,6 +281,10 @@
 </script>
 <script src="${ctx}/js/recipes/recipe-details.js"></script>
 <script src="${ctx}/js/recipes/recipe-detailside.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="/js/icons-init.js" defer></script>
+
+
 
 <div id="myReportModal" class="modal" hidden>
     <div class="modal-content">

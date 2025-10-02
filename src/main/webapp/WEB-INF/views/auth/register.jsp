@@ -24,7 +24,7 @@
             <h1 class="page-title">Sign Up</h1>
             <a href="/home" class="float-text">home</a>
         </div>
-        <a class="btn-logout" href="/home">Back</a>
+        <a class="btn-back" href="/home">Back</a>
     </header>
 
     <!-- 가입 카드 -->
@@ -93,7 +93,7 @@
                 <!-- 제출 -->
                 <div class="actions" style="margin-top:12px">
                     <div class="left">
-                        <a class="btn ghost" href="/auth/login">로그인으로 이동</a>
+                        <a class="btn primary" href="/auth/login">로그인으로 이동</a>
                     </div>
                     <button class="btn primary" id="submitBtn" type="submit" disabled>가입하기</button>
                 </div>

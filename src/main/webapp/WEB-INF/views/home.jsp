@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Lumeat — 빛나는 한 끼</title>
+    <title>Lu:meet</title>
 
     <link rel="preconnect" href="https://www.youtube.com">
     <link rel="preconnect" href="https://i.ytimg.com">
@@ -58,11 +58,15 @@
 <body>
 <header class="container">
     <div class="flex-box">
-        <h1 class="page-title">Lumeat</h1>
+        <h1 class="page-title">Lu:meet</h1>
         <div class="notif-wrap">
+            <!-- ▼ 비로그인일 때만 노출되는 로그인 버튼 -->
+            <sec:authorize access="!isAuthenticated()">
+                <a class="btn small ghost login-top" href="<c:url value='/auth/login'/>">Login</a>
+            </sec:authorize>
             <sec:authorize access="isAuthenticated()">
                 <sec:authentication property="principal" var="loginUser"/>
-                <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+                <a class="alink"  href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>
             </sec:authorize>
 
             <button id="btnNotif" class="notif-btn" aria-haspopup="dialog" aria-expanded="false"
@@ -90,7 +94,7 @@
     <form action="${pageContext.request.contextPath}/search" method="get">
         <input name="q" class="search-input" type="search"
                placeholder="Search for recipes… (e.g. Spaghetti, Pancakes, Salad)"/>
-        <button class="search-btn" aria-label="검색">🔍</button>
+        <button class="search-btn" aria-label="검색">search</button>
     </form>
 </div>
 
@@ -180,7 +184,8 @@
             <h2 class="section-title">Following</h2>
             <sec:authorize access="!isAuthenticated()">
                 <div class="card p-16 empty-follow" style="text-align:center; padding:24px;">
-                    <div style="font-size:32px; line-height:1.2; margin-bottom:8px;">🔒</div>
+                    <div style="font-size:32px; line-height:1.2; margin-bottom:8px;"><i data-lucide="Lock"></i>
+                    </div>
                     <p style="margin:4px 0;"><strong>로그인 후 사용 가능합니다</strong></p>
                     <p class="muted" style="margin:8px 0 16px;">관심 있는 셰프를 팔로우하면 새 레시피가 여기 표시됩니다.</p>
                     <a class="btn primary" href="<c:url value='/auth/login'/>">Login</a>
@@ -200,11 +205,11 @@
 <footer>
     <div class="authbar">
         <input class="search" type="search" placeholder="재료·요리·해시태그 검색"/>
-        <button class="search-btn" aria-label="검색">🔍</button>
+        <button class="search-btn" aria-label="검색">search</button>
     </div>
     <nav class="tabs">
-        <a class="tab is-active" href="/mypage">Profile</a>
-        <a class="tab" href="/recipes/add">Upload</a>
+        <a class="btab is-active" href="/mypage">Profile</a>
+        <a class="btab" href="/recipes/add">Upload</a>
     </nav>
 </footer>
 
@@ -217,5 +222,9 @@
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>
 <script src="<c:url value='/js/login-to-follow.js'/>" defer></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="/js/icons-init.js" defer></script>
+
+
 </body>
 </html>

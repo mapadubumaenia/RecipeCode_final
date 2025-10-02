@@ -61,6 +61,82 @@
         return 0;
     }
 
+
+    // 상대/절대 경로를 절대 URL로 변환
+    function toAbsUrl(path){
+        try { return new URL(path, window.location.origin).href; }
+        catch { return String(path || ''); }
+    }
+
+// 텍스트를 클립보드에 복사 (HTTPS/보안컨텍스트 우선, 폴백 포함)
+    async function copyText(text){
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return true;
+            }
+        } catch {}
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly','');
+            ta.style.position = 'fixed';
+            ta.style.top = '-1000px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+
+    // Share 버튼: 상세 URL 복사 + 알림
+    document.addEventListener('click', async function(e){
+        const btn = e.target.closest('.js-share');
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 게시물 uuid 찾기
+        const card = btn.closest('article.post[data-id]');
+        const rid  = card ? card.getAttribute('data-id') : null;
+        if (!rid || !isUuid36(rid)) {
+            alert('공유할 링크를 찾지 못했어요.');
+            return;
+        }
+
+        // 상세조회 경로 → 절대 URL
+        const href = toAbsUrl(detailUrl(rid));
+
+        const ok = await copyText(href);
+        alert(ok ? '링크가 복사되었어요.\n' : '클립보드 복사에 실패했어요.');
+    });
+
+// Share 버튼 키보드 접근성 (Enter/Space)
+    document.addEventListener('keydown', async function(e){
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const btn = document.activeElement;
+        if (!btn || !btn.classList || !btn.classList.contains('js-share')) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const card = btn.closest('article.post[data-id]');
+        const rid  = card ? card.getAttribute('data-id') : null;
+        if (!rid || !isUuid36(rid)) {
+            alert('공유할 링크를 찾지 못했어요.');
+            return;
+        }
+        const href = toAbsUrl(detailUrl(rid));
+        const ok = await copyText(href);
+        alert(ok ? '링크가 복사되었어요.\n'  : '클립보드 복사에 실패했어요.');
+    });
+
+
     // ISO 문자열/epoch 숫자 → "YYYY-MM-DD HH:mm" (로컬시간)
     function fmtYmdHm(input){
         if (input == null) return '';
@@ -84,6 +160,51 @@
         const mm = String(d.getMinutes()).padStart(2,'0');
         return `${y}-${m}-${dd} ${hh}:${mm}`;
     }
+
+    // 공통: 입력(ISO 문자열/정수 epoch 초·ms) → Date
+    function toDate(input){
+        if (input == null) return null;
+        let d;
+        if (typeof input === 'number') {
+            d = new Date(input > 1e12 ? input : input * 1000);
+        } else {
+            const s = String(input).trim();
+            if (/^\d+$/.test(s)) {
+                const n = Number(s);
+                d = new Date(n > 1e12 ? n : n * 1000);
+            } else {
+                d = new Date(s);
+            }
+        }
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+// 새 포맷터: 24시간 초과 → YYYY-MM-DD HH:mm, 24시간 이내 → N시간 전, 1시간 이내 → N분 전, 1분 미만 → 방금 전
+    function fmtSmartTime(input){
+        const d = toDate(input);
+        if (!d) return '';
+
+        const now = Date.now();
+        let diff = now - d.getTime();
+        if (!Number.isFinite(diff)) return '';
+
+        if (diff < 0) diff = 0; // 미래값 들어오면 0으로 클램프
+
+        const min = Math.floor(diff / 60000);
+        const hour = Math.floor(diff / 3600000);
+
+        if (hour >= 24) {
+            return fmtYmdHm(d); // 기존 포맷 재사용
+        } else if (hour >= 1) {
+            return `${hour}시간 전`;
+        } else if (min >= 1) {
+            return `${min}분 전`;
+        } else {
+            return '방금 전';
+        }
+    }
+
+
 
     // ===== 좋아요 UI 헬퍼 =====
     function applyLikeVisual(btn, liked){
@@ -280,7 +401,7 @@
                     if (!tag) return;
                     const node = document.createElement('div');
                     node.className = 'tag-item';
-                    node.innerHTML = '<span>#' + esc(tag) + '</span><span class="chip">' + esc(fmt.format(cnt)) + '</span>';
+                    node.innerHTML = '<div class="tag-bar"><span>#' + esc(tag) + '</span><span class="chip">' + esc(fmt.format(cnt)) + '</span></div>';
                     frag.appendChild(node);
                 });
                 if (frag.childNodes.length > 0) { $wrap.innerHTML = ''; $wrap.appendChild(frag); }
@@ -369,7 +490,7 @@
                     '    <div class="avatar-ss"><img src="" alt="" data-user-id="' + esc(userIdAttr) + '"></div>' +
                     '    <div class="post-info">' +
                     '      <div class="post-id">' + (cleanId ? '<a class="author-link" href="' + profileHref + '">@' + esc(cleanId) + '</a>' : '') + '</div>' +
-                    '      <div class="muted"><time datetime="' + esc(it.createdAt || '') + '">' + esc(fmtYmdHm(it.createdAt)) + '</time></div>' +
+                    '      <div class="muted"><time datetime="' + esc((toDate(it.createdAt)?.toISOString()) || '') + '">' + esc(fmtSmartTime(it.createdAt)) + '</time></div>' +
                     '    </div>' +
                     '    <button class="followbtn-sm' + (self ? ' is-self' : '') + '"' +
                     '       data-user-id="' + esc(userIdAttr) + '"' +
@@ -707,5 +828,23 @@
         setupPopularTags();
         setupForYou();
         setupTrending();
+    });
+})();
+
+(function () {
+    const CTX = (typeof window !== "undefined" && window.__CTX__) ? window.__CTX__ : "";
+    const $input = document.querySelector('footer .authbar .search');
+    const $btn   = document.querySelector('footer .authbar .search-btn');
+    if (!$input || !$btn) return;
+
+    const go = () => {
+        const q = ($input.value || '').trim();
+        const url = CTX + '/search' + (q ? ('?q=' + encodeURIComponent(q)) : '');
+        window.location.href = url;
+    };
+
+    $btn.addEventListener('click', (e) => { e.preventDefault(); go(); });
+    $input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); go(); }
     });
 })();

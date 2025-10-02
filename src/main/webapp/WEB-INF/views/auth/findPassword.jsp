@@ -22,7 +22,7 @@
             <h1 class="page-title">비밀번호 찾기</h1>
             <a href="/home" class="float-text">home</a>
         </div>
-        <a class="btn-logout" href="/auth/login">Back</a>
+        <a class="btn-back" href="/auth/login">Back</a>
     </header>
 
     <section class="auth">

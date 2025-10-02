@@ -2,7 +2,6 @@
    프로필 카드
    ========================= */
 
-.alink{cursor:pointer; color: var(--subtext); font-weight: 700}
 .profile-top {display:flex; gap:8px; flex-direction: column; align-items: flex-start; justify-content: center;}
 .userInfo {display: flex; flex-direction: column; justify-content: center;}
 .profile {display: flex;}
@@ -63,7 +62,7 @@
 
 .intro {
     margin: 8px 0;
-    color: #555;
+    color: var(--text);
     font-size: 14px;
 }
 
@@ -93,16 +92,8 @@
     margin: 10px 0;
 }
 
-.chip {
-    display: inline-block;
-    background: var(--btn);
-    color: var(--text);
-    font-weight: 600;
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 16px;
-    margin: 2px;
-}
+.chip {display: inline-block; background: var(--btn); color: var(--wtext); font-weight:700; font-size: 12px;  padding: 4px 10px;
+    border-radius: 16px; margin: 2px; box-shadow: var(--shadow)}
 
 /* =========================
    피드 카드
@@ -308,18 +299,23 @@
     flex: 1;
     padding: 6px 12px;
     border-radius: 20px;
-    border: 1px solid var(--border);
-    background: #fff;
+    border: 1px solid var(--brand);
+    color: var(--text);
+    background: var(--bg);
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
     transition: all 0.2s;
 }
 
+.tab-btn:hover {background: var(--brand); border: 1px solid var(--brand); color: var(--wtext)}
+
 .follow-tabs .tab-btn.is-active {
-    background: #111827;
-    color: #fff;
+    background: var(--brand);
+    color: var(--wtext);
 }
+
+.tab-btn.is-active:hover {background: var(--muted); border: 1px solid var(--muted);}
 
 .follow-list {
     display: grid;

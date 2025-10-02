@@ -2,7 +2,9 @@
 .select-box{display:inline-flex;align-items:center;justify-content:center;height:40px;border-radius:12px;border:1px solid var(--border)}
 .search-bar{display:flex;gap:8px;flex:1}
 .search-input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
-.search-btn{padding:10px 12px;border:none;border-radius:12px;background:var(--brand);color:#fff;cursor:pointer}
+.search-btn{padding:10px 12px;border:none;border-radius:12px;
+  background:var(--brand);color:var(--wtext);cursor:pointer;font-weight: 700; font-size: 14px;}
+.search-btn:hover{background: var(--muted);}
 
 /* 목록/태그 */
 .trend-grid{display:grid;grid-auto-flow:column;grid-auto-columns:80%;gap:12px;overflow-x:auto;padding:4px 2px 8px;margin-bottom:8px}
@@ -14,7 +16,7 @@
 /* 푸터/버튼 (검색 페이지 none) */
 footer{display:flex;justify-content:flex-end;}
 
-.like.active {color:darkred; font-weight: bold;}
+.like.active {color:var(--like); font-weight: bold;}
 /* 커뮤니티 피드 카드 */
 .post{display:flex;flex-direction:column;gap:10px;margin-bottom: 8px;}
 .post-head{display:flex;flex-direction: row; align-items:center;gap:10px}
@@ -76,8 +78,8 @@ footer{display:flex;justify-content:flex-end;}
 
 /* 반응형(PC 전용 정리) */
 @media (min-width:768px){
-  .btn{padding:12px;border-radius:12px;border:1px solid #111;font-weight:700;background:#fff}
-  .btn.primary{background:#111;color:#fff}
+  .btn{padding:12px;border-radius:12px;border:1px solid var(--brand);font-weight:700;background:var(--bg)}
+  .btn.primary{background:var(--brand);color:var(--wtext)}
 }
 @media (min-width:1024px){
   .register{display:none}
@@ -122,3 +124,40 @@ header .home-btn{ margin-left: 4px; white-space: nowrap; }
 }
 .empty .emoji { font-size:28px; margin-bottom:8px; }
 .empty .hint { font-size:13px; color:#888; margin-top:6px; }
+
+
+/* 검색 페이지: 하단 푸터 버튼 전부 숨김 */
+footer{ display:none !important; }
+
+/* Results 타이틀 + Upload 버튼 한 줄 정렬 */
+.section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+/* 모바일 기본: Upload 보이기 */
+.section-head .upload-top{
+  display:inline-flex;           /* 모바일에서 노출 */
+  padding:8px 12px;
+  border-radius:12px;
+  border:1px solid var(--brand);
+  background:var(--brand);
+  color:var(--wtext);
+  font-weight:700;
+  text-decoration:none;
+  line-height:1;
+}
+.section-head .upload-top:hover{
+  background: var(--muted);
+  border-color: var(--muted);
+}
+
+/* 데스크탑 이상: Upload 숨김 */
+@media (min-width:1024px){
+  .section-head .upload-top{
+    display:none;                /* PC에서는 숨김 (기존 별도 업로드 버튼 사용) */
+  }
+}
