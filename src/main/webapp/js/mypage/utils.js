@@ -1,5 +1,37 @@
 // utils.js
 
+// 안전 파서: 응답이 JSON이든 텍스트든 에러 없이 파싱
+async function parseBodySafe(res) {
+    const ct = (res.headers.get("content-type") || "").toLowerCase();
+    // 1) JSON으로 보인다면 먼저 json() 시도 → 실패하면 text() 폴백
+    if (ct.includes("application/json")) {
+        try {
+            return { kind: "json", data: await res.json() };
+        } catch {
+            try {
+                const t = await res.text();
+                return { kind: "text-badjson", data: t }; // 헤더는 json인데 실제는 텍스트
+            } catch {
+                return { kind: "none", data: null };
+            }
+        }
+    }
+    // 2) JSON이 아니라면 text() 먼저 → 혹시 JSON 문자열이면 파싱 시도
+    try {
+        const t = await res.text();
+        try {
+            const j = JSON.parse(t);
+            return { kind: "json-mislabeled", data: j }; // 헤더는 text인데 실제는 JSON
+        } catch {
+            return { kind: "text", data: t };
+        }
+    } catch {
+        return { kind: "none", data: null };
+    }
+}
+
+
+
 // TODO: (운영 시 활성화) CSRF 토큰을 JS에서 쓰고 싶을 때
 window.CSRF = window.CSRF || (() => {
     const t = document.querySelector('meta[name="_csrf"]');
@@ -187,24 +219,30 @@ document.addEventListener("click", async (e) => {
         res = await fetch(url, { method, credentials: "same-origin", headers });
     }
 
-    // 응답 파싱
-    const ctype = res.headers.get("content-type") || "";
-    const body  = ctype.includes("application/json") ? await res.json() : { message: await res.text() };
+        // ✅ 안전 파싱 (절대 SyntaxError 안 터지게)
+        const parsed = await parseBodySafe(res);
+        const body   = parsed.data;
 
-    // 에러 처리
-    if (!res.ok) {
-        if (res.status === 401) {
-            alert("로그인 후 이용해주세요.");
+// ✅ 에러 처리 (401은 서버 문구 그대로 노출)
+        if (!res.ok) {
+            if (res.status === 401) {
+                // 서버가 텍스트만 줘도 그대로 보여줌
+                const msg401 = (typeof body === "string" && body) ? body
+                    : (body?.message || "로그인하지 않은 사용자입니다.");
+                alert(msg401);
+                return;
+            }
+
+            // 그 외 에러
+            const msg = (typeof body === "string" && body) ? body
+                : (body?.message || body?.msg || "좋아요 처리에 실패했어요.");
+            if (res.status === 400 || res.status === 403 || /SELF_LIKE|본인/.test(msg)) {
+                alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
+            } else {
+                alert(msg);
+            }
             return;
         }
-        const msg = body?.message || body?.msg || "좋아요 처리에 실패했어요.";
-        if (res.status === 400 || res.status === 403 || /SELF_LIKE|본인/.test(msg)) {
-            alert("본인 레시피에는 좋아요를 누를 수 없습니다.");
-        } else {
-            alert(msg);
-        }
-        return;
-    }
 
     // 표준/유연 응답 처리: { isLike | liked, likesCount }
     const nowLiked = (body?.isLike ?? body?.liked ?? !isLike) === true;
