@@ -85,10 +85,32 @@
         videoPane?.style && (videoPane.style.display = isImg ? 'none' : '');
         mountMeta(isImg ? 'IMAGE' : 'VIDEO');
 
-        if (!isImg) updateVideoPreview();
-        if (window.RecipesValidation?.revalidateTypeFields) {
-               window.RecipesValidation.revalidateTypeFields();
-             }
+    //     if (!isImg) updateVideoPreview();
+    //     if (window.RecipesValidation?.revalidateTypeFields) {
+    //            window.RecipesValidation.revalidateTypeFields();
+    //          }
+    // }
+
+        if (!isImg) {
+                updateVideoPreview();
+            console.log('[recipe] switched to VIDEO, clearing thumb error...');
+                // VIDEO 모드: 썸네일 에러/ARIA/라벨 남은 것 전부 초기화
+                //     window.RecipesValidation?.clearThumbError?.();
+            // clear 함수가 없으면 잠시 대기 후 재시도
+                 if (window.RecipesValidation?.clearThumbError) {
+                         window.RecipesValidation.clearThumbError();
+                     } else {
+                         setTimeout(() => {
+                                 window.RecipesValidation?.clearThumbError?.();
+                             }, 300);
+                     }
+            // 동영상 모드일 때만 URL을 가볍게 재검증
+             window.RecipesValidation?.revalidateVideoOnly?.();
+              } else {
+            // IMAGE 모드에선 강제검증 절대 금지 (유저가 만졌거나 제출할 때만)
+                // IMAGE 모드: 규칙 재평가(있다면)
+                //     window.RecipesValidation?.revalidateTypeFields?.();
+              }
     }
 
     tabImage?.addEventListener('click', (e)=>{
@@ -123,9 +145,13 @@
         ph?.classList.add('hidden');
         thumbPreview.onload = ()=> URL.revokeObjectURL(url);
 
-         if (window.RecipesValidation?.revalidateTypeFields) {
-             window.RecipesValidation.revalidateTypeFields();
-             }
+         // if (window.RecipesValidation?.revalidateTypeFields) {
+         //     window.RecipesValidation.revalidateTypeFields();
+         //     }
+
+        // 썸네일을 실제로 고르면 해당 필드만 재검증
+        window.RecipesValidation?.revalidateTypeFields?.();
+
     });
 
     // === 태그 ===
