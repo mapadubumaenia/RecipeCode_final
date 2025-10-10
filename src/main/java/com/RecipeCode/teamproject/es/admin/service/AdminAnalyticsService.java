@@ -158,14 +158,14 @@ public class AdminAnalyticsService {
 
         NativeQueryBuilder qb = NativeQuery.builder()
                 .withQuery(Query.of(b -> b.bool(bb -> bb
-                        .filter(f -> f.range(r -> r.field("createdAt")
+                        .filter(f -> f.range(r -> r.field("updatedAt")
                                 .gte(JsonData.of(fromF.toString()))
                         ))
                         .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
                         .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
                 )))
                 .withSort(s -> s.field(f -> f.field("views").order(SortOrder.Desc)))
-                .withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)))
+                .withSort(s -> s.field(f -> f.field("updatedAt").order(SortOrder.Desc)))
                 .withPageable(PageRequest.of(0, sizeF));
 
         SearchHits<RecipeSearchDoc> hits = es.search(qb.build(), RecipeSearchDoc.class);
@@ -286,14 +286,15 @@ public class AdminAnalyticsService {
         final int sizeF = Math.min(Math.max(size, 1), 50);
         final Instant fromF = Instant.now().minus(daysF, ChronoUnit.DAYS);
 
+
         NativeQueryBuilder qb = NativeQuery.builder()
                 .withQuery(Query.of(b -> b.bool(bb -> bb
-                        .filter(f -> f.range(r -> r.field("createdAt").gte(JsonData.of(fromF.toString()))))
+                        .filter(f -> f.range(r -> r.field("updatedAt").gte(JsonData.of(fromF.toString()))))
                         .filter(f -> f.term(t -> t.field("visibility").value("PUBLIC")))
                         .mustNot(m -> m.term(t -> t.field("deleted").value(true)))
                 )))
                 .withSort(s -> s.field(f -> f.field("likes").order(SortOrder.Desc)))
-                .withSort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)))
+                .withSort(s -> s.field(f -> f.field("updatedAt").order(SortOrder.Desc)))
                 .withPageable(PageRequest.of(0, sizeF));
 
         SearchHits<RecipeSearchDoc> hits = es.search(qb.build(), RecipeSearchDoc.class);
