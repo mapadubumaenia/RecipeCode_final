@@ -1,5 +1,6 @@
 package com.RecipeCode.teamproject.config;
 
+import com.RecipeCode.teamproject.reci.auth.handler.CustomAuthenticationFailureHandler;
 import com.RecipeCode.teamproject.reci.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +19,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final AuthenticationSuccessHandler oAuth2SuccessHandler;
     @Bean
@@ -45,7 +46,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/auth/loginProcess")                // 로그인 처리 URL
                         .usernameParameter("userEmail")                              // form에서 name="email"
                         .defaultSuccessUrl("/", true)     // 로그인 성공 시 이동
-                        .failureUrl("/errors") // 실패 시 이동
+                        .failureHandler(customAuthenticationFailureHandler) // 실패 시 이동
                         .permitAll())
                 .oauth2Login(oauth -> oauth
                         .loginPage("/auth/login") // 같은 페이지에서 소셜 버튼 제공
