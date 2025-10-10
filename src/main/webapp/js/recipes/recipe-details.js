@@ -1,3 +1,5 @@
+
+
 // 본문 "더보기" 토글
 (function () {
     const box = document.getElementById('postDesc');
@@ -9,6 +11,9 @@
         btn.textContent = box.classList.contains('expanded') ? '접기' : '더보기';
     });
 })();
+
+
+
 
 // 이미지/텍스트 슬라이더
 (function () {
@@ -260,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="btnEdit">수정</button>
             <button class="btnDelete">삭제</button>
         `;
-        
+
         // 로그인한 경우에만 좋아요/신고 버튼 추가
         if (isLoggedIn) {
             actionHtml += `
