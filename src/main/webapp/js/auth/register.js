@@ -55,7 +55,7 @@ function validateHandle(){
 }
 
 $('#checkHandleBtn').addEventListener('click', async ()=>{
-    const handleVal = $('#handle').value.trim();
+    const handleVal = $('#handle').value.trim().startsWith('@') ? $('#handle').value.trim() : '@' + $('#handle').value.trim();
     if(!validateHandle()) { alert('아이디 형식을 확인하세요'); return; }
     const ok = await checkDuplicate("handle", handleVal);
     handleChecked = ok;
