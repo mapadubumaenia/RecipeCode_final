@@ -100,7 +100,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     .nickname(nickname != null ? nickname : provider + "_" + providerId)
                     .profileImage(profileImage)
                     .profileStatus("PUBLIC")
-                    .role("R_USER")
+                    .role("ROLE_USER")
                     .provider(provider)
                     .providerId(providerId)
                     .deleted("N")

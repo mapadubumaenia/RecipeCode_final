@@ -12,6 +12,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const sendBtn = document.getElementById("codebtn");  // 인증코드 발송 버튼
     const resetBtn = document.getElementById("savebtn"); // 비밀번호 재설정 버튼
 
+    let timerElement = document.getElementById("timer");
+    let countdown;    // setInterval 핸들러
+    let remainingTime = 0;
+
+    // 타이머 시작 함수
+    function startTimer() {
+        // 기존 타이머 초기화
+        clearInterval(countdown);
+
+        // 타이머 엘리먼트가 없으면 생성
+        if (!timerElement) {
+            timerElement = document.createElement("div");
+            timerElement.id = "timer";
+            timerElement.style = "margin-top:8px; color:red; font-weight:bold;";
+            sendBtn.parentElement.appendChild(timerElement);
+        }
+
+        remainingTime = 10 * 60; // 10분 = 600초
+
+        countdown = setInterval(() => {
+            const min = String(Math.floor(remainingTime / 60)).padStart(2, "0");
+            const sec = String(remainingTime % 60).padStart(2, "0");
+            timerElement.textContent = `${min}:${sec}`;
+            remainingTime--;
+
+            if (remainingTime < 0) {
+                clearInterval(countdown);
+                timerElement.textContent = "인증시간 만료";
+                alert("인증 시간이 만료되었습니다. 다시 요청해주세요.");
+
+                // 입력 & 버튼 비활성화
+                codeInput.disabled = true;
+                resetBtn.disabled = true;
+            }
+        }, 1000);
+    }
+
+    // 타이머 초기화 함수
+    function resetTimer() {
+        clearInterval(countdown);
+        timerElement.textContent = "";
+        codeInput.disabled = false;
+        resetBtn.disabled = false;
+    }
+
     //  인증코드 발송
     sendBtn.addEventListener("click", (e) => {
         e.preventDefault();
@@ -31,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await res.json();
                 if (res.ok && data.status === "ok") {
                     alert(data.message); // "인증 메일 발송 완료"
+                    resetTimer(); // 타이머 초기화
+                    startTimer(); // 타이머 시작
                 } else {
                     alert(data.message || "등록되지 않은 이메일입니다.");
                 }
