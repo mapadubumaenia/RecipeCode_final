@@ -45,7 +45,10 @@
             <form method="post" action="">
                 <div class="field">
                     <label for="code">인증코드</label>
-                    <input class="input" type="text" id="code" name="code" required>
+                    <div class="input-wrap">
+                        <input class="input" type="text" id="code" name="code" required>
+                        <div class="timer" id="timer"></div>
+                    </div>
                 </div>
                 <!-- 비밀번호 -->
                 <div class="field">
