@@ -260,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="btnEdit">수정</button>
             <button class="btnDelete">삭제</button>
         `;
-
+        
         // 로그인한 경우에만 좋아요/신고 버튼 추가
         if (isLoggedIn) {
             actionHtml += `
