@@ -49,21 +49,38 @@
     if ($form.length === 0) return;
 
     const validator = $form.validate({
-      ignore: [], // hidden도 검증(대표이미지/타입 전환용)
+      ignore: ":hidden", // 기본값: 숨겨진 필드는 검증하지 않음
       errorClass: "fld-error",
       validClass: "fld-valid",
       errorElement: "em",
       highlight: function (el) {
-        $(el).addClass("has-error");
-      },
-      unhighlight: function (el) {
-        $(el).removeClass("has-error");
-      },
+        const $el = $(el);
+            // 썸네일은 label(#thumbBox)에만 에러 스타일 부여 (input 내부 레이아웃 붕괴 방지)
+                if ($el.attr('id') === 'thumb') {
+                $('#thumbBox').addClass('has-error');
+              } else {
+                $el.addClass('has-error');
+              }
+          },
+          unhighlight: function (el) {
+          const $el = $(el);
+          if ($el.attr('id') === 'thumb') {
+              $('#thumbBox').removeClass('has-error');
+            } else {
+              $el.removeClass('has-error');
+            }
+        },
       errorPlacement: function (error, el) {
-        const $row = $(el).closest(".row");
-        if ($row.length) error.appendTo($row);
-        else error.insertAfter(el);
-      },
+          const $el = $(el);
+          // ★ 핵심: 썸네일 메시지는 label 밖으로! (label 바로 뒤에 붙임)
+              if ($el.attr('id') === 'thumb') {
+              $('#thumbBox').after(error);
+              return;
+            }
+          const $row = $el.closest('.row');
+          if ($row.length) error.appendTo($row);
+          else error.insertAfter($el);
+        },
 
       // ----- 고정 필드 규칙 -----
       rules: {
@@ -166,6 +183,36 @@
           validator.element(this);
         });
       },
+
+      clearThumbError: function(){
+        const $thumb = $('#thumb');
+        if ($thumb.length === 0) return;
+
+        // 플러그인이 label 안에 넣든 밖에 넣든 전부 제거
+        $thumb.closest('label, .thumb, #thumbBox')
+            .find('#thumb-error, .fld-error')
+            .remove();
+
+        // aria/클래스 초기화
+        $thumb.removeClass('error has-error fld-error')
+            .attr('aria-invalid', 'false')
+            .removeAttr('aria-describedby');
+
+        // validator 내부 상태 초기화
+        const v = $('#recipeForm').data('validator');
+        if (v) {
+          if (typeof v.resetForm === 'function') {
+            v.resetForm(); // 모든 에러 및 상태 초기화
+          } else {
+            v.successList = [$thumb[0]];
+            v.showErrors();
+          }
+        }
+
+        console.log('[RecipesValidation] thumb error cleared');
+      }
+
     };
+
   });
 })(jQuery);
