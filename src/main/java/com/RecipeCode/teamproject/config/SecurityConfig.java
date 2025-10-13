@@ -1,6 +1,7 @@
 package com.RecipeCode.teamproject.config;
 
 import com.RecipeCode.teamproject.reci.auth.handler.CustomAuthenticationFailureHandler;
+import com.RecipeCode.teamproject.reci.auth.handler.LoginRedirectHandler;
 import com.RecipeCode.teamproject.reci.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,8 @@ public class SecurityConfig {
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final AuthenticationSuccessHandler oAuth2SuccessHandler;
+    private final LoginRedirectHandler loginRedirectHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -35,6 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/search","/recipes/**").permitAll() // JSP 뷰
                         .requestMatchers("/css/**","/js/**","/images/**","/webjars/**").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll() // 검색 API
                         .requestMatchers("/comments/**").permitAll() // 댓글 조회 허용
                         .anyRequest().permitAll()
@@ -45,7 +49,7 @@ public class SecurityConfig {
                         .loginPage("/auth/login")                                // 사용자 정의 로그인 페이지
                         .loginProcessingUrl("/auth/loginProcess")                // 로그인 처리 URL
                         .usernameParameter("userEmail")                              // form에서 name="email"
-                        .defaultSuccessUrl("/", true)     // 로그인 성공 시 이동
+                        .successHandler(loginRedirectHandler)
                         .failureHandler(customAuthenticationFailureHandler) // 실패 시 이동
                         .permitAll())
                 .oauth2Login(oauth -> oauth
