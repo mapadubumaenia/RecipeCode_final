@@ -20,6 +20,9 @@
     .strength{height:8px;background:#eee;border-radius:999px;overflow:hidden}
     .strength > span{display:block;height:100%;width:0;background:var(--danger);transition:width .25s ease, background .25s ease}
 
+    /* 약관요약 */
+    .terms-box {background: #fff;border: 1px solid var(--border);border-radius: 12px;padding: 12px 14px;margin-top: 16px;margin-bottom: 8px;font-size: 0.8rem;color: var(--text);line-height: 1.6;}
+
     /* 약관 스위치 (공통 스타일과 유사) */
     .switch{display:inline-flex;align-items:center;gap:8px;user-select:none}
     .switch input{appearance:none;width:42px;height:24px;background:#ddd;border-radius:999px;position:relative;outline:none;cursor:pointer}
