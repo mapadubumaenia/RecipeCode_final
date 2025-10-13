@@ -1,11 +1,13 @@
 package com.RecipeCode.teamproject.reci.admin.entity;
 
 import com.RecipeCode.teamproject.common.BaseTimeEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.Table;
+import com.RecipeCode.teamproject.reci.auth.membertag.entity.MemberTag;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "ADMIN")
@@ -33,4 +35,5 @@ public class Admin extends BaseTimeEntity {
     private String adminInterestTag;
     private String profileStatus;   // PUBLIC, FOLLOW, PRIVATE
     private String role;
+
 }
