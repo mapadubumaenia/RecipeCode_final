@@ -6,7 +6,6 @@ import com.RecipeCode.teamproject.reci.feed.comments.repository.CommentsReposito
 import com.RecipeCode.teamproject.reci.feed.recipeslikes.repository.RecipesLikesRepository;
 import com.RecipeCode.teamproject.reci.function.notification.dto.NotificationDto;
 import com.RecipeCode.teamproject.reci.function.notification.entity.Notification;
-import com.RecipeCode.teamproject.reci.function.notification.enums.NotificationEvent;
 import com.RecipeCode.teamproject.reci.function.notificationDelivery.entity.NotificationDelivery;
 import lombok.*;
 
@@ -40,9 +39,8 @@ public class NotificationDeliveryDto {
                 .map(Member::getUserId)
                 .orElse(actorEmail);
 
-        // 2) 메시지 조립
-        String message = NotificationEvent.valueOf(notification.getEvent())
-                .formatMessage(actorUserId);
+        // 2)  메시지는 저장된 값을 그대로 사용
+        String message = notification.getMessage();
 
         // 3) 기본 NotificationDto
         NotificationDto notificationDto = new NotificationDto(
@@ -57,18 +55,32 @@ public class NotificationDeliveryDto {
                 notification.getInsertTime(),
                 null
         );
-
-        if ("COMMENT".equals(notification.getSourceType())) {
-            Long commentId = Long.valueOf(notification.getSourceId());
-            commentsRepository.findById(commentId).ifPresent(comment -> {
-                notificationDto.setRecipeUuid(comment.getRecipes().getUuid());
-            });
-        } else if ("LIKE".equals(notification.getSourceType())) {
-            Long likeId = Long.valueOf(notification.getSourceId());
-            recipesLikesRepository.findById(likeId).ifPresent(like -> {
-                notificationDto.setRecipeUuid(like.getRecipes().getUuid());
-            });
+        // 4) 소스 타입에 따른 링크 데이터 세팅
+        String st = notification.getSourceType();
+        if ("COMMENT".equals(st)) {
+            try {
+                Long commentId = Long.valueOf(notification.getSourceId());
+                commentsRepository.findById(commentId).ifPresent(c ->
+                        notificationDto.setRecipeUuid(c.getRecipes().getUuid())
+                );
+            } catch (NumberFormatException ignore) {
+            }
+        } else if ("LIKE".equals(st)) {
+            try {
+                Long likeId = Long.valueOf(notification.getSourceId());
+                recipesLikesRepository.findById(likeId).ifPresent(like ->
+                        notificationDto.setRecipeUuid(like.getRecipes().getUuid())
+                );
+            } catch (NumberFormatException ignore) {
+            }
+        } else if ("RECIPE".equals(st)) {
+            //  신고 '유지' 케이스: sourceId에 recipeUuid가 들어있음
+            notificationDto.setRecipeUuid(notification.getSourceId());
+        } else if ("RECIPE_REPORT".equals(st)) {
+            //  신고 '삭제' 케이스: 이동 없음 → recipeUuid 설정하지 않음
+            // no-op
         }
+        // 기타/알 수 없는 타입도 예외 던지지 말고 그대로 둔다.
 
         return new NotificationDeliveryDto(
                 delivery.getDeliveryId(),

@@ -1,5 +1,6 @@
 package com.RecipeCode.teamproject.reci.function.recipeReport.controller;
 
+import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.feed.recipes.service.RecipesService;
 import com.RecipeCode.teamproject.reci.function.recipeReport.dto.RecipeReportDto;
 import com.RecipeCode.teamproject.reci.function.recipeReport.service.RecipeReportService;
@@ -99,16 +100,22 @@ public class RecipeReportController {
     @PostMapping("/report/edit")
     public String update(@RequestParam Long reportId,
                          @RequestParam Long newStatus,
-                         @RequestParam(required = false) String uuid) {
+                         @RequestParam(required = false) String uuid,
+                         @AuthenticationPrincipal SecurityUserDto admin) {
 
-        // 1. 서비스에 상태 전달
-        recipeReportService.updateStatus(reportId, newStatus);
+        String adminEmail = (admin != null) ? admin.getUserEmail() : "admin@lumeet.com";
 
-        // 2. uuid가 넘어왔다는 건 "삭제" 버튼을 누른 경우
-        if (uuid != null && newStatus == 2L) {
-            recipesService.softDeleteRecipe(uuid); // 게시글 소프트 삭제
+        if (newStatus != 2L) {
+            recipeReportService.updateStatus(reportId, newStatus);
+            return "redirect:/admin/moderation/reports";
         }
 
+        String action = (uuid != null) ? "DELETE" : "KEEP";
+        if ("DELETE".equals(action)) {
+            recipesService.softDeleteRecipe(uuid);
+        }
+
+        recipeReportService.processReport(reportId, action, adminEmail);
         return "redirect:/admin/moderation/reports";
     }
 

@@ -18,4 +18,7 @@ public class FollowDto {
     // 팔로우용 dto 추가
     private boolean followingStatus;        // 로그인한 내가 이 사용자를 팔로우 중?
     private boolean followerStatus;         // 이 사용자가 나를 팔로우 중?
+
+
+
 }
