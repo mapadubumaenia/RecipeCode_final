@@ -15,7 +15,7 @@
     .input-wrap{position:relative}
     .input-wrap .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
     .input-wrap .check{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
-
+    .input-wrap .timer{position:absolute;right:15px;top:50%;transform:translateY(-50%);border:0;background:transparent;font-size:14px;color: red}
     /* 비밀번호 강도 */
     .strength{height:8px;background:#eee;border-radius:999px;overflow:hidden}
     .strength > span{display:block;height:100%;width:0;background:var(--danger);transition:width .25s ease, background .25s ease}

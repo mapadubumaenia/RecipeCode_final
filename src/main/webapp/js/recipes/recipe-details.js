@@ -1,3 +1,5 @@
+
+
 // 본문 "더보기" 토글
 (function () {
     const box = document.getElementById('postDesc');
@@ -9,6 +11,9 @@
         btn.textContent = box.classList.contains('expanded') ? '접기' : '더보기';
     });
 })();
+
+
+
 
 // 이미지/텍스트 슬라이더
 (function () {

@@ -54,7 +54,10 @@
         <div class="grow">
         </div>
         <sec:authorize access="isAuthenticated()">
-          <span class="muted"><sec:authentication property="principal.nickname"/> 님</span>
+          <span class="muted"><a href="${pageContext.request.contextPath}/"><sec:authentication property="principal.nickname"/></a>님</span>
+                <form action="${pageContext.request.contextPath}/auth/logout" method="post">
+                <button type="submit" class="btn-logout">logout</button>
+                </form>
         </sec:authorize>
       </div>
     </div>

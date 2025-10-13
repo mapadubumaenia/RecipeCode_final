@@ -65,9 +65,19 @@
             <sec:authorize access="!isAuthenticated()">
                 <a class="btn small ghost login-top" href="<c:url value='/auth/login'/>">Login</a>
             </sec:authorize>
+
             <sec:authorize access="isAuthenticated()">
                 <sec:authentication property="principal" var="loginUser"/>
-                <a class="alink"  href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>
+                <c:choose>
+                    <c:when test="${pageContext.request.isUserInRole('ROLE_ADMIN')}">
+                        <!-- 관리자-->
+                        <a href="${pageContext.request.contextPath}/admin">${loginUser.nickname}</a>님
+                    </c:when>
+                    <c:otherwise>
+                        <!-- 일반 회원 -->
+                        <a href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}</a>님
+                    </c:otherwise>
+                </c:choose>
             </sec:authorize>
 
             <button id="btnNotif" class="notif-btn" aria-haspopup="dialog" aria-expanded="false"
