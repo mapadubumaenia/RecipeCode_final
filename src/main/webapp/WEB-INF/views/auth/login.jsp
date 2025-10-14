@@ -33,6 +33,7 @@
         <article class="card p-16">
             <!-- 나중에 JSP form으로 교체 -->
             <form id="loginForm" method="post" action="/auth/loginProcess">
+                <input type="hidden" name="redirect" value="${param.redirect}">
                 <%-- TODO: csrf 인증 토큰(중요): 안하면 로그인페이지로 redirect 됨 --%>
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <!-- 이메일 -->

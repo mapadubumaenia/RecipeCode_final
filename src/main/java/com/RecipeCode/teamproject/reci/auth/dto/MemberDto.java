@@ -1,6 +1,6 @@
 package com.RecipeCode.teamproject.reci.auth.dto;
 
-import com.RecipeCode.teamproject.reci.auth.membertag.entity.MemberTag;
+
 import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;

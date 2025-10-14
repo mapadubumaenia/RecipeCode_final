@@ -1,6 +1,8 @@
 package com.RecipeCode.teamproject.reci.mypage.controller;
 
+import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.MapStruct;
+import com.RecipeCode.teamproject.reci.admin.repository.AdminRepository;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.dto.SecurityUserDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
@@ -18,6 +20,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -36,17 +39,15 @@ public class MyPageViewController {
     private final NotiSettingRepository notiSettingRepository;
     private final FollowService followService;
     private final MemberService memberService;
+    private final AdminRepository adminRepository;
     private final MemberRepository memberRepository;
     private final MemberTagService memberTagService;
     private final MapStruct mapStruct;
+    private final ErrorMsg errorMsg;
 
     @GetMapping("/mypage")
     public String myPageView(@AuthenticationPrincipal SecurityUserDto principal,
                              Model model) {
-        // 1) 비로그인일 때 로그인 페이지로
-        if (principal == null) {
-            return "redirect:/auth/login";
-        }
 
 
         // 2) 로그인 이메일로 Member 조회
@@ -74,15 +75,15 @@ public class MyPageViewController {
     @GetMapping("/mypage/edit")
     public String profileEdit(@AuthenticationPrincipal SecurityUserDto principal,
                               Model model) {
-        log.info("principal: {}", principal);
-
-        if (principal == null) {
-            // 로그인 안 된 경우 처리 (로그인 페이지로 이동 or 에러 페이지)
-            return "redirect:/auth/login";
-        }
 
         Member member = memberRepository.findByUserEmailWithTags(principal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseGet(() -> {
+                    // 관리자 확인
+                    if (adminRepository.findByAdminEmail(principal.getUsername()).isPresent()) {
+                        throw new IllegalArgumentException(errorMsg.getMessage("errors.admin.profile"));
+                    }
+                    throw new IllegalArgumentException(errorMsg.getMessage("errors.not.found"));
+                });
 
         List<NotiSetting> notiSettings = notiSettingRepository.findByMember(member);
 
@@ -97,7 +98,13 @@ public class MyPageViewController {
                                 RedirectAttributes rttr) {
 
         Member member = memberRepository.findByUserEmailWithTags(principal.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
+                .orElseGet(() -> {
+                    // 관리자 확인
+                    if (adminRepository.findByAdminEmail(principal.getUsername()).isPresent()) {
+                        throw new IllegalArgumentException(errorMsg.getMessage("errors.admin.profile"));
+                    }
+                    throw new IllegalArgumentException(errorMsg.getMessage("errors.not.found"));
+                });
 
         memberDto.setUserEmail(principal.getUserEmail());
 

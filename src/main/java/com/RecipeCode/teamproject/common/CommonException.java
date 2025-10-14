@@ -39,11 +39,18 @@ public class CommonException {
 
     // 좋아요 본인 제한 에러
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException e){
+    public Object handleIllegalArgument(IllegalArgumentException e , Model model){
         if(e.getMessage().contains("로그인")){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED) // UNAUTHORIZED 401
                     .body(e.getMessage());
         }
+
+        if (e.getMessage().contains("관리자")) {
+            String errors = e.getMessage();
+            model.addAttribute("errors", errors);
+            return "errors";
+        }
+
         return ResponseEntity
                 // BAD_REQUEST(에러) 400
                 .status(HttpStatus.BAD_REQUEST)
