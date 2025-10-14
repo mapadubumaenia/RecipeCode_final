@@ -172,10 +172,25 @@
 
         </aside>
     </section>
-</main>
+    <!-- 비밀번호 확인 모달 -->
+    <div class="modal fade" id="passwordCheckModal" tabindex="-1" aria-labelledby="passwordCheckLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passwordCheckLabel">비밀번호 확인</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="passwordCheckForm">
+                        <input type="password" name="password" placeholder="비밀번호 입력" required class="form-control"/>
+                        <button type="submit" class="btn btn-primary mt-3">확인</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <!-- FAQ 플로팅 버튼 -->
-<a id="faq-btn" class="faq-btn" href="<c:url value="faq" />">FAQ</a>
+<a id="faq-btn" class="faq-btn" href="<c:url value='/faq' />">FAQ</a>
 <div class="to-topbox">
     <button id="backToTop" class="to-top" aria-label="맨 위로">Top</button>
 </div>
@@ -186,6 +201,7 @@
     window.ctx = "${pageContext.request.contextPath}";
     window.currentUserEmail = "${currentUserEmail}";
 </script>
+
 <script src="${pageContext.request.contextPath}/js/mypage/airpanle.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/utils.js"></script>
 <script src="${pageContext.request.contextPath}/js/mypage/mypage-feed.js"></script>
@@ -193,7 +209,59 @@
 <script src="${pageContext.request.contextPath}/js/mypage/position-fixed.js"></script>
 <!-- jQuery CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JS (Popper 포함 버전) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <%--알림 js--%>
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>
+    <script>
+        $(function(){
+            const modalEl = document.getElementById("passwordCheckModal");
+            const modal = new bootstrap.Modal(modalEl);
+
+            $(".edit-profile").click(function(e){
+                e.preventDefault();
+                const editUrl = window.ctx + "/mypage/edit";
+
+                $.ajax({
+                    url: window.ctx + "/member/checkPasswordExist",
+                    type: "GET",
+                    dataType: "json",
+                    success: function(hasPassword){
+                        if (hasPassword === true || hasPassword === "true") {
+                            modal.show();
+                        } else {
+                            window.location.href = editUrl;
+                        }
+                    }
+                });
+            });
+
+            $("#passwordCheckForm").on("submit", function(e){
+                e.preventDefault();
+                const pw = $("input[name='password']").val().trim();
+                if (pw === "") return alert("비밀번호를 입력하세요.");
+
+                $.ajax({
+                    url: window.ctx + "/member/verifyPassword",
+                    type: "POST",
+                    data: { password: pw },
+                    success: function(valid){
+                        console.log("서버응답:", valid);
+                        if (valid === true || valid === "true") {
+                            modal.hide();
+                            window.location.href = window.ctx + "/mypage/edit";
+                        } else {
+                            alert("비밀번호가 올바르지 않습니다.");
+                        }
+                    },
+                    error: function(){
+                        alert("비밀번호 확인 중 오류가 발생했습니다.");
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+
 </body>
 </html>

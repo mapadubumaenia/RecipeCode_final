@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MemberRepository extends JpaRepository<Member,String> {
+public interface MemberRepository extends JpaRepository<Member,String>,  MemberRepositoryCustom {
     Optional<Member> findByUserEmail(String userEmail);
     //프로필이미지용
     Optional<Member> findByUserId(String userId);

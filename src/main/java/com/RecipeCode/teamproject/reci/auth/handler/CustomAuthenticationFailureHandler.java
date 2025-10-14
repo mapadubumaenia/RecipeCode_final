@@ -28,10 +28,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             errorMessage = "비밀번호가 올바르지 않습니다.";
         } else if (exception instanceof UsernameNotFoundException) {
             errorMessage = "존재하지 않는 이메일입니다.";
-        } else if (exception instanceof DisabledException) {
-            errorMessage = "비활성화된 계정입니다.";
-        } else if (exception instanceof LockedException) {
-            errorMessage = "잠긴 계정입니다.";
         }
 
         // ✅ JSP로 직접 전달할 메시지 속성 설정

@@ -67,3 +67,52 @@
   .profile-info{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:6px 12px}
   .page-title{margin-bottom:8px}
 }
+
+/*비밀번호 확인 모달*/
+/* modal 기본 스타일 최소 버전 */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: 0;
+  background-color: rgba(0,0,0,0.5);
+}
+
+
+.modal-title{
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size:18px;
+  margin-left: 0.5rem;
+}
+.modal.show {
+  display: block;
+}
+
+.modal-dialog {
+  position: relative;
+  margin: 1.75rem auto;
+  max-width: 350px;
+}
+#passwordCheckForm{
+  margin-bottom: 5px;
+  margin-left: 0.5rem;
+}
+#passwordCheckForm .form-control{
+  height: 32px;
+  width: 200px;
+}
+#passwordCheckForm .btn{
+  width: 80px;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
