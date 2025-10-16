@@ -85,7 +85,7 @@ public class ProfileFeedViewController {
         // 5)
 
         Set<String> userIds = new HashSet<String>();
-        for(FollowDto f : followings.getContent()) {
+        for (FollowDto f : followings.getContent()) {
             userIds.add(f.getMember().getUserId());
         }
         for (FollowDto f : followers.getContent()) {
@@ -95,7 +95,7 @@ public class ProfileFeedViewController {
         Map<String, Long> followerCounts = new HashMap<String, Long>();
         Map<String, Long> followingCounts = new HashMap<String, Long>();
 
-        for(String uid : userIds) {
+        for (String uid : userIds) {
             String idForLookup = uid.startsWith("@") ? uid : "@" + uid;
             Member m = memberService.getByUserId(idForLookup);
             if (m != null) {
@@ -108,7 +108,6 @@ public class ProfileFeedViewController {
 
         model.addAttribute("followerCounts", followerCounts);
         model.addAttribute("followingCounts", followingCounts);
-
 
         return "profile/profile_feed";
     }
