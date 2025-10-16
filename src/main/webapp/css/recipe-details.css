@@ -5,7 +5,6 @@
 /* 오버라이드 */
 .btn{background:var(--brand);border:1px solid var(--line);color:#fff;cursor:pointer;padding:8px 14px;border-radius:999px;font-weight:700}
 
-v
 /* 상세 전용 레이아웃/콘텐츠 */
 .layout{ display:grid;gap: 8px; }
 .content,.mainContent,.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
@@ -65,19 +64,13 @@ v
 .collapsible.expanded .contentText{max-height:none}
 .comments{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-top:14px;padding:0 12px}
 .comment-input{display:flex;gap:10px;align-items:flex-start;justify-content:center;margin-bottom:12px}
-.comment-input textarea,.reply-input .reply-text,.edit-textarea{flex:1; background:#fff;color:#131313;border:1px solid var(--line);border-radius:10px;min-height:70px;resize:vertical}
-.reply-input{display:flex;gap:8px;align-items:flex-start;margin:8px 0 10px}
+.comment-input textarea, .reply-text,.edit-textarea{flex:1; background:#fff;color:#131313;border:1px solid var(--line);border-radius:10px;min-height:70px;resize:vertical}
 .replies{margin-top:8px;padding-left:48px;border-left:2px solid var(--line)}
-.reply-list .reply-item{display:flex;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
 .editing .cmtCard{background:#fafafa;border-radius:12px;padding:8px}
 .edit-controls{display:flex;gap:8px;margin-top:8px}
 .edit-controls .btn--ghost{background:transparent;border:1px solid var(--line)}
 .toggleBox{display:flex;justify-content:center;width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);font-weight:700;background:transparent;margin-bottom:12px}
 .cmtCard{display: flex; flex-direction: row;}
-.cmtInfo{display: flex; flex-direction: row; align-items: center; gap: 4px; color:#ddd;}
-.name{flex:1; color:var(--text)}
-.name .createdAt {font-weight: normal; }
-.cmtActions{display: flex; flex-wrap: nowrap; gap: 12px; justify-content: end;}
 .time {font-size: 0.85rem; color: var(--muted)}
 
 /* 댓글 수정 */
@@ -95,6 +88,10 @@ v
   border-radius:10px; padding:6px 10px;}
 .reply-list .reply-item {display:flex; gap:8px; padding:10px 0;border-bottom:1px solid var(--line);}
 .reply-list .reply-item:last-child { border-bottom: none; }
+
+/* 대댓글 입력 영역 버튼 */
+.replies button {background: transparent; border: 1px solid var(--line);border-radius: 10px;color: var(--text);padding: 6px 12px;font-size: 0.85rem;cursor: pointer;transition: background 0.2s ease, color 0.2s ease;}
+.replies button:hover {background: var(--brand); color: #fff;}
 
 /* 댓글 액션 버튼 공통 */
 .comment-actions button {
