@@ -121,7 +121,7 @@ public class CommentsService {
                 comment.getRecipes().getMember().getUserEmail(),    //레시피 작성자
                 NotificationEvent.COMMENT,                          //이벤트 타입
                 "COMMENT",                                          //서비스 타입
-                String.valueOf(comment.getCommentsId())             //소스 ID
+                String.valueOf(comment.getCommentsId())           //소스 ID
         );
 
 

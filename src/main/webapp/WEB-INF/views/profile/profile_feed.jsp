@@ -30,7 +30,7 @@
             <div class="header-actions">
                 <sec:authorize access="isAuthenticated()">
                     <sec:authentication property="principal" var="loginUser"/>
-                    <a class="alink"  href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>
+                    <a class="alink" href="${pageContext.request.contextPath}/mypage">${loginUser.nickname}님</a>
                 </sec:authorize>
 
                 <div class="notif-wrap">
@@ -75,72 +75,72 @@
     <!-- 프로필 카드 -->
     <section class="card profile-card">
         <aside class="left">
-        <div class="cardLeft">
-            <div class="profile-img">
-            <!-- 프로필 이미지 -->
-            <div class="avatar-lg">
-                <c:if test="${not empty user.profileImageUrl}">
-                    <img src="${user.profileImageUrl}" alt="${user.nickname}" class="avatar-lg"/>
-                </c:if>
-            </div>
-        </div>
-
-        <!-- 프로필 정보 -->
-        <div class="profile-info">
-            <!-- 아이디 + 닉네임 -->
-            <div class="profile-top">
-                <div class="userInfo">
-                    <div class="profile">
-                        <h2 class="profile-name">${user.userId}</h2>
-                    <span class="muted">${user.nickname}</span>
-                    </div>
-                    <div class="profile-left">
-                        <!-- 위치 -->
-                        <c:if test="${not empty user.userLocation}">
-                            <p class="muted">📍 ${user.userLocation}</p>
+            <div class="cardLeft">
+                <div class="profile-img">
+                    <!-- 프로필 이미지 -->
+                    <div class="avatar-lg">
+                        <c:if test="${not empty user.profileImageUrl}">
+                            <img src="${user.profileImageUrl}" alt="${user.nickname}" class="avatar-lg"/>
                         </c:if>
                     </div>
                 </div>
+
+                <!-- 프로필 정보 -->
+                <div class="profile-info">
+                    <!-- 아이디 + 닉네임 -->
+                    <div class="profile-top">
+                        <div class="userInfo">
+                            <div class="profile">
+                                <h2 class="profile-name">${user.userId}</h2>
+                                <span class="muted">${user.nickname}</span>
+                            </div>
+                            <div class="profile-left">
+                                <!-- 위치 -->
+                                <c:if test="${not empty user.userLocation}">
+                                    <p class="muted">📍 ${user.userLocation}</p>
+                                </c:if>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            </div>
-        </div>
         </aside>
 
 
-            <!-- 짧은 소개 -->
-<%--            <c:if test="${not empty user.userIntroduce}">--%>
-<%--                <p class="intro">${user.userIntroduce}</p>--%>
-<%--            </c:if>--%>
+        <!-- 짧은 소개 -->
+        <%--            <c:if test="${not empty user.userIntroduce}">--%>
+        <%--                <p class="intro">${user.userIntroduce}</p>--%>
+        <%--            </c:if>--%>
 
-            <!-- 위치 -->
-<%--            <c:if test="${not empty user.userLocation}">--%>
-<%--                <p class="muted">📍 ${user.userLocation}</p>--%>
-<%--            </c:if>--%>
+        <!-- 위치 -->
+        <%--            <c:if test="${not empty user.userLocation}">--%>
+        <%--                <p class="muted">📍 ${user.userLocation}</p>--%>
+        <%--            </c:if>--%>
 
-            <!-- 관심 태그 -->
-<%--            <c:if test="${not empty user.interestTags}">--%>
-<%--                <div class="tags">--%>
-<%--                    <c:forEach items="${user.interestTags}" var="t">--%>
-<%--                        <span class="chip">#${t.tag}</span>--%>
-<%--                    </c:forEach>--%>
-<%--                </div>--%>
-<%--            </c:if>--%>
+        <!-- 관심 태그 -->
+        <%--            <c:if test="${not empty user.interestTags}">--%>
+        <%--                <div class="tags">--%>
+        <%--                    <c:forEach items="${user.interestTags}" var="t">--%>
+        <%--                        <span class="chip">#${t.tag}</span>--%>
+        <%--                    </c:forEach>--%>
+        <%--                </div>--%>
+        <%--            </c:if>--%>
 
-            <!-- SNS / 링크 아이콘 -->
-<%--            <div class="profile-links">--%>
-<%--                <c:if test="${not empty user.userWebsite}">--%>
-<%--                    <a href="${user.userWebsite}" target="_blank" class="link-icon">🌐</a>--%>
-<%--                </c:if>--%>
-<%--                <c:if test="${not empty user.userInsta}">--%>
-<%--                    <a href="https://instagram.com/${user.userInsta}" target="_blank" class="link-icon">📸</a>--%>
-<%--                </c:if>--%>
-<%--                <c:if test="${not empty user.userYoutube}">--%>
-<%--                    <a href="https://youtube.com/${user.userYoutube}" target="_blank" class="link-icon">▶</a>--%>
-<%--                </c:if>--%>
-<%--                <c:if test="${not empty user.userBlog}">--%>
-<%--                    <a href="${user.userBlog}" target="_blank" class="link-icon">✍</a>--%>
-<%--                </c:if>--%>
-<%--            </div>--%>
+        <!-- SNS / 링크 아이콘 -->
+        <%--            <div class="profile-links">--%>
+        <%--                <c:if test="${not empty user.userWebsite}">--%>
+        <%--                    <a href="${user.userWebsite}" target="_blank" class="link-icon">🌐</a>--%>
+        <%--                </c:if>--%>
+        <%--                <c:if test="${not empty user.userInsta}">--%>
+        <%--                    <a href="https://instagram.com/${user.userInsta}" target="_blank" class="link-icon">📸</a>--%>
+        <%--                </c:if>--%>
+        <%--                <c:if test="${not empty user.userYoutube}">--%>
+        <%--                    <a href="https://youtube.com/${user.userYoutube}" target="_blank" class="link-icon">▶</a>--%>
+        <%--                </c:if>--%>
+        <%--                <c:if test="${not empty user.userBlog}">--%>
+        <%--                    <a href="${user.userBlog}" target="_blank" class="link-icon">✍</a>--%>
+        <%--                </c:if>--%>
+        <%--            </div>--%>
 
 
         <!-- SNS / 링크 아이콘 -->
@@ -164,28 +164,28 @@
             </div>
 
             <div class="bottom-left">
-            <div class="profile-links">
-               <c:if test="${not empty user.userWebsite}">
-               <a href="${user.userWebsite}" target="_blank" class="link-icon">🌐</a>
-               </c:if>
-              <c:if test="${not empty user.userInsta}">
-               <a href="https://instagram.com/${user.userInsta}" target="_blank" class="link-icon">📸</a>
-              </c:if>
-              <c:if test="${not empty user.userYoutube}">
-              <a href="https://youtube.com/${user.userYoutube}" target="_blank" class="link-icon">▶</a>
-              </c:if>
-              <c:if test="${not empty user.userBlog}">
-                <a href="${user.userBlog}" target="_blank" class="link-icon">✍</a>
-                </c:if>
-            </div>
-            <!-- 관심 태그 -->
-            <c:if test="${not empty user.interestTags}">
-                <div class="tags">
-                    <c:forEach items="${user.interestTags}" var="t">
-                        <span class="chip">#${t.tag}</span>
-                    </c:forEach>
+                <div class="profile-links">
+                    <c:if test="${not empty user.userWebsite}">
+                        <a href="${user.userWebsite}" target="_blank" class="link-icon">🌐</a>
+                    </c:if>
+                    <c:if test="${not empty user.userInsta}">
+                        <a href="https://instagram.com/${user.userInsta}" target="_blank" class="link-icon">📸</a>
+                    </c:if>
+                    <c:if test="${not empty user.userYoutube}">
+                        <a href="https://youtube.com/${user.userYoutube}" target="_blank" class="link-icon">▶</a>
+                    </c:if>
+                    <c:if test="${not empty user.userBlog}">
+                        <a href="${user.userBlog}" target="_blank" class="link-icon">✍</a>
+                    </c:if>
                 </div>
-            </c:if>
+                <!-- 관심 태그 -->
+                <c:if test="${not empty user.interestTags}">
+                    <div class="tags">
+                        <c:forEach items="${user.interestTags}" var="t">
+                            <span class="chip">#${t.tag}</span>
+                        </c:forEach>
+                    </div>
+                </c:if>
             </div>
         </aside>
 
@@ -229,11 +229,14 @@
                             <!-- 중앙: 유저 정보 -->
                             <div class="mini-info">
                                 <div class="mini-top">
-                                    <a href="/follow/network/${f.member.userId}"><span class="user-id">${f.member.userId}</span></a>
+                                    <a href="/follow/network/${f.member.userId}"><span
+                                            class="user-id">${f.member.userId}</span></a>
                                     <span class="muted">${f.member.nickname}</span>
                                     <div class="mini-stats">
-                                        <span class="f-count">팔로워 <b><c:out value="${followerCounts[f.member.userId]}" default="0"/></b></span>
-                                        <span class="f-count">팔로잉 <b><c:out value="${followingCounts[f.member.userId]}" default="0"/></b></span>
+                                        <span class="f-count">팔로워 <b><c:out value="${followerCounts[f.member.userId]}"
+                                                                            default="0"/></b></span>
+                                        <span class="f-count">팔로잉 <b><c:out value="${followingCounts[f.member.userId]}"
+                                                                            default="0"/></b></span>
                                     </div>
                                 </div>
                                 <c:if test="${not empty f.member.userLocation}">
@@ -242,7 +245,8 @@
                             </div>
 
                             <!-- 오른쪽: 향후 버튼 자리 -->
-                            <div class="mini-action"></div>
+                            <div class="mini-action">
+                            </div>
                         </div>
                     </c:if>
                 </c:forEach>
@@ -262,11 +266,14 @@
                             <!-- 중앙: 유저 정보 -->
                             <div class="mini-info">
                                 <div class="mini-top">
-                                    <a href="/follow/network/${f.member.userId}"><span class="user-id">${f.member.userId}</span></a>
+                                    <a href="/follow/network/${f.member.userId}"><span
+                                            class="user-id">${f.member.userId}</span></a>
                                     <span class="muted">${f.member.nickname}</span>
                                     <div class="mini-stats">
-                                        <span class="f-count">팔로워 <b><c:out value="${followerCounts[f.member.userId]}" default="0"/></b></span>
-                                        <span class="f-count">팔로잉 <b><c:out value="${followingCounts[f.member.userId]}" default="0"/></b></span>
+                                        <span class="f-count">팔로워 <b><c:out value="${followerCounts[f.member.userId]}"
+                                                                            default="0"/></b></span>
+                                        <span class="f-count">팔로잉 <b><c:out value="${followingCounts[f.member.userId]}"
+                                                                            default="0"/></b></span>
                                     </div>
                                 </div>
                                 <c:if test="${not empty f.member.userLocation}">
@@ -275,7 +282,8 @@
                             </div>
 
                             <!-- 오른쪽: 향후 버튼 자리 -->
-                            <div class="mini-action"></div>
+                            <div class="mini-action">
+                            </div>
                         </div>
                     </c:if>
                 </c:forEach>
