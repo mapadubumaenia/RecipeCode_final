@@ -5,7 +5,10 @@ $(function () {
     const notifDot = $(".notif-dot");
     const markAllBtn = $("#markAll");
     const closeBtn = $("#closeNotif");
+    const token = $("meta[name='_csrf']").attr("content");
+    const header = $("meta[name='_csrf_header']").attr("content");
 
+    
     // 알림 점 표시 업데이트
     function updateDot(hasUnread) {
         notifBtn.toggleClass("has-new", hasUnread);
@@ -174,6 +177,7 @@ $(function () {
             $.ajax({
                 url: `/api/notification/${deliveryId}/read`,
                 type: "PATCH",
+                headers: {[header]: token},
                 success: function () {
 
                     // 링크 유무에 따라 라벨 교체
@@ -199,6 +203,7 @@ $(function () {
         $.ajax({
             url: "/api/notification/readAll",
             type: "PATCH",
+            headers: {[header]: token},
             success: function () {
                 loadNotifications();
                 loadUnreadCount();
