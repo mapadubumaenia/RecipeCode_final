@@ -73,6 +73,8 @@
                                 <button class="btn primary"
                                         onclick="location.href='/faq/edition?faqNum=${faq.faqNum}'">수정</button>
                                 <form action="/faq/delete" method="post" style="display:inline">
+                                        <!-- ✅ CSRF 토큰 추가 -->
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                                     <input type="hidden" name="faqNum" value="${faq.faqNum}" />
                                     <button type="submit" class="btn danger"
                                             onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>

@@ -172,6 +172,7 @@
                     <td>${c.reportStatus == 0 ? "대기중" : c.reportStatus == 1 ? "처리중" : "완료"}</td>
                     <td>
                         <form action="/comments/report/updateStatus" method="post" style="display:inline;">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             <input type="hidden" name="reportId" value="${c.reportId}">
                             <input type="hidden" name="adminEmail" value="${loginUserEmail}">
                             <select name="newReportStatus">
@@ -182,6 +183,7 @@
                             <button type="submit" class="btn small green">변경</button>
                         </form>
                         <form action="/comments/report/delete" method="post" style="display:inline;">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             <input type="hidden" name="reportId" value="${c.reportId}">
                             <button type="submit" class="btn small red" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
                         </form>

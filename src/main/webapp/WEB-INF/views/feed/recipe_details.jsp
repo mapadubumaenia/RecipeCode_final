@@ -19,8 +19,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- JSP <head> 안에 추가 (스프링 시큐리티 쓰면 제공됨) -->
-<%--    <meta name="_csrf" content="${_csrf.token}"/>--%>
-<%--    <meta name="_csrf_header" content="${_csrf.headerName}"/>--%>
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
         <%@ include file="/WEB-INF/views/common/head.jsp" %>
     <title><c:out value="${recipe.recipeTitle}"/> - Details</title>
     <c:set var="ctx" value="${pageContext.request.contextPath}" />
@@ -276,7 +276,8 @@
         </aside>
     </div>
 </div>
-
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     const ctx = "${pageContext.request.contextPath}";
 </script>
@@ -352,8 +353,6 @@
 <%--<script>--%>
 <%--    const ctx = "${pageContext.request.contextPath}";--%>
 <%--</script>--%>
-<!-- jQuery CDN -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <%--알림 js--%>
 <script src="<c:url value='/js/mypage/utils.js'/>"></script>
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>

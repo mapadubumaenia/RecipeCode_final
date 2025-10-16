@@ -2,6 +2,8 @@
 const $ = (s, el= document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
+
+
 // 프로필이미지
 $("#avatar")?.addEventListener("change", (e) =>{
     const file = e.target.files?.[0];
@@ -110,6 +112,7 @@ function delete_account() {
     fetch("/mypage/delete", {
         method: "POST",
         headers: {
+            [header]: token,
             "Content-Type": "application/json"
         }
     })

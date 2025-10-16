@@ -9,6 +9,10 @@ const ownerEmail = (typeof profileOwnerEmail === "string" && profileOwnerEmail)
     ? profileOwnerEmail
     : (typeof currentUserEmail === "string" ? currentUserEmail : "");
 
+//
+const token = document.querySelector("meta[name='_csrf']").content;
+const header = document.querySelector("meta[name='_csrf_header']").content;
+
 // DOM
 const followingListEl = document.getElementById("followingList");
 const followerListEl  = document.getElementById("followerList");
@@ -159,7 +163,8 @@ document.addEventListener("click", async (e) => {
     try {
         const res = await fetch(url,{
             method,
-            credentials: "include"
+            credentials: "include",
+            headers: { [header]: token }
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 

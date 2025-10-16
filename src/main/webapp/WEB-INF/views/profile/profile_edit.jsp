@@ -18,9 +18,9 @@
     <link rel="stylesheet" href="<c:url value='/css/profile-edit.css'/>">
 </head>
 <body>
-<%-- TODO: csrf 인증 토큰(중요): 안하면 로그인페이지로 redirect 됨 --%>
-<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 <form action="<c:url value='/mypage/updateProfile'/>" method="post" enctype="multipart/form-data">
+    <!-- CSRF 토큰 추가 -->
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 <main class="container">
     <!-- 헤더: 기존 마이페이지/팔로우 리스트와 동일한 구조 -->
     <header class="profile-header">
@@ -142,6 +142,7 @@
                             <input class="input" type="password" id="pw" name="password" placeholder="8자 이상, 대/소문자+숫자 조합 권장" minlength="8" />
                             <button class="toggle" type="button" aria-label="비밀번호 표시" data-target="#pw">👁️</button>
                         </div>
+                        <div id="pwMatchHint" class="hint muted"></div>
                     </div>
                     <div class="row">
                         <label class="label">비밀번호 확인</label>

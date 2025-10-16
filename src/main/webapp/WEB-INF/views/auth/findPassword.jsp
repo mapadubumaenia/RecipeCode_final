@@ -30,6 +30,8 @@
         <article class="card p-16">
             <!-- 이메일 -->
             <form method="post" action="">
+                <!-- ✅ CSRF 토큰 추가 -->
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="field">
                     <label for="email">가입 이메일</label>
                     <input class="input" type="email" id="email" name="email" placeholder="you@example.com" required>
@@ -43,6 +45,8 @@
         <article class="card p-16">
             <!-- 인증코드 + 새 비밀번호 -->
             <form method="post" action="">
+                <!-- ✅ CSRF 토큰 추가 -->
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="field">
                     <label for="code">인증코드</label>
                     <div class="input-wrap">
