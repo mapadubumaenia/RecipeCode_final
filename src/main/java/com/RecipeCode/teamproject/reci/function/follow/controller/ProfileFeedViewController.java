@@ -45,6 +45,8 @@ public class ProfileFeedViewController {
         // 1) 로그인 체크
         if (principal == null) return "redirect:/auth/login";
 
+
+
         // 로그인한 유저
         Member viewer = memberService.getByUserEmail(principal.getUsername());
         if (viewer == null) return "redirect:/auth/login";

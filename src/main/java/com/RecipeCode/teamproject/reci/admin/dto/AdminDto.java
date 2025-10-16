@@ -1,6 +1,10 @@
 package com.RecipeCode.teamproject.reci.admin.dto;
 
+import com.RecipeCode.teamproject.reci.tag.dto.TagDto;
 import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -12,8 +16,6 @@ public class AdminDto {
     private String adminId;
     private String nickname;
     private String password;
-    private byte[] profileImage;
-    private String profileImageUrl;
     private String adminLocation;
     private String adminIntroduce;
     private String adminWebsite;
@@ -21,7 +23,18 @@ public class AdminDto {
     private String adminYoutube;
     private String adminBlog;
     private String role;
+    private String profileStatus;
+    private String provider;
+    private String providerId;
+    private List<TagDto> interestTags;
 
-    private String adminInterestTag;
-    private String profileStatus;   // PUBLIC, FOLLOW, PRIVATE
+    private byte[] profileImage;
+    private String profileImageUrl;
+
+    // MemberDto
+    private Boolean noti_FOLLOW;
+    private Boolean noti_COMMENT;
+
+    private String deleted;
+    private LocalDateTime deletedAt;
 }

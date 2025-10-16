@@ -32,8 +32,14 @@ public class Admin extends BaseTimeEntity {
     private String adminInsta;
     private String adminYoutube;
     private String adminBlog;
-    private String adminInterestTag;
     private String profileStatus;   // PUBLIC, FOLLOW, PRIVATE
     private String role;
+    private String provider;      // local, google, kakao
+    private String providerId;
+
+
+    // 삭제
+    private String deleted;
+    private LocalDateTime deletedAt;
 
 }

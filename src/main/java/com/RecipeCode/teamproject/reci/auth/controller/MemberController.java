@@ -1,5 +1,7 @@
 package com.RecipeCode.teamproject.reci.auth.controller;
 
+import com.RecipeCode.teamproject.reci.admin.entity.Admin;
+import com.RecipeCode.teamproject.reci.admin.repository.AdminRepository;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.repository.MemberRepository;
@@ -15,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.security.Principal;
 
 @Log4j2
 @Controller
@@ -22,6 +25,9 @@ import java.io.IOException;
 public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final AdminRepository adminRepository;
+
+
     //    로그인 페이지
     @GetMapping("/auth/login")
     public String login() {
@@ -53,7 +59,17 @@ public class MemberController {
     @GetMapping("/member/{userId}/profile-image")
     public ResponseEntity<byte[]> getProfileImage(@PathVariable String userId) {
         Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("회원 없음"));
+                .orElseGet(() -> {
+                    // 🔹 2. 회원이 없으면 관리자 테이블에서 조회
+                    Admin admin = adminRepository.findByAdminId(userId)
+                            .orElseThrow(() -> new RuntimeException("회원 없음"));
+                    // Admin → Member 변환 없이 바로 임시 Member 객체 생성
+                    Member m = new Member();
+                    m.setUserId(admin.getAdminId());
+                    m.setProfileImage(admin.getProfileImage());
+                    m.setProfileImageUrl(admin.getProfileImageUrl());
+                    return m;
+                });
 
         byte[] image = member.getProfileImage();
         MediaType mediaType = MediaType.IMAGE_JPEG;
@@ -83,6 +99,21 @@ public class MemberController {
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(image);
+    }
+
+    @GetMapping("/member/checkPasswordExist")
+    @ResponseBody
+    public boolean checkPasswordExist(Principal principal) {
+        String userEmail = principal.getName();
+        Member member = memberService.getByUserEmail(userEmail);
+        return member.getPassword() != null && !member.getPassword().isEmpty();
+    }
+
+    @PostMapping("/member/verifyPassword")
+    @ResponseBody
+    public boolean verifyPassword(@RequestParam String password, Principal principal) {
+        String username = principal.getName();
+        return memberService.checkPassword(username, password);
     }
 
 }

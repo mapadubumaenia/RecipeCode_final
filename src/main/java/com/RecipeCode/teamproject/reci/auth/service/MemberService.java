@@ -2,6 +2,8 @@ package com.RecipeCode.teamproject.reci.auth.service;
 
 import com.RecipeCode.teamproject.common.ErrorMsg;
 import com.RecipeCode.teamproject.common.MapStruct;
+import com.RecipeCode.teamproject.reci.admin.entity.Admin;
+import com.RecipeCode.teamproject.reci.admin.repository.AdminRepository;
 import com.RecipeCode.teamproject.reci.auth.dto.MemberDto;
 import com.RecipeCode.teamproject.reci.auth.entity.Member;
 import com.RecipeCode.teamproject.reci.auth.membertag.entity.MemberTag;
@@ -29,6 +31,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final AdminRepository adminRepository;
     private final NotiSettingRepository notiSettingRepository;
     private final MapStruct mapStruct;
     private final PasswordEncoder passwordEncoder;
@@ -65,7 +68,7 @@ public class MemberService {
         if (member.getProfileStatus() == null || member.getProfileStatus().isBlank()) {
             member.setProfileStatus("PUBLIC");
             member.setProvider("local");
-            member.setRole("R_USER");
+            member.setRole("ROLE_USER");
             member.setDeleted("N");
             memberRepository.save(member);
             memberRepository.flush();
@@ -90,19 +93,27 @@ public class MemberService {
     //    상세조회(Profile 페이지용)
     public Member getByUserEmail(String email) {
         return memberRepository.findByUserEmail(email)
-                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.register")));
-
+                .or(() -> adminRepository.findByAdminEmail(email)
+                        .map(this::convertAdminToMember))
+                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
     }
 
     public Member getByUserId(String userId) {
-        return memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.register")));
+            return memberRepository.findByUserId(userId)
+                    .or(() -> adminRepository.findByAdminId(userId)
+                            .map(this::convertAdminToMember))
+                    .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
     }
 
     public Member getByUserEmailTags(String email) {
         return memberRepository.findByUserEmailWithTags(email)
+                .or(() -> adminRepository.findByAdminEmail(email)
+                        .map(this::convertAdminToMember))
                 .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
+    }
 
+    private Member convertAdminToMember(Admin admin) {
+        return Member.fromAdmin(admin);
     }
 
 
@@ -197,5 +208,11 @@ public class MemberService {
     }
     public boolean existsByUserId(String userId) {
         return memberRepository.existsByUserId(userId);
+    }
+
+    public boolean checkPassword(String userEmail, String inputPassword) {
+        Member member = memberRepository.findByUserEmail(userEmail).orElse(null);
+        if (member == null || member.getPassword() == null) return false;
+        return passwordEncoder.matches(inputPassword, member.getPassword());
     }
 }

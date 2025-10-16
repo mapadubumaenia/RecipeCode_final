@@ -72,6 +72,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .userWebsite(admin.getAdminWebsite())
                     .userYoutube(admin.getAdminYoutube())
                     .profileStatus(admin.getProfileStatus())
+                    .deleted(admin.getDeleted())
+                    .deletedAt(admin.getDeletedAt())
+                    .provider(admin.getProvider())
+                    .providerId(admin.getProviderId())
                     .build();
 
             return new SecurityUserDto(
