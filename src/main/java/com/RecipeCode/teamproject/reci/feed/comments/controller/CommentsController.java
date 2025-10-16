@@ -37,7 +37,7 @@ public class CommentsController {
     @GetMapping("/{recipeUuid}")
     public ResponseEntity<?> getComments(@PathVariable String recipeUuid,
                                          @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "10") int size) {
+                                         @RequestParam(defaultValue = "5") int size) {
         try {
             // 로그인 여부 확인 (없으면 그냥 null)
             SecurityUserDto loginUser = null;

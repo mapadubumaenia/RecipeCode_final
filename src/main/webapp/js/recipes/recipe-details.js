@@ -376,10 +376,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 댓글 수정
     async function editComment(commentsId, contentElem) {
-        const oldContent = contentElem.textContent;
         const cmtCard = contentElem.closest(".comment");
+        if (cmtCard?.classList.contains("editing")) return;
         cmtCard?.classList.add("editing");
 
+        const oldContent = contentElem.textContent;
         const textarea = document.createElement("textarea");
         textarea.value = oldContent;
         textarea.classList.add("edit-textarea");
@@ -476,10 +477,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 대댓 작성
     function openReplyInput(parentId, container) {
+        if (container.querySelector("textarea"))return;
+
         const textarea = document.createElement("textarea");
+
         const btn = document.createElement("button");
         btn.textContent = "등록";
+        btn.classList.add("btn--ghost");
 
+        const cancel = document.createElement("button");
+        cancel.textContent = "취소";
+        cancel.classList.add("btn--ghost");
+
+        // 등록
         btn.addEventListener("click", async () => {
             const content = textarea.value.trim();
             if (!content) return;
@@ -497,8 +507,16 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadCommentsCount();
         });
 
+        // 취소
+        cancel.addEventListener("click",()=>{
+            textarea.remove();
+            btn.remove();
+            cancel.remove();
+        });
+
         container.appendChild(textarea);
         container.appendChild(btn);
+        container.appendChild(cancel);
     }
 
     // 댓글 수 세기
