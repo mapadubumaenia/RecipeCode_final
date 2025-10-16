@@ -48,22 +48,21 @@ public class CommentsService {
     public List<CommentsDto> countByRecipes_Uuid(String recipeUuid, int page, int size, String userEmail) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("insertTime").descending());
 
-        Recipes recipe = recipesRepository.findById(recipeUuid)
-                .orElseThrow(() -> new RuntimeException(errorMsg.getMessage("errors.not.found")));
-
         final Member memberFinal = (userEmail != null) ? memberRepository.findByUserEmail(userEmail).orElse(null) : null;
 
+        Page<Comments> commentsPage = commentsRepository
+                .findByRecipesUuidAndParentIdIsNull(recipeUuid, pageable);
 
-        return commentsRepository.findByRecipesUuidAndParentIdIsNull(recipeUuid, pageable)
-                .stream().map(comments -> {
+        return commentsPage.getContent().stream()
+                .map(comments -> {
                     CommentsDto dto = mapStruct.toDto(comments);
 
                     if (comments.getDeletedAt() != null) {
                         dto.setCommentsContent("삭제된 댓글입니다.");
                     }
+
                     dto.setReplyCount(commentsRepository.countByParentId_CommentsId(comments.getCommentsId()));
 
-                    // 좋아요 상태 추가
                     long likeCount = commentsLikesRepository.countByComments(comments);
                     dto.setLikeCount(likeCount);
 
@@ -82,8 +81,10 @@ public class CommentsService {
                     dto.setAlreadyReported(reported);
 
                     return dto;
-                }).toList();
+                })
+                .toList();
     }
+
 
     // 댓글 작성
     @Transactional
@@ -123,10 +124,7 @@ public class CommentsService {
                 "COMMENT",                                          //서비스 타입
                 String.valueOf(comment.getCommentsId())           //소스 ID
         );
-
-
     }
-
 
     // 대댓글 불러오기
     public List<CommentsDto> getReplies(Long parentId, String userEmail) {
@@ -199,6 +197,10 @@ public class CommentsService {
         if (!comment.getMember().getUserEmail().equals(userEmail)) {
             throw new RuntimeException("본인 댓글만 수정할 수 있습니다.");
         }
+        // 삭제 여부 확인
+        if (comment.getDeletedAt() != null) {
+            throw new RuntimeException("삭제된 댓글은 수정할 수 없습니다.");
+        }
         // 수정
         comment.setCommentsContent(commentsDto.getCommentsContent());
         comment.setUpdateTime(java.time.LocalDateTime.now());
@@ -226,9 +228,9 @@ public class CommentsService {
         Comments comments = commentsRepository.findById(commentsId)
                 .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
 
-        // 삭제된 댓글은 수정 불가
+        // 이미 삭제
         if (comments.getDeletedAt() != null) {
-            throw new RuntimeException("삭제된 댓글은 수정할 수 없습니다.");
+            throw new RuntimeException("이미 삭제된 댓글입니다.");
         }
 
         // 작성자 확인
@@ -237,5 +239,6 @@ public class CommentsService {
         }
 
         comments.setDeletedAt(LocalDateTime.now());
+        commentsRepository.save(comments);
     }
 }

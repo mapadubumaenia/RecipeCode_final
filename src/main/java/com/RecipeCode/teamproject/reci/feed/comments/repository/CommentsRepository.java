@@ -1,6 +1,7 @@
 package com.RecipeCode.teamproject.reci.feed.comments.repository;
 
 import com.RecipeCode.teamproject.reci.feed.comments.entity.Comments;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,13 +21,12 @@ public interface CommentsRepository extends JpaRepository<Comments, Long> {
     int countByParentId_CommentsId(Long commentsId);
 
     // 특정 레시피의 댓글 조회 (부모댓글 기준)
-    List<Comments> findByRecipesUuidAndParentIdIsNull(String recipeUuid, Pageable pageable);
+    Page<Comments> findByRecipesUuidAndParentIdIsNull(String recipeUuid, Pageable pageable);
 
     // 특정 댓글의 자식 댓글 조회
     List<Comments> findByParentIdCommentsId(Long parentId);
 
     List<Comments> findByRecipesUuidAndParentIdIsNullAndDeletedAtIsNull(String recipeUuid, Pageable pageable);
-    List<Comments> findByParentIdCommentsIdAndDeletedAtIsNull(Long parentId);
     List<Comments> findByDeletedAtIsNull();
 
     @Query(value = "select c.recipes.uuid as uuid, count(c.commentsId) as cnt\n" +
