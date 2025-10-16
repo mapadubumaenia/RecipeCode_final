@@ -56,6 +56,7 @@
         <sec:authorize access="isAuthenticated()">
           <span class="muted"><a href="${pageContext.request.contextPath}/"><sec:authentication property="principal.nickname"/></a>님</span>
                 <form action="${pageContext.request.contextPath}/auth/logout" method="post">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <button type="submit" class="btn-logout">logout</button>
                 </form>
         </sec:authorize>

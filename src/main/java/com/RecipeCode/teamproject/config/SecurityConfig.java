@@ -1,7 +1,6 @@
 package com.RecipeCode.teamproject.config;
 
 import com.RecipeCode.teamproject.reci.auth.handler.CustomAuthenticationFailureHandler;
-import com.RecipeCode.teamproject.reci.auth.handler.LoginRedirectHandler;
 import com.RecipeCode.teamproject.reci.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +22,6 @@ public class SecurityConfig {
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final AuthenticationSuccessHandler oAuth2SuccessHandler;
-    private final LoginRedirectHandler loginRedirectHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -33,15 +31,20 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf->csrf.disable())
+//                .csrf(csrf->csrf.disable())\
+                // csrf 예외설정
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/email-certify/**")
+                )
                 // 개발용: 전부 열어두기
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/search","/recipes/**").permitAll() // JSP 뷰
+                        .requestMatchers("/", "/search","/recipes/**","/comments/**").permitAll() // JSP 뷰
                         .requestMatchers("/css/**","/js/**","/images/**","/webjars/**").permitAll()
+                        .requestMatchers("/api/email-certify/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/mypage/**", "/profile/**", "/follow/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/search").permitAll() // 검색 API
-                        .requestMatchers("/comments/**").permitAll() // 댓글 조회 허용
+                        .requestMatchers("/api/follow/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/search").permitAll() // 검색 API// 댓글 조회 허용
                         .anyRequest().permitAll()
 
                 )

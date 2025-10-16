@@ -1,3 +1,6 @@
+const token  = $("meta[name='_csrf']").attr("content");
+const header = $("meta[name='_csrf_header']").attr("content");
+
 
 
 // 본문 "더보기" 토글
@@ -216,7 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const res = await fetch(`${ctx}/comments/report/save`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: {[header]: token,
+                    "Content-Type": "application/json"},
                 body: JSON.stringify(formData),
                 credentials: "include"
             });
@@ -353,7 +357,8 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const res = await fetch(`${ctx}/comments/${recipeUuid}`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: {[header]: token,
+                    "Content-Type": "application/json"                },
                 body: JSON.stringify({commentsContent: content}),
                 credentials: "include"
             });
@@ -415,7 +420,8 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const res = await fetch(`${ctx}/comments/${commentsId}`, {
                     method: "PATCH",
-                    headers: {"Content-Type": "application/json"},
+                    headers: {[header]: token,
+                        "Content-Type": "application/json"},
                     body: JSON.stringify({commentsContent: newContent})
                 });
                 if (!res.ok) {
@@ -448,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirm("정말 삭제하시겠습니까?")) return;
 
         try {
-            const res = await fetch(`${ctx}/comments/${commentsId}`, { method: "DELETE" });
+            const res = await fetch(`${ctx}/comments/${commentsId}`, { method: "DELETE",  headers: {[header]: token},});
             if (!res.ok) throw new Error("삭제 실패");
             CommentElem.remove();
             await loadCommentsCount();
@@ -479,7 +485,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!content) return;
             const res = await fetch(`${ctx}/comments/replies/${parentId}`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: {[header]: token,
+                    "Content-Type": "application/json"},
                 body: JSON.stringify({commentsContent: content})
             });
             if (res.ok) {
@@ -512,7 +519,8 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const res = await fetch(`${ctx}/comments/likes/${commentId}`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: {[header]: token,
+                    "Content-Type": "application/json"},
                 credentials: "include"
             });
             if (res.status === 401) {

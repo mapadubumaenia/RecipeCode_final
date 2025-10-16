@@ -21,7 +21,6 @@
     <link rel="stylesheet" href="<c:url value='/css/notification.css'/>">
 
     <%-- TODO: CSRF 토큰 (나중에 적용 시 주석 해제) --%>
-
     <meta name="_csrf" content="${_csrf.token}"/>
     <meta name="_csrf_header" content="${_csrf.headerName}"/>
 
@@ -214,53 +213,59 @@
 <%--알림 js--%>
 <script src="${pageContext.request.contextPath}/js/notification.js"></script>
     <script>
-        $(function(){
+        $(function() {
             const modalEl = document.getElementById("passwordCheckModal");
             const modal = new bootstrap.Modal(modalEl);
+            const token = $("meta[name='_csrf']").attr("content");
+            const header = $("meta[name='_csrf_header']").attr("content");
 
-            $(".edit-profile").click(function(e){
-                e.preventDefault();
-                const editUrl = window.ctx + "/mypage/edit";
-
-                $.ajax({
-                    url: window.ctx + "/member/checkPasswordExist",
-                    type: "GET",
-                    dataType: "json",
-                    success: function(hasPassword){
-                        if (hasPassword === true || hasPassword === "true") {
-                            modal.show();
-                        } else {
-                            window.location.href = editUrl;
-                        }
-                    }
-                });
+            $(document).ajaxSend(function (e, xhr, options) {
+                xhr.setRequestHeader(header, token);
             });
 
-            $("#passwordCheckForm").on("submit", function(e){
-                e.preventDefault();
-                const pw = $("input[name='password']").val().trim();
-                if (pw === "") return alert("비밀번호를 입력하세요.");
+                $(".edit-profile").click(function (e) {
+                    e.preventDefault();
+                    const editUrl = window.ctx + "/mypage/edit";
 
-                $.ajax({
-                    url: window.ctx + "/member/verifyPassword",
-                    type: "POST",
-                    data: { password: pw },
-                    success: function(valid){
-                        console.log("서버응답:", valid);
-                        if (valid === true || valid === "true") {
-                            modal.hide();
-                            window.location.href = window.ctx + "/mypage/edit";
-                        } else {
-                            alert("비밀번호가 올바르지 않습니다.");
+                    $.ajax({
+                        url: window.ctx + "/member/checkPasswordExist",
+                        type: "GET",
+                        dataType: "json",
+                        success: function (hasPassword) {
+                            if (hasPassword === true || hasPassword === "true") {
+                                modal.show();
+                            } else {
+                                window.location.href = editUrl;
+                            }
                         }
-                    },
-                    error: function(){
-                        alert("비밀번호 확인 중 오류가 발생했습니다.");
-                    }
+                    });
                 });
-                return false;
+
+                $("#passwordCheckForm").on("submit", function (e) {
+                    e.preventDefault();
+                    const pw = $("input[name='password']").val().trim();
+                    if (pw === "") return alert("비밀번호를 입력하세요.");
+
+                    $.ajax({
+                        url: window.ctx + "/member/verifyPassword",
+                        type: "POST",
+                        data: {password: pw},
+                        success: function (valid) {
+                            console.log("서버응답:", valid);
+                            if (valid === true || valid === "true") {
+                                modal.hide();
+                                window.location.href = window.ctx + "/mypage/edit";
+                            } else {
+                                alert("비밀번호가 올바르지 않습니다.");
+                            }
+                        },
+                        error: function () {
+                            alert("비밀번호 확인 중 오류가 발생했습니다.");
+                        }
+                    });
+                    return false;
+                });
             });
-        });
     </script>
 
 </body>

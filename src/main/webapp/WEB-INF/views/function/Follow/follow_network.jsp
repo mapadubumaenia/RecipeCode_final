@@ -31,7 +31,10 @@
       <!-- ▶ 알림 + 마이페이지 -->
       <div class="header-actions">
           <%-- TODO: CSRF hidden input (나중에 적용 시 주석 해제) --%>
-          <%-- <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/> --%>
+    <sec:authorize access="isAuthenticated()">
+        <meta name="_csrf" content="${_csrf.token}"/>
+        <meta name="_csrf_header" content="${_csrf.headerName}"/>
+    </sec:authorize>
         <div class="notif-wrap">
           <!-- 알림 버튼 -->
           <sec:authorize access="isAuthenticated()">
