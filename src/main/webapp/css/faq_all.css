@@ -73,5 +73,5 @@ mark{background:#fff2a8;padding:0 2px;border-radius:4px}
 
 @media (min-width: 992px){
     .layout{grid-template-columns:1fr 320px}
-    .sidebar{position:sticky;top:12px;align-self:start;height:max-content}
+    /*.sidebar{position:sticky;top:12px;align-self:start;}*/
 }
