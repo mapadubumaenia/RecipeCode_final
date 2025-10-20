@@ -1,5 +1,5 @@
 # 🌐 프로젝트 이름
-> 간단하고 기억에 남는 프로젝트 한줄 설명
+ Luminous + Eat, 빛나는 한 끼 LU:meet
 
 ![메인 스크린샷](./docs/screenshot.png)
 
