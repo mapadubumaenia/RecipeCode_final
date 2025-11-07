@@ -61,4 +61,6 @@ public class SearchController {
     ) {
         return feedService.personalFeed(userId, after, size);
     }
+
+    //코드 테스트 용
 }
