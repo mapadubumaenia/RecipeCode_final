@@ -15,6 +15,7 @@ public class FeedController {
 
 
 
+    // 이것도 주석 추가
     @GetMapping("/personal")
     public FeedPageDto personal(
             @RequestParam String userEmail,

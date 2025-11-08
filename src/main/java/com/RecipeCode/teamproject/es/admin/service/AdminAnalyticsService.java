@@ -48,7 +48,7 @@ public class AdminAnalyticsService {
     /* -------------------------------------------
      * 1) 제로결과 키워드 Top-N (기간 필터)
      *    source: rc-search-logs-000001 (SearchLogDoc)
-     *    bucket: terms(q) + sub-agg max(at)
+     *    bucket: terms(q) + sub-agg max(at)  이건 제로결과 키워드인데 범켓이랑 소스는 왜나왔지
      * ------------------------------------------- */
         public List<Map<String, Object>> zeroResultKeywords(Instant from, Instant to, int size) {
             final Instant fromF = (from == null) ? Instant.now().minus(30, ChronoUnit.DAYS) : from;

@@ -57,6 +57,7 @@ public class AdminPageController {
         return "admin/layout";
     }
 
+    // 어드민 페이지 FAQ??
     @GetMapping("/faq")
     public String faq(@PageableDefault(size = 20) Pageable pageable,
                       @RequestParam(value="search", required=false) String search,

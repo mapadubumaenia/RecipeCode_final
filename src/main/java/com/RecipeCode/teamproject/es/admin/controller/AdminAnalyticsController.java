@@ -34,7 +34,7 @@ public class AdminAnalyticsController {
         return out;
     }
 
-    // 2) 많이 본 게시물
+    // 2) 많이 본 게시물 여기서 뭘했는지 점검
     @GetMapping("/top-viewed")
     public List<Map<String, Object>> topViewed(
             @RequestParam(defaultValue = "7") int days,
@@ -43,7 +43,7 @@ public class AdminAnalyticsController {
         return svc.topViewed(days, size);
     }
 
-    // 3) 트렌딩 태그
+    // 3) 트렌딩 태그 여기도
     @GetMapping("/trending-tags")
     public List<Map<String, Object>> trendingTags(
             @RequestParam(defaultValue = "30") int days,
