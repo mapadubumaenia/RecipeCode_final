@@ -17,7 +17,7 @@ public class FeedPageController {
 
     private final FeedService feed;
 
-    // 홈 = 피드
+    // 홈 = 피드 ㅇㅇ
     @GetMapping({"/"})
     public String home(Model model,
                        HttpSession session,
@@ -25,7 +25,7 @@ public class FeedPageController {
                        @RequestParam(required = false) String after,
                        @RequestParam(defaultValue = "20") int size) {
 
-        // 로그인 이메일 확보 (사이트 정책에 맞게 한 줄만 쓰면 됨)
+        // 로그인 이메일 확보 (사이트 정책에 맞게 한 줄만 쓰면 됨) 로그인 이메일 확보
         String sessionEmail = (String) session.getAttribute("loginEmail"); // 로그인 시 세션에 넣어둔 값이 있으면 사용
         String secEmail = (principal != null) ? principal.getName() : null; // Spring Security 기본값일 때
 

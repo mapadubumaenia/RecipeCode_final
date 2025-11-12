@@ -14,7 +14,7 @@ public class HomeApiController {
 
     private final AdminAnalyticsService admin;
 
-    /** 최근 N일 좋아요 상위 게시물 */
+    /** 최근 N일 좋아요 상위 게시물 입니다. */
     @GetMapping("/trending")
     public Map<String, Object> trending(@RequestParam(defaultValue = "7") int days,
                                         @RequestParam(defaultValue = "4") int size){
